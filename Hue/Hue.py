@@ -133,5 +133,3 @@ class Hue(object):
 	def setLampAlarm(self, lamp, hue):
 		data_to_update = json.dumps({ "hue": hue, "on": True, "bri": 200, "alert":"select" })
 		return self.setLampStatus(lamp, data_to_update)
-		
-				
