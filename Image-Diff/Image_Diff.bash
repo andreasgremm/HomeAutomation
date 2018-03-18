@@ -27,7 +27,7 @@ then
 	rm -f $imagedir/Thumbs.db
 fi
 
-for i in $( find $imagedir -type f -name '*.jpg' ); do 
+for i in $( find $imagedir -type f -name '*.jpg' | sort ); do 
 	if [ $piccount -eq 0 ]
 	then
 		pic1=`basename $i`
