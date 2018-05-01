@@ -24,4 +24,4 @@ DIRECTORY=/volume1/Backups
 
 NOW=$(date +"%Y-%m-%d")
 LOGFILE="$SERVER-$NOW.log"
-/bin/rsync -av --delete --exclude-from=$DIRECTORY/_scripts/rsync-exclude.txt -e "ssh -p 22" root@$ADDRESS:/ $DIRECTORY/$SERVER/ >> $DIRECTORY/logs/$LOGFILE 2>&1
+/bin/rsync -av --delete --exclude-from=$DIRECTORY/_scripts/rsync-exclude.txt -e "ssh -p 22" root@$ADDRESS:/ $DIRECTORY/$SERVER/ >>$DIRECTORY/logs/$LOGFILE 2>&1
