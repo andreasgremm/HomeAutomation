@@ -21,7 +21,7 @@ if [ ! -d "/mnt/synology/Wohnzimmer_Diffs" ]; then
   exit
 fi
 
-Image_diff.bash /mnt/mediencenter/Hochgeladen /mnt/synology/Wohnzimmer_Diffs
+/usr/local/bin/Image_diff.bash /mnt/mediencenter/Hochgeladen /mnt/synology/Wohnzimmer_Diffs
 
 umount /mnt/synology
 umount /mnt/mediencenter

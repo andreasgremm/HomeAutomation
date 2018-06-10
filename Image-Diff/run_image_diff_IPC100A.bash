@@ -18,6 +18,6 @@ if [ ! -d "/mnt/synology/IPC100A_Diffs" ]; then
   exit
 fi
 
-Image_diff.bash /mnt/synology/FTP /mnt/synology/IPC100A_Diffs
+/usr/local/bin/Image_diff.bash /mnt/synology/FTP /mnt/synology/IPC100A_Diffs
 
 umount /mnt/synology
