@@ -7,6 +7,6 @@ if [ ! -d "/mnt/synology/IPC100A_Diffs" ]; then
   exit
 fi
 
-pictures2video.bash /mnt/synology/IPC100A_Diffs /mnt/synology/video IPC100A
+/usr/local/bin/pictures2video.bash /mnt/synology/IPC100A_Diffs /mnt/synology/video IPC100A
 
 umount /mnt/synology

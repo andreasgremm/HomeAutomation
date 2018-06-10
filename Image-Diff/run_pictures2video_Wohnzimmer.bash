@@ -8,6 +8,6 @@ if [ ! -d "/mnt/synology/Wohnzimmer_Diffs" ]; then
   exit
 fi
 
-pictures2video.bash /mnt/synology/Wohnzimmer_Diffs /mnt/synology/video Wohnzimmer
+/usr/local/bin/pictures2video.bash /mnt/synology/Wohnzimmer_Diffs /mnt/synology/video Wohnzimmer
 
 umount /mnt/synology
