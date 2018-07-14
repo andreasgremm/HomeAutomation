@@ -68,7 +68,7 @@ def on_message(mosq, obj, msg):
 	global lampstatus, setLampOwn, alarmActive
 #	print(msg.topic + " " + str(msg.qos) + " " + msg.payload.decode())
 	if msg.topic == 'hue/lampstatus/'+str(lamp):
-		lampstatus= msg.payload.decode() == 'True' 
+		lampstatus= msg.payload.decode() == 'True'
 		if motion and not lampstatus:
 			lampControl={"lamp":lamp, "data":hueControlData}
 			mqttc.publish('hue/control', json.dumps(lampControl))
@@ -113,8 +113,8 @@ if __name__ == '__main__':
 	parser.add_argument('-b', '--broker', help="IP Adress des MQTT Brokers", dest="mqttBroker", default="localhost")
 	parser.add_argument('-p', '--port', help="Port des MQTT Brokers", dest="port", default="1883")
 	parser.add_argument('-c', '--client-id', help="Id des Clients", dest="clientID", default="MQTT_Motiondetektor")
-	parser.add_argument('-u', '--user', help="Broker-Benutzer", dest="user", default='mqttgremm')
-	parser.add_argument('-P', '--password', help="Broker-Password", dest="password", default='MdOijT3vGkXD43qAWTJX')
+	parser.add_argument('-u', '--user', help="Broker-Benutzer", dest="user", default='MQTT User')
+	parser.add_argument('-P', '--password', help="Broker-Password", dest="password", default='MQTT PASSWORD')
 	parser.add_argument('-sp', '--sensor-pin', help="Sensor Pin des Bewegungsmelders", dest="motionPin", default=23)
 	parser.add_argument('-l', '--lamp', help="Lampen Nummer", dest="lamp", default=1)
 	parser.add_argument('-t', '--timeout', help="Time Out in Minuten bis die Ueberwachung wieder abgeschaltet wird", dest="timeout", default=2)
@@ -187,4 +187,3 @@ if __name__ == '__main__':
 				lampstatus = False
 
 		time.sleep(2)
-

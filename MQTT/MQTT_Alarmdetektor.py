@@ -84,8 +84,8 @@ if __name__ == '__main__':
 	parser.add_argument('-b', '--broker', help="IP Adress des MQTT Brokers", dest="mqttBroker", default="localhost")
 	parser.add_argument('-p', '--port', help="Port des MQTT Brokers", dest="port", default="1883")
 	parser.add_argument('-c', '--client-id', help="Id des Clients", dest="clientID", default="MQTT_Alarmdetektor")
-	parser.add_argument('-u', '--user', help="Broker-Benutzer", dest="user", default='mqttgremm')
-	parser.add_argument('-P', '--password', help="Broker-Password", dest="password", default='MdOijT3vGkXD43qAWTJX')
+	parser.add_argument('-u', '--user', help="Broker-Benutzer", dest="user", default='Mqtt USER')
+	parser.add_argument('-P', '--password', help="Broker-Password", dest="password", default='Mqtt PASSWORD')
 	parser.add_argument('-sp', '--sensor-pin', help="Sensor Pin des Alarm-Detectors", dest="alarmPin", default=4)
 	parser.add_argument('-l', '--location', help="Ort des Alarmsensors", dest="location", default='AUTO')
 	parser.add_argument('-t', '--timeout', help="Time Out in Sekunden", dest="timeout", default=2)
@@ -131,4 +131,3 @@ if __name__ == '__main__':
 			alarmON = False
 
 		time.sleep(2*timeout)
-
