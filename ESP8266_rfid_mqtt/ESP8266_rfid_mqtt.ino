@@ -1,6 +1,7 @@
 /*
     ESP8266 RFID Reader - MQTT Sender
     Copyright 2016 Christian Moll <christian@chrmoll.de>
+    Copyright 2018 Andreas Gremm
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,11 +59,12 @@ const char* mqttPass = "MQTT Password";
 const char* mqttClientId = "MQTT Client Name";
 */
 
-int onPin = D1;
-int offPin = D2;
+int autoAlarmPin = D1;
+int wohnzimmerAlarmPin = D2;
 int irPin = A0;
 int irValue;
-bool alarm = false;
+bool wohnzimmerAlarm = false;
+bool autoAlarm = false;
 int motion;
 bool buzzer = true;
 
@@ -78,10 +80,10 @@ void wificonnect();
 void mqttconnect();
 
 void setup(void){
-  pinMode(onPin, OUTPUT);
-  pinMode(offPin, OUTPUT);
-  digitalWrite(onPin, HIGH);
-  digitalWrite(offPin, HIGH);
+  pinMode(autoAlarmPin, OUTPUT);
+  pinMode(wohnzimmerAlarmPin, OUTPUT);
+  digitalWrite(autoAlarmPin, HIGH);
+  digitalWrite(wohnzimmerAlarmPin, HIGH);
   pinMode(irPin, INPUT);
 
 
@@ -97,10 +99,10 @@ void setup(void){
   mqtt.setCallback(messageReceived);
 
   wificonnect();
-  digitalWrite(onPin, LOW);
+  digitalWrite(autoAlarmPin, LOW);
 
   mqttconnect();
-  digitalWrite(offPin, LOW);
+  digitalWrite(wohnzimmerAlarmPin, LOW);
 
   MDNS.begin(host);
 
@@ -122,7 +124,6 @@ void loop(void){
 
   httpServer.handleClient();
   mqtt.loop();
-  //delay(10);
   handleRFID();
   handleIR();
 }
@@ -145,6 +146,7 @@ void mqttconnect() {
   }
   Serial.println("\n MQTT connected!");
   mqtt.subscribe("alarm/wohnzimmer/motion");
+  mqtt.subscribe("alarm/auto/motion");
   mqtt.publish("clientstatus/RFIDReader", "ONLINE");
 }
 
@@ -155,7 +157,7 @@ void handleRoot() {
 void handleIR() {
   irValue = analogRead(irPin);
   if (irValue > 100) {
-    if (alarm and buzzer){
+    if (wohnzimmerAlarm and buzzer){
       buzzer = false;
       mqtt.publish("buzzer/wohnzimmer", "2");
     }
@@ -171,17 +173,27 @@ void messageReceived(char * topic, unsigned char * payload, unsigned int length)
      Serial.print((const char)payload[i]);
   }
 
-  if(strncmp((const char *)payload, "False", length) == 0) {
-    digitalWrite(onPin, LOW);
-    digitalWrite(offPin, HIGH);
-    alarm = false;
-  }
-  if(strncmp((const char *)payload, "True", length) == 0) {
-    digitalWrite(onPin, HIGH);
-    digitalWrite(offPin, LOW);
-    alarm = true;
+  if (strcmp(topic,"alarm/wohnzimmer/motion") == 0) {
+    if (strncmp((const char *)payload, "False", length) == 0) {
+      digitalWrite(wohnzimmerAlarmPin, LOW);
+      wohnzimmerAlarm = false;
+    }
+    if (strncmp((const char *)payload, "True", length) == 0) {
+      digitalWrite(wohnzimmerAlarmPin, HIGH);
+      wohnzimmerAlarm = true;
+    }
   }
 
+  if (strcmp(topic,"alarm/auto/motion") == 0) {
+    if (strncmp((const char *)payload, "False", length) == 0) {
+      digitalWrite(autoAlarmPin, LOW);
+      autoAlarm = false;
+    }
+    if (strncmp((const char *)payload, "True", length) == 0) {
+      digitalWrite(autoAlarmPin, HIGH);
+      autoAlarm = true;
+    }
+  }
   Serial.println();
 }
 
@@ -192,10 +204,17 @@ void handleRFID() {
   Serial.println(rfiduid);
   mqtt.publish("rfid_reader/uid", rfiduid.c_str());
   if (strcmp(rfiduid.c_str(),"c5d54c73") == 0) {
-    if (alarm) {
+    if (wohnzimmerAlarm) {
       mqtt.publish("alarm/wohnzimmer/motion",(const uint8_t *)"False",5,true);
     } else {
       mqtt.publish("alarm/wohnzimmer/motion",(const uint8_t *)"True",4,true);
+    }
+  }
+  if (strcmp(rfiduid.c_str(),"c6ebfe1f") == 0) {
+    if (autoAlarm) {
+      mqtt.publish("alarm/auto/motion",(const uint8_t *)"False",5,true);
+    } else {
+      mqtt.publish("alarm/auto/motion",(const uint8_t *)"True",4,true);
     }
   }
   rfid.PICC_HaltA();
