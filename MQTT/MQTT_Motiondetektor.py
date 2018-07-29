@@ -21,7 +21,20 @@ from mail import mail
 from MQTT_Motiondetektor_config import *
 from http.client import HTTPConnection
 from signal import *
+from slacker import Slacker
+###
+#
+# Provide the following values
+#
+# slackerKey='<slackerKey'
+# DefaultMQTTPassword = "<mqtt password"
+# DefaultMQTTUser = "<mqtt user"
+# mail_receiver = ['mail1', 'mail2', 'mail3', ...]
+from Security.MotionDetector import *
+from Security.Slacker import *
+from Security.MQTT import *
 
+slack = Slacker(slackerKey)
 motion = False
 nomotion = False
 noMotionTime=dt.datetime.now()
@@ -34,6 +47,7 @@ lamp=0
 RUN = True
 hueControlData={"on":True, "bri":254, "hue": 34392}
 client_id=''
+
 
 def motion_detected(channel):
 	global motion, nomotion, noMotionTime
@@ -113,8 +127,8 @@ if __name__ == '__main__':
 	parser.add_argument('-b', '--broker', help="IP Adress des MQTT Brokers", dest="mqttBroker", default="localhost")
 	parser.add_argument('-p', '--port', help="Port des MQTT Brokers", dest="port", default="1883")
 	parser.add_argument('-c', '--client-id', help="Id des Clients", dest="clientID", default="MQTT_Motiondetektor")
-	parser.add_argument('-u', '--user', help="Broker-Benutzer", dest="user", default='MQTT User')
-	parser.add_argument('-P', '--password', help="Broker-Password", dest="password", default='MQTT PASSWORD')
+	parser.add_argument('-u', '--user', help="Broker-Benutzer", dest="user", default=DefaultMQTTUser)
+	parser.add_argument('-P', '--password', help="Broker-Password", dest="password", default=DefaultMQTTPassword)
 	parser.add_argument('-sp', '--sensor-pin', help="Sensor Pin des Bewegungsmelders", dest="motionPin", default=23)
 	parser.add_argument('-l', '--lamp', help="Lampen Nummer", dest="lamp", default=1)
 	parser.add_argument('-t', '--timeout', help="Time Out in Minuten bis die Ueberwachung wieder abgeschaltet wird", dest="timeout", default=2)
@@ -161,8 +175,10 @@ if __name__ == '__main__':
 				mjpg_status=subprocess.call(["systemctl", "start", mjpg])
 
 			if not mailstatus:
-				contentText=' Bewegung erkannt um: ' + str(dt.datetime.now()) +'\n Siehe: http://andreas-gremm.selfhost.bz:8080'
+				contentText=' Bewegung erkannt um: ' + str(dt.datetime.now()) +'\n Siehe: https://familie-gremm.synology.me/camera/'
 				contentHtml='<head></head><body><h2>Bewegung erkannt um: ' + str(dt.datetime.now()) + '</h2><br>Siehe: <a href="http://andreas-gremm.selfhost.bz:8080">Kamera</a></body></html>'
+
+				rsp=slack.chat.post_message('#alarmanlageninfo', contentText, as_user='alarmanlage')
 
 				for receiver in mail_receiver:
 					mail.sendmail(receiver,' Bewegung erkannt!', [contentText, contentHtml])

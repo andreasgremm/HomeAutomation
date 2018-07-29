@@ -9,14 +9,30 @@
 import RPi.GPIO as GPIO
 import paho.mqtt.client as paho
 import time, atexit
+import datetime as dt
 from urllib.parse import urlparse
 from signal import *
 import argparse
 import json
 import base64
+from slacker import Slacker
+###
+#
+# Provide the following values
+#
+# slackerKey='<slackerKey'
+# DefaultMQTTPassword = "<mqtt password"
+# DefaultMQTTUser = "<mqtt user"
+
+from Security.Slacker import *
+from Security.MQTT import *
+
+slack = Slacker(slackerKey)
+
 
 alarmON = False
 alarmActive = False
+mailstatus = False
 RUN = True
 client_id=''
 
@@ -84,8 +100,8 @@ if __name__ == '__main__':
 	parser.add_argument('-b', '--broker', help="IP Adress des MQTT Brokers", dest="mqttBroker", default="localhost")
 	parser.add_argument('-p', '--port', help="Port des MQTT Brokers", dest="port", default="1883")
 	parser.add_argument('-c', '--client-id', help="Id des Clients", dest="clientID", default="MQTT_Alarmdetektor")
-	parser.add_argument('-u', '--user', help="Broker-Benutzer", dest="user", default='Mqtt USER')
-	parser.add_argument('-P', '--password', help="Broker-Password", dest="password", default='Mqtt PASSWORD')
+	parser.add_argument('-u', '--user', help="Broker-Benutzer", dest="user", default=DefaultMQTTUser)
+	parser.add_argument('-P', '--password', help="Broker-Password", dest="password", default=DefaultMQTTPassword)
 	parser.add_argument('-sp', '--sensor-pin', help="Sensor Pin des Alarm-Detectors", dest="alarmPin", default=4)
 	parser.add_argument('-l', '--location', help="Ort des Alarmsensors", dest="location", default='AUTO')
 	parser.add_argument('-t', '--timeout', help="Time Out in Sekunden", dest="timeout", default=2)
@@ -125,9 +141,14 @@ if __name__ == '__main__':
 #		print (' alarm = ', alarmON, ' GPIO:', pinin, ' = ', GPIO.input(pinin))
 		if alarmActive:
 			if  alarmON:
+				if not mailstatus:
+					contentText=' Autoalarm erkannt um: ' + str(dt.datetime.now())
+					rsp=slack.chat.post_message('#alarmanlageninfo', contentText, as_user='alarmanlage')
+					mailstatus = True
 				mqttc.publish("buzzer/wohnzimmer", '6')
 				time.sleep(3*timeout)
 		else:
 			alarmON = False
+			mailstatus = False
 
 		time.sleep(2*timeout)
