@@ -1,2 +1,4 @@
 .DS_Store
 *.bin
+pythonenv
+__pycache__

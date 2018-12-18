@@ -1,5 +1,5 @@
 /*
-    ESP8266 RFID Reader - MQTT Sender
+    ESP8266 Klatschschalter - MQTT Sender
     Copyright 2016 Christian Moll <christian@chrmoll.de>
     Copyright 2018 Andreas Gremm
 
@@ -37,15 +37,12 @@
 #include <ESP8266HTTPUpdateServer.h>
 
 #include <PubSubClient.h>
-
-#include <SPI.h>
-#include <MFRC522.h>
-
-#define SS_PIN D4
-#define RST_PIN D3
+#include <Ticker.h>  //Ticker Library
+ 
+#define LED 2 //On board LED
 
 // Remove this include which sets the below constants to my own conveniance
-#include </Users/andreas/Documents/git-github/non-git-local-includes/ESP8266_rfid_mqtt_local.h>
+#include </Users/andreas/Documents/git-github/non-git-local-includes/ESP8266_klatschschalter_mqtt.h>
 
 // The following constants need to be set in the program
 /*
@@ -59,15 +56,15 @@ const char* mqttPass = "MQTT Password";
 const char* mqttClientId = "MQTT Client Name";
 */
 
-int autoAlarmPin = D1;
-int wohnzimmerAlarmPin = D2;
-int irPin = A0;
-int irValue;
-bool wohnzimmerAlarm = false;
-bool autoAlarm = false;
-int motion;
-bool buzzer = true;
+const byte interruptPin = 13;
+
+volatile byte interruptCounter = 0;
+volatile int numberOfInterrupts = 0;
+volatile int numberOfKlatsch = 0;
+ 
 long mqttConnectionLost = 0;
+
+Ticker inputTimer;
 
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
@@ -75,25 +72,22 @@ ESP8266HTTPUpdateServer httpUpdater;
 WiFiClient wifi;
 PubSubClient mqtt(wifi);
 
-MFRC522 rfid(SS_PIN, RST_PIN);
+void ICACHE_RAM_ATTR handleInterrupt() {
+  interruptCounter++;
+}
 
-/*
-void wificonnect();
-void mqttconnect();
- */
+void ICACHE_RAM_ATTR handleTicker() {
+  numberOfKlatsch = numberOfInterrupts;
+  numberOfInterrupts = 0;
+  digitalWrite(LED, HIGH);
+}
 
 void setup(void){
-  pinMode(autoAlarmPin, OUTPUT);
-  pinMode(wohnzimmerAlarmPin, OUTPUT);
-  digitalWrite(autoAlarmPin, HIGH);
-  digitalWrite(wohnzimmerAlarmPin, HIGH);
-  pinMode(irPin, INPUT);
+  pinMode(interruptPin, INPUT);
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED,LOW);
 
-
-  SPI.begin();
-  rfid.PCD_Init();
- 
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println();
   Serial.println("Booting Sketch...");
   WiFi.mode(WIFI_STA);
@@ -102,24 +96,21 @@ void setup(void){
   mqtt.setCallback(messageReceived);
 
   wificonnect();
-  digitalWrite(autoAlarmPin, LOW);
-
   mqttconnect();
-  digitalWrite(wohnzimmerAlarmPin, LOW);
 
   MDNS.begin(host);
 
   //Attach handles for different pages.
   httpUpdater.setup(&httpServer);
-
   httpServer.on("/", handleRoot);
   httpServer.on("/status",handleStatus);
-
   httpServer.begin();
 
   MDNS.addService("http", "tcp", 80);
-  Serial.print("MFRC522 software version = ");
-  Serial.println(rfid.PCD_ReadRegister(rfid.VersionReg),HEX);
+
+  attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, RISING);
+  timer1_attachInterrupt(handleTicker);
+  timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE);
 
   Serial.println("Up and running!");
 }
@@ -133,8 +124,47 @@ void loop(void){
 
   httpServer.handleClient();
   mqtt.loop();
-  handleRFID();
-  handleIR();
+  
+  if (numberOfKlatsch>0){
+    Serial.print("Number of Klatsch: ");
+    Serial.println(numberOfKlatsch);
+    switch (numberOfKlatsch) {
+      case 1:
+         Serial.println("Do nothing");
+      break;
+      
+      case 2:
+         mqtt.publish("radio/power", "on");
+      break;
+
+      case 3:
+         mqtt.publish("radio/volume", "<");
+      break;
+
+      case 4:
+         mqtt.publish("radio/volume", ">");
+      break;
+
+      default:
+         mqtt.publish("radio/power", "off");
+      break;
+    }
+    
+    numberOfKlatsch=0;
+  }
+
+  if(interruptCounter>0){
+    if (numberOfInterrupts == 0) {
+      timer1_write(1200000); //3-4s
+      digitalWrite(LED, LOW);
+    }
+ 
+    interruptCounter--;
+    numberOfInterrupts++;
+ 
+    Serial.print("An interrupt has occurred. Total: ");
+    Serial.println(numberOfInterrupts);
+  }
 }
 
 void wificonnect() {
@@ -151,14 +181,12 @@ void wificonnect() {
 }
 
 void mqttconnect() {
-  while (!mqtt.connect(mqttClientId, mqttUser, mqttPass, "clientstatus/RFIDReader",1,1,"OFFLINE")) {
+  while (!mqtt.connect(mqttClientId, mqttUser, mqttPass, "clientstatus/Klatschschalter-1",1,1,"OFFLINE")) {
     Serial.print(".");
     delay(500);
   }
   Serial.println("\n MQTT connected!");
-  mqtt.subscribe("alarm/wohnzimmer/motion");
-  mqtt.subscribe("alarm/auto/motion");
-  mqtt.publish("clientstatus/RFIDReader", "ONLINE");
+  mqtt.publish("clientstatus/Klatschschalter-1", "ONLINE");
 }
 
 void handleRoot() {
@@ -167,107 +195,21 @@ void handleRoot() {
 }
 
 void handleStatus() {
-  bool rfidStatus = rfid.PCD_PerformSelfTest();
-  rfid.PCD_Init();
   char theStatus[80];
-  sprintf(theStatus, "RFID-Selftest: %s\nMQTT-Reconnect: %d\n",rfidStatus ? "True" : "False",mqttConnectionLost);
+  sprintf(theStatus, "MQTT-Reconnect: %d\n",mqttConnectionLost);
   httpServer.send(200, "text/plain", theStatus);
 }
 
-void handleIR() {
-  irValue = analogRead(irPin);
-  if (irValue > 100) {
-    if (wohnzimmerAlarm and buzzer){
-      buzzer = false;
-      mqtt.publish("buzzer/wohnzimmer", "2");
-    }
-  } else {
-    buzzer = true;
-  }
-}
+
 void messageReceived(char * topic, unsigned char * payload, unsigned int length) {
-/*
+
   Serial.print("incoming: ");
   Serial.print(topic);
   Serial.print(" - ");
   for (byte i = 0; i < length; i++) {
      Serial.print((const char)payload[i]);
   }
-*/
-  if (strcmp(topic,"alarm/wohnzimmer/motion") == 0) {
-    if (strncmp((const char *)payload, "False", length) == 0) {
-      digitalWrite(wohnzimmerAlarmPin, LOW);
-      wohnzimmerAlarm = false;
-    }
-    if (strncmp((const char *)payload, "True", length) == 0) {
-      digitalWrite(wohnzimmerAlarmPin, HIGH);
-      wohnzimmerAlarm = true;
-    }
-  }
 
-  if (strcmp(topic,"alarm/auto/motion") == 0) {
-    if (strncmp((const char *)payload, "False", length) == 0) {
-      digitalWrite(autoAlarmPin, LOW);
-      autoAlarm = false;
-    }
-    if (strncmp((const char *)payload, "True", length) == 0) {
-      digitalWrite(autoAlarmPin, HIGH);
-      autoAlarm = true;
-    }
-  }
- // Serial.println();
+ Serial.println();
 }
 
-void blinkLed(int led, int nr, bool ledstatus) {
-  if (nr == 0) {
-    return;
-  }
-  nr--;
-  digitalWrite(led, !ledstatus);
-  delay(200);
-  digitalWrite(led, ledstatus);
-  delay(200);
-  blinkLed(led, nr, ledstatus);  
-}
-
-void handleRFID() {
-  if (!rfid.PICC_IsNewCardPresent()) return;
-  if (!rfid.PICC_ReadCardSerial()) return;
-  String rfiduid = printHex(rfid.uid.uidByte, rfid.uid.size);
-  rfid.PICC_HaltA();
-  rfid.PCD_StopCrypto1();
-  blinkLed(wohnzimmerAlarmPin, 3, wohnzimmerAlarm);
-  
-//  Serial.println(rfiduid);
-  mqtt.publish("rfid_reader/uid", rfiduid.c_str());
-  if (strcmp(rfiduid.c_str(),"c5d54c73") == 0) {
-    if (wohnzimmerAlarm) {
-      mqtt.publish("alarm/wohnzimmer/motion",(const uint8_t *)"False",5,true);
-    } else {
-      mqtt.publish("alarm/wohnzimmer/motion",(const uint8_t *)"True",4,true);
-    }
-  }
-  if (strcmp(rfiduid.c_str(),"c6ebfe1f") == 0) {
-    if (autoAlarm) {
-      mqtt.publish("alarm/auto/motion",(const uint8_t *)"False",5,true);
-    } else {
-      mqtt.publish("alarm/auto/motion",(const uint8_t *)"True",4,true);
-    }
-  }
-}
-
-double mapDouble(double x, double in_min, double in_max, double out_min, double out_max)
-{
-  double temp = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-  temp = (int) (4*temp + .5);
-  return (double) temp/4;
-}
-
-String printHex(byte *buffer, byte bufferSize) {
-  String id = "";
-  for (byte i = 0; i < bufferSize; i++) {
-    id += buffer[i] < 0x10 ? "0" : "";
-    id += String(buffer[i], HEX);
-  }
-  return id;
-}
