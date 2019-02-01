@@ -20,12 +20,13 @@ from Security.FSAPI import *
 
 radioKey = 0
 defaultService = ""
+volumeList=['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15']
 
 # Define event callbacks
 def on_connect(mosq, obj, flags, rc):
 	print("Connect client: "+mosq._client_id.decode()+", rc: " + str(rc))
 	mqttc.publish("clientstatus/"+mosq._client_id.decode(), "ONLINE", 0, True)
-	mqttc.subscribe([("radio/#", 2)])
+	mqttc.subscribe([("radio/power", 2),("radio/volume", 2)])
 
 def on_disconnect(mosq, obj, rc):
 	print("Disconnect client: " + mosq._client_id.decode() + ", rc: " + str(rc))
@@ -44,15 +45,31 @@ def on_message(mosq, obj, msg):
 				fs.power = True
 			elif payload == 'off':
 				fs.power = False
+			elif payload == '?':
+				mqttc.publish("radio/status/power", str(fs.power), 0, True)
 
 		elif msg.topic ==  'radio/volume':
 			oldvolume = int(fs.volume)
 
 			if payload == '<':
-				newvolume = oldvolume - 1
+				fs.volume = str(oldvolume - 1)
+			elif payload == '<<':
+				fs.volume = str(oldvolume - 2)
 			elif payload == '>':
-				newvolume = oldvolume + 1
-			fs.volume = str(newvolume)
+				fs.volume = str(oldvolume + 1)
+			elif payload == '>>':
+				fs.volume = str(oldvolume + 2)
+			elif payload == '?':
+				mqttc.publish("radio/status/volume", str(fs.volume), 0, True)
+			elif payload == '??':
+				mqttc.publish("radio/status/mute", str(fs.mute), 0, True)
+			elif payload == '0':
+				fs.mute = True
+			elif payload == '*':
+				fs.mute = False
+			elif payload in volumeList:
+				fs.volume = payload
+
 
 def on_publish(mosq, obj, mid):
 	print("mid: " + str(mid))

@@ -30,20 +30,30 @@
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
 */
 
+/*
+#include <Wire.h>  // Only needed for Arduino 1.6.5 and earlier
+#include "SSD1306Wire.h" // legacy include: `#include "SSD1306.h"`
+// Initialize the OLED display using Wire library
+SSD1306Wire  display(0x3c, D3, D5);
+*/
+
+char theOutput[80];
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-// #include <ESP8266HTTPUpdateServer.h>
+#include <ESP8266HTTPUpdateServer.h>
 
-#include <PubSubClient.h>
+// #include <PubSubClient.h>
 #include <Ticker.h>  //Ticker Library
 #include <EEPROM.h>
  
-#define LED 2 //On board LED
+#define LED 2
+#define internalLED 16 //On board LED
+#define KLINGEL D6
 
 // Remove this include which sets the below constants to my own conveniance
-#include </Users/andreas/Documents/git-github/non-git-local-includes/ESP8266_klatschschalter_mqtt.h>
+#include </Users/andreas/Documents/git-github/non-git-local-includes/ESP8266_klingeldetektor.h>
 
 // The following constants need to be set in the program
 /*
@@ -62,21 +72,19 @@ const byte interruptPin = 13;
 volatile byte interruptCounter = 0;
 volatile int numberOfInterrupts = 0;
 volatile int numberOfKlatsch = 0;
-volatile bool radioPower = false;
-volatile bool radioMute = false;
- 
+// volatile int maxKlatsch = 0;
+
 long mqttConnectionLost = 0;
-byte defaultVolume = atoi("7");
-char charDefaultVolume[3];
 const byte eepromInitialized = 100;
+byte defaultAnzahl=9;
 
 Ticker inputTimer;
 
 ESP8266WebServer httpServer(80);
-//ESP8266HTTPUpdateServer httpUpdater;
+ESP8266HTTPUpdateServer httpUpdater;
 
 WiFiClient wifi;
-PubSubClient mqtt(wifi);
+//PubSubClient mqtt(wifi);
 
 void ICACHE_RAM_ATTR handleInterrupt() {
   interruptCounter++;
@@ -84,128 +92,112 @@ void ICACHE_RAM_ATTR handleInterrupt() {
 
 void ICACHE_RAM_ATTR handleTicker() {
   numberOfKlatsch = numberOfInterrupts;
+//  maxKlatsch = max(maxKlatsch, numberOfKlatsch);
   numberOfInterrupts = 0;
   digitalWrite(LED, HIGH);
 }
 
 void setup(void){
   pinMode(interruptPin, INPUT);
+  pinMode(KLINGEL, OUTPUT);
+  digitalWrite(KLINGEL, LOW);
+
   pinMode(LED, OUTPUT);
   digitalWrite(LED,HIGH);
-
-  Serial.begin(9600);
+  pinMode(internalLED, OUTPUT);
+  digitalWrite(internalLED,HIGH); 
+  Serial.begin(115200);
   Serial.println();
   Serial.println("Booting Sketch...");
 
   EEPROM.begin(2);
   if (EEPROM.read(0) == eepromInitialized){
-    defaultVolume = EEPROM.read(1);
-    Serial.print("Default Valume from EEPROM:");
-    Serial.print(defaultVolume);
-    itoa(defaultVolume, charDefaultVolume,10);
-    Serial.print(" Char: ");
-    Serial.println(charDefaultVolume);
+    defaultAnzahl = EEPROM.read(1);
+    Serial.print("Default Anzahl from EEPROM:");
+    Serial.println(defaultAnzahl);
   }
-  else {
-    itoa(defaultVolume, charDefaultVolume,10);
-  }
-  
+
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  mqtt.setServer(brocker, 1883);
-  mqtt.setCallback(messageReceived);
+//  mqtt.setServer(brocker, 1883);
+//  mqtt.setCallback(messageReceived);
 
   wificonnect();
-  mqttconnect();
-
-  MDNS.begin(host);
-
+//  mqttconnect();
   //Attach handles for different pages.
- // httpUpdater.setup(&httpServer);
+  httpUpdater.setup(&httpServer);
   httpServer.on("/", handleRoot);
   httpServer.on("/status",handleStatus);
-  httpServer.on("/DEFAULTVOLUME",handleDefaultVolume);
+  httpServer.on("/DEFAULTANZAHL",handleDefaultAnzahl);
   httpServer.begin();
 
-  MDNS.addService("http", "tcp", 80);
+   if (MDNS.begin(host)) {
+      MDNS.addService("http", "tcp", 80);
+   }
+   else {
+    Serial.println("Error setting up MDNS responder!");
+   };
 
   attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, RISING);
   timer1_attachInterrupt(handleTicker);
   timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE);
 
   Serial.println("Up and running!");
+
+/*
+  // Initialising the UI will init the display too.
+  display.init();
+
+  display.flipScreenVertically();
+  display.setFont(ArialMT_Plain_10);
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  */
 }
 
 void loop(void){
-  if(!mqtt.connected()) {
+  delay(10);
+  // Allow MDNS processing
+  MDNS.update();
+  
+/*  if(!mqtt.connected()) {
     Serial.println("MQTT connection lost.");
     mqttConnectionLost++;
     mqttconnect();
   }
-
+*/
   httpServer.handleClient();
-  mqtt.loop();
-  
-  if (numberOfKlatsch>0){
-    Serial.print("Number of Klatsch: ");
-    Serial.println(numberOfKlatsch);
-    switch (numberOfKlatsch) {
-      case 1:
-         Serial.println("Do nothing");
-      break;
-      
-      case 2:
-         if(!radioPower) {
-            mqtt.publish("radio/power", "on");
-            mqtt.publish("radio/volume", "*");
-            mqtt.publish("radio/volume", charDefaultVolume);
-            radioMute = false;
-            radioPower = true;
-         }
-         else if (radioPower && radioMute){
-            mqtt.publish("radio/volume", "*");
-            radioMute = false;
-         }
-         else if (radioPower && !radioMute){
-            mqtt.publish("radio/volume","0");
-            radioMute = true;
-         }
-         
-      break;
-
-      case 3:
-         mqtt.publish("radio/volume", ">>");
-      break;
-
-      case 4:
-         mqtt.publish("radio/volume", "<");
-      break;
-
-      case 5:
-         mqtt.publish("radio/power", "off");
-      break;
-      
-      default:
-         mqtt.publish("radio/volume", charDefaultVolume);
-      break;
-    }
-    
+//  mqtt.loop();
+  if (numberOfKlatsch>defaultAnzahl){
+    sprintf(theOutput, "Number of Klatsch: %d",numberOfKlatsch);
+    Serial.println(theOutput);
+    digitalWrite(internalLED, LOW);
+    digitalWrite(KLINGEL, HIGH); 
+    delay(10);
+    digitalWrite(KLINGEL, LOW);
+    digitalWrite(internalLED, HIGH);
+/*    
+    display.clear();
+    display.drawString(0, 0, theOutput);
+    sprintf(theOutput, "Max Klatsch: %d",maxKlatsch);
+    display.drawString(10, 12, theOutput);
+    display.display();
+    */ 
     numberOfKlatsch=0;
   }
 
   if(interruptCounter>0){
     if (numberOfInterrupts == 0) {
-      mqtt.publish("radio/power", "?");
-      mqtt.publish("radio/volume", "??");
-      timer1_write(1200000); //3-4s
+//      mqtt.publish("radio/power", "?");
+//      mqtt.publish("radio/volume", "??");
+      timer1_write(600000); //3-4s
       digitalWrite(LED, LOW);
     }
  
     interruptCounter--;
     numberOfInterrupts++;
- 
-    Serial.print("An interrupt has occurred. Total: ");
-    Serial.println(numberOfInterrupts);
+    sprintf(theOutput, "An interrupt has occurred. Total: %d\n",numberOfInterrupts);
+    Serial.println(theOutput);
+
   }
 }
 
@@ -222,7 +214,7 @@ void wificonnect() {
   Serial.println("\n WiFi connected!");
 }
 
-void mqttconnect() {
+/*void mqttconnect() {
   while (!mqtt.connect(mqttClientId, mqttUser, mqttPass, "clientstatus/Klatschschalter-1",1,1,"OFFLINE")) {
     Serial.print(".");
     delay(500);
@@ -231,49 +223,49 @@ void mqttconnect() {
   mqtt.publish("clientstatus/Klatschschalter-1", "ONLINE");
   mqtt.subscribe("radio/status/#",1);
 }
+*/
 
 void handleRoot() {
   String message = "<html><head></head><body><a href='/status'>Status</a><br />\
-<form action='/DEFAULTVOLUME' method='post'>\
-Default Lautst&auml;rke: <input type='number' min='1' max='12' name='volume' value='"+String(defaultVolume)+"' >\
+<a href='/update'>Update</a><br />\
+<form action='/DEFAULTANZAHL' method='post'>\
+Ausl&ouml;sung durch Anzahl Signale: <input type='number' min='1' max='12' name='Anzahl' value='"+String(defaultAnzahl)+"' >\
 <input type='submit' value='Default setzen'>\
 </form><br />\
 </body></html>";
 
- // httpServer.send(200, "text/plain", "It works!!!");
- // httpServer.send(200, "text/html", "<html><head></head><body><a href='/status'>Status</a><br /><a href='/update'>Update</a></body></html>");
   httpServer.send(200, "text/html", message);
 }
 
 void handleStatus() {
   char theStatus[80];
-  sprintf(theStatus, "MQTT-Reconnect: %d\n",mqttConnectionLost);
-  httpServer.send(200, "text/plain", theStatus);
+  sprintf(theStatus, "<html><head></head><body>MQTT-Reconnect: %d <br /><a href='/'>Startseite</a></body></html>",mqttConnectionLost);
+  httpServer.send(200, "text/html", theStatus);
 }
 
-void handleDefaultVolume() {
+void handleDefaultAnzahl() {
+  char theStatus[180];
   if (httpServer.args()>0) {
     for ( uint8_t i = 0; i < httpServer.args(); i++ ) {
-      if (httpServer.argName(i) == "volume") {
+      if (httpServer.argName(i) == "Anzahl") {
          // do something here with value from server.arg(i);
-         defaultVolume=httpServer.arg(i).substring(0,1).toInt();
-         Serial.print("Default Valume from HTTP POST:");
+         defaultAnzahl=httpServer.arg(i).substring(0,2).toInt();
+         Serial.print("Default Anzahl from HTTP POST:");
          Serial.print(" Byte: ");
-         Serial.print(defaultVolume);
+         Serial.print(defaultAnzahl);
          Serial.print(" String: ");
          Serial.println(httpServer.arg(i));
          EEPROM.write(0, eepromInitialized);
-         EEPROM.write(1,defaultVolume);
+         EEPROM.write(1,defaultAnzahl);
          EEPROM.commit();
+         sprintf(theStatus, "<html><head></head><body>Anzahl gesetzt auf: %d <br /><a href='/'>Startseite</a></body></html>",defaultAnzahl);
+         httpServer.send(200, "text/html", theStatus);
       }
    }
   }
-  char theStatus[80];
-  sprintf(theStatus, "MQTT-Reconnect: %d\n",mqttConnectionLost);
-  httpServer.send(200, "text/plain", theStatus);
 }
 
-void messageReceived(char * topic, unsigned char * payload, unsigned int length) {
+/*void messageReceived(char * topic, unsigned char * payload, unsigned int length) {
 
    Serial.print("incoming: ");
    Serial.print(topic);
@@ -299,5 +291,5 @@ void messageReceived(char * topic, unsigned char * payload, unsigned int length)
       radioMute = true;
     }
   }
-}
+}*/
 

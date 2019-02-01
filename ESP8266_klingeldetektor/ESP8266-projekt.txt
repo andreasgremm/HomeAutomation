@@ -1,0 +1,7 @@
+https://www.open-electronics.org/lets-play-with-the-esp-03-demoboard/
+https://www.hackster.io/harshmangukiya/program-esp8266-esp-12e-with-arduino-using-ftdi-cable-2310c9
+https://iotguider.in/ftdi-usb-to-ttl/program-esp8266-esp-12e-with-arduino-using-ftdi/
+http://stefanfrings.de/esp8266/
+https://www.esp8266.com/wiki/doku.php?id=esp8266-module-family
+https://www.mikrocontroller-elektronik.de/esp12e-tutorial-einstieg-mit-dem-esp8266-modul/
+http://www.netzmafia.de/skripten/hardware/TL431/index.html
