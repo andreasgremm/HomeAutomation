@@ -13,7 +13,7 @@ fi
 
 imagedir=$1
 videodir=$2
-videoname=$3_`date +%F_%R`.mp4
+videoname=$3_`date +%F_%H-%M`.mp4
 
 pushd $imagedir
 

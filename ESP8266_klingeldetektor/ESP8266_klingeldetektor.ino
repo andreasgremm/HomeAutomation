@@ -47,6 +47,7 @@ char theOutput[80];
 // #include <PubSubClient.h>
 #include <Ticker.h>  //Ticker Library
 #include <EEPROM.h>
+#include <time.h>
  
 #define LED 2
 #define internalLED 16 //On board LED
@@ -58,14 +59,16 @@ char theOutput[80];
 // The following constants need to be set in the program
 /*
 const char* host = "HOSTNAME";
-const char* ssid = "SSID of WlAN";
-const char* password = "PASSWORD to conect to ssid";
+const char* ssid[] = {"ssid1", "ssid2"};
+const char* password[] = {"pw1", "pw2"};
 
 const char* brocker = "HOSTNAME or IP of MQTT brocker";
 const char* mqttUser = "MQTT User Name";
 const char* mqttPass = "MQTT Password";
 const char* mqttClientId = "MQTT Client Name";
 */
+
+size_t anzSSID = sizeof(ssid) / sizeof(ssid[0]);
 
 const byte interruptPin = 13;
 
@@ -77,6 +80,7 @@ volatile int numberOfKlatsch = 0;
 long mqttConnectionLost = 0;
 const byte eepromInitialized = 100;
 byte defaultAnzahl=9;
+boolean networkConnected = false;
 
 Ticker inputTimer;
 
@@ -118,11 +122,29 @@ void setup(void){
   }
 
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  WiFi.disconnect();
+  delay(100);
+  while (!networkConnected) {
+    int n = WiFi.scanNetworks();
+    if (n == 0) {
+      Serial.println("no networks found");
+    } else {
+      for (int i = 0; i < n; ++i) {
+        for (int j=0;j < anzSSID; j++) {
+          if (WiFi.SSID(i).equals(String(ssid[j]))) {
+            networkConnected = true;
+            wificonnect(ssid[j], password[j]);
+            break;
+          }
+        }
+      }
+    }
+      
+  delay(10);
+  }
+  
 //  mqtt.setServer(brocker, 1883);
 //  mqtt.setCallback(messageReceived);
-
-  wificonnect();
 //  mqttconnect();
   //Attach handles for different pages.
   httpUpdater.setup(&httpServer);
@@ -138,6 +160,9 @@ void setup(void){
     Serial.println("Error setting up MDNS responder!");
    };
 
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 0);
+  
   attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, RISING);
   timer1_attachInterrupt(handleTicker);
   timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE);
@@ -168,7 +193,9 @@ void loop(void){
   httpServer.handleClient();
 //  mqtt.loop();
   if (numberOfKlatsch>defaultAnzahl){
-    sprintf(theOutput, "Number of Klatsch: %d",numberOfKlatsch);
+    time_t tnow = time(nullptr);
+    Serial.print(String(ctime(&tnow)));
+    sprintf(theOutput, " Number of Klatsch: %d",numberOfKlatsch);
     Serial.println(theOutput);
     digitalWrite(internalLED, LOW);
     digitalWrite(KLINGEL, HIGH); 
@@ -201,7 +228,7 @@ void loop(void){
   }
 }
 
-void wificonnect() {
+void wificonnect(const char * ssid, const char * password) {
   while(WiFi.waitForConnectResult() != WL_CONNECTED){
     WiFi.begin(ssid, password);
     Serial.println("WiFi failed, retrying.");
