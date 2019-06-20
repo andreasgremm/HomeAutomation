@@ -30,14 +30,8 @@
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
 */
 
-/*
-#include <Wire.h>  // Only needed for Arduino 1.6.5 and earlier
-#include "SSD1306Wire.h" // legacy include: `#include "SSD1306.h"`
-// Initialize the OLED display using Wire library
-SSD1306Wire  display(0x3c, D3, D5);
-*/
+//#define WLANON
 
-char theOutput[80];
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
@@ -77,10 +71,15 @@ volatile int numberOfInterrupts = 0;
 volatile int numberOfKlatsch = 0;
 // volatile int maxKlatsch = 0;
 
-long mqttConnectionLost = 0;
+// long mqttConnectionLost = 0;
 const byte eepromInitialized = 100;
-byte defaultAnzahl=9;
+byte defaultAnzahl=6;
 boolean networkConnected = false;
+byte mySSID;
+byte mac[6];
+String smac;
+
+char theOutput[80];
 
 Ticker inputTimer;
 
@@ -92,13 +91,16 @@ WiFiClient wifi;
 
 void ICACHE_RAM_ATTR handleInterrupt() {
   interruptCounter++;
+/*  time_t tnow = time(nullptr);
+  Serial.println(String(ctime(&tnow)));
+  */
 }
 
 void ICACHE_RAM_ATTR handleTicker() {
   numberOfKlatsch = numberOfInterrupts;
 //  maxKlatsch = max(maxKlatsch, numberOfKlatsch);
   numberOfInterrupts = 0;
-  digitalWrite(LED, HIGH);
+  digitalWrite(LED, LOW);
 }
 
 void setup(void){
@@ -107,7 +109,7 @@ void setup(void){
   digitalWrite(KLINGEL, LOW);
 
   pinMode(LED, OUTPUT);
-  digitalWrite(LED,HIGH);
+  digitalWrite(LED,LOW);
   pinMode(internalLED, OUTPUT);
   digitalWrite(internalLED,HIGH); 
   Serial.begin(115200);
@@ -121,6 +123,11 @@ void setup(void){
     Serial.println(defaultAnzahl);
   }
 
+#ifndef WLANON
+  WiFi.mode(WIFI_OFF);
+#endif
+
+#ifdef WLANON
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   delay(100);
@@ -134,13 +141,16 @@ void setup(void){
           if (WiFi.SSID(i).equals(String(ssid[j]))) {
             networkConnected = true;
             wificonnect(ssid[j], password[j]);
+            mySSID = j;
             break;
           }
         }
       }
-    }
-      
-  delay(10);
+    }    
+  delay(1000);
+//  WiFi.printDiag(Serial);
+  WiFi.macAddress(mac);
+  smac = macToString(mac);
   }
   
 //  mqtt.setServer(brocker, 1883);
@@ -153,45 +163,43 @@ void setup(void){
   httpServer.on("/DEFAULTANZAHL",handleDefaultAnzahl);
   httpServer.begin();
 
-   if (MDNS.begin(host)) {
+  if (MDNS.begin(host)) {
       MDNS.addService("http", "tcp", 80);
    }
    else {
-    Serial.println("Error setting up MDNS responder!");
+      Serial.println("Error setting up MDNS responder!");
    };
 
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
   setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 0);
-  
+
+#endif
+
   attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, RISING);
   timer1_attachInterrupt(handleTicker);
   timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE);
 
   Serial.println("Up and running!");
-
-/*
-  // Initialising the UI will init the display too.
-  display.init();
-
-  display.flipScreenVertically();
-  display.setFont(ArialMT_Plain_10);
-  display.setTextAlignment(TEXT_ALIGN_LEFT);
-  */
 }
 
 void loop(void){
   delay(10);
-  // Allow MDNS processing
-  MDNS.update();
   
+#ifdef WLANON
+// Allow MDNS processing
+ MDNS.update();
+
 /*  if(!mqtt.connected()) {
     Serial.println("MQTT connection lost.");
     mqttConnectionLost++;
     mqttconnect();
   }
 */
+
   httpServer.handleClient();
 //  mqtt.loop();
+#endif
+
   if (numberOfKlatsch>defaultAnzahl){
     time_t tnow = time(nullptr);
     Serial.print(String(ctime(&tnow)));
@@ -202,13 +210,7 @@ void loop(void){
     delay(10);
     digitalWrite(KLINGEL, LOW);
     digitalWrite(internalLED, HIGH);
-/*    
-    display.clear();
-    display.drawString(0, 0, theOutput);
-    sprintf(theOutput, "Max Klatsch: %d",maxKlatsch);
-    display.drawString(10, 12, theOutput);
-    display.display();
-    */ 
+
     numberOfKlatsch=0;
   }
 
@@ -217,9 +219,8 @@ void loop(void){
 //      mqtt.publish("radio/power", "?");
 //      mqtt.publish("radio/volume", "??");
       timer1_write(600000); //3-4s
-      digitalWrite(LED, LOW);
+      digitalWrite(LED, HIGH);
     }
- 
     interruptCounter--;
     numberOfInterrupts++;
     sprintf(theOutput, "An interrupt has occurred. Total: %d\n",numberOfInterrupts);
@@ -231,13 +232,11 @@ void loop(void){
 void wificonnect(const char * ssid, const char * password) {
   while(WiFi.waitForConnectResult() != WL_CONNECTED){
     WiFi.begin(ssid, password);
-    Serial.println("WiFi failed, retrying.");
+    Serial.print(".");
     delay(500);
   }
-
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-
   Serial.println("\n WiFi connected!");
 }
 
@@ -253,7 +252,10 @@ void wificonnect(const char * ssid, const char * password) {
 */
 
 void handleRoot() {
-  String message = "<html><head></head><body><a href='/status'>Status</a><br />\
+  time_t tnow = time(nullptr);
+  String message = "<html><head><title>Klingeldetektor</title></head><body>\
+<h4>Uhrzeit: " + String(ctime(&tnow)) + "</h4>\
+<a href='/status'>Status</a><br />\
 <a href='/update'>Update</a><br />\
 <form action='/DEFAULTANZAHL' method='post'>\
 Ausl&ouml;sung durch Anzahl Signale: <input type='number' min='1' max='12' name='Anzahl' value='"+String(defaultAnzahl)+"' >\
@@ -265,8 +267,12 @@ Ausl&ouml;sung durch Anzahl Signale: <input type='number' min='1' max='12' name=
 }
 
 void handleStatus() {
-  char theStatus[80];
-  sprintf(theStatus, "<html><head></head><body>MQTT-Reconnect: %d <br /><a href='/'>Startseite</a></body></html>",mqttConnectionLost);
+  String theStatus = "<html><head></head><body>Verbunden mit: <b>" + String(ssid[mySSID]) + "</b><br />\
+MAC-Adresse: <b>" + smac + "</b><br />\
+IP-Adresse: <b>" + ipToString(WiFi.localIP()) + "</b><br />\
+Subnet Mask: <b>" + ipToString(WiFi.subnetMask()) + "</b><br />\
+Gateway-IP: <b>" + ipToString(WiFi.gatewayIP()) + "</b><br />\
+<a href='/'>Startseite</a></body></html>";
   httpServer.send(200, "text/html", theStatus);
 }
 
@@ -290,6 +296,24 @@ void handleDefaultAnzahl() {
       }
    }
   }
+}
+
+String ipToString(IPAddress ip){
+  String s="";
+  for (int i=0; i<4; i++)
+    s += i  ? "." + String(ip[i]) : String(ip[i]);
+  return s;
+}
+
+String macToString(byte mac[6]){
+  String s="";
+  for (byte i=0; i<6; i++){
+    char buf[3];
+    sprintf(buf, "%2X", mac[i]);
+    s += buf;
+    if (i < 5) s+=':';
+  }
+  return s;
 }
 
 /*void messageReceived(char * topic, unsigned char * payload, unsigned int length) {

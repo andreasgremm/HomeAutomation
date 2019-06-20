@@ -100,7 +100,7 @@ void setup(void){
   EEPROM.begin(2);
   if (EEPROM.read(0) == eepromInitialized){
     defaultVolume = EEPROM.read(1);
-    Serial.print("Default Valume from EEPROM:");
+    Serial.print("Default Volume from EEPROM:");
     Serial.print(defaultVolume);
     itoa(defaultVolume, charDefaultVolume,10);
     Serial.print(" Char: ");

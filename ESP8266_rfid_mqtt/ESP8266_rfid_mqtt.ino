@@ -35,6 +35,7 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
+#include <time.h>
 
 #include <PubSubClient.h>
 
@@ -43,6 +44,9 @@
 
 #define SS_PIN D4
 #define RST_PIN D3
+int autoAlarmPin = D1;
+int wohnzimmerAlarmPin = D2;
+int irPin = A0;
 
 // Remove this include which sets the below constants to my own conveniance
 #include </Users/andreas/Documents/git-github/non-git-local-includes/ESP8266_rfid_mqtt_local.h>
@@ -59,15 +63,21 @@ const char* mqttPass = "MQTT Password";
 const char* mqttClientId = "MQTT Client Name";
 */
 
-int autoAlarmPin = D1;
-int wohnzimmerAlarmPin = D2;
-int irPin = A0;
+
 int irValue;
 bool wohnzimmerAlarm = false;
 bool autoAlarm = false;
 int motion;
 bool buzzer = true;
 long mqttConnectionLost = 0;
+byte mac[6];
+String smac;
+
+unsigned long previousMillis = 0;  
+unsigned long currentMillis;
+const long interval = 60000;   
+
+String mfrc522SoftwareVersion;
 
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
@@ -88,8 +98,7 @@ void setup(void){
   digitalWrite(autoAlarmPin, HIGH);
   digitalWrite(wohnzimmerAlarmPin, HIGH);
   pinMode(irPin, INPUT);
-
-
+ 
   SPI.begin();
   rfid.PCD_Init();
  
@@ -107,7 +116,8 @@ void setup(void){
   mqttconnect();
   digitalWrite(wohnzimmerAlarmPin, LOW);
 
-  MDNS.begin(host);
+  WiFi.macAddress(mac);
+  smac = macToString(mac);
 
   //Attach handles for different pages.
   httpUpdater.setup(&httpServer);
@@ -117,14 +127,26 @@ void setup(void){
 
   httpServer.begin();
 
-  MDNS.addService("http", "tcp", 80);
-  Serial.print("MFRC522 software version = ");
-  Serial.println(rfid.PCD_ReadRegister(rfid.VersionReg),HEX);
+  if (MDNS.begin(host)) {
+      MDNS.addService("http", "tcp", 80);
+   }
+   else {
+      Serial.println("Error setting up MDNS responder!");
+   };
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 0);
+ 
+
+  mfrc522SoftwareVersion = "MFRC522 software version = <b>" + String(rfid.PCD_ReadRegister(rfid.VersionReg),HEX) + "</b><br />";
+  Serial.println(mfrc522SoftwareVersion);
 
   Serial.println("Up and running!");
 }
 
 void loop(void){
+  delay(10);
+  currentMillis = millis();
+
   if(!mqtt.connected()) {
     Serial.println("MQTT connection lost.");
     mqttConnectionLost++;
@@ -133,6 +155,7 @@ void loop(void){
 
   httpServer.handleClient();
   mqtt.loop();
+  MDNS.update();
   handleRFID();
   handleIR();
 }
@@ -162,16 +185,44 @@ void mqttconnect() {
 }
 
 void handleRoot() {
- // httpServer.send(200, "text/plain", "It works!!!");
-  httpServer.send(200, "text/html", "<html><head></head><body><a href='/status'>Status</a><br /><a href='/update'>Update</a></body></html>");
+  time_t tnow = time(nullptr);
+  String message = "<html><head><title>RFC Reader</title></head><body>\
+<h4>Uhrzeit: " + String(ctime(&tnow)) + "</h4>\
+<a href='/status'>Status</a><br />\
+<a href='/update'>Update</a><br />\
+</body></html>";
+
+  httpServer.send(200, "text/html", message);
+}
+
+bool handleRfidStatus() {
+  bool rfidStatus = rfid.PCD_PerformSelfTest();
+  rfid.PCD_Init();
+  if (rfidStatus) {
+      blinkLed(wohnzimmerAlarmPin, 2, wohnzimmerAlarm);
+  }
+  else {
+      blinkLed(autoAlarmPin, 2, autoAlarm);
+  }
+  return rfidStatus;
 }
 
 void handleStatus() {
-  bool rfidStatus = rfid.PCD_PerformSelfTest();
-  rfid.PCD_Init();
-  char theStatus[80];
-  sprintf(theStatus, "RFID-Selftest: %s\nMQTT-Reconnect: %d\n",rfidStatus ? "True" : "False",mqttConnectionLost);
-  httpServer.send(200, "text/plain", theStatus);
+  char theRfidStatus[80];
+  bool rfidStatus = handleRfidStatus();
+
+  sprintf(theRfidStatus, "RFID-Selftest:<b> %s</b><br />MQTT-Reconnect:<b> %d </b><br />",rfidStatus ? "True" : "False",mqttConnectionLost);
+
+   String theStatus = "<html><head><style>table, th, td {border: 1px solid black;}</style>\
+<title>RFC Reader</title></head><body>\
+<table><caption>Network Attributes</caption><tr><th>Attribut</th><th>Wert</th></tr>\
+<tr><td>MAC-Adresse</td><td><b>" + smac + "</b></td></tr>\
+<tr><td>IP-Adresse</td><td><b>" + ipToString(WiFi.localIP()) + "</b></td></tr>\
+<tr><td>Subnet Mask</td><td><b>" + ipToString(WiFi.subnetMask()) + "</b></td></tr>\
+<tr><td>Gateway-IP</td><td><b>" + ipToString(WiFi.gatewayIP()) + "</b></td></tr>\
+</table><br />" + String(theRfidStatus) + mfrc522SoftwareVersion + "\
+<a href='/'>Startseite</a></body></html>";
+  httpServer.send(200, "text/html", theStatus);
 }
 
 void handleIR() {
@@ -180,6 +231,11 @@ void handleIR() {
     if (wohnzimmerAlarm and buzzer){
       buzzer = false;
       mqtt.publish("buzzer/wohnzimmer", "2");
+    }
+    if (abs(currentMillis - previousMillis) >= interval) {
+      // save time
+      previousMillis = currentMillis;
+      bool rfidStatus = handleRfidStatus();
     }
   } else {
     buzzer = true;
@@ -271,3 +327,23 @@ String printHex(byte *buffer, byte bufferSize) {
   }
   return id;
 }
+
+
+String ipToString(IPAddress ip){
+  String s="";
+  for (int i=0; i<4; i++)
+    s += i  ? "." + String(ip[i]) : String(ip[i]);
+  return s;
+}
+
+String macToString(byte mac[6]){
+  String s="";
+  for (byte i=0; i<6; i++){
+    char buf[3];
+    sprintf(buf, "%2X", mac[i]);
+    s += buf;
+    if (i < 5) s+=':';
+  }
+  return s;
+}
+
