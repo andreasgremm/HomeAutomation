@@ -2,3 +2,4 @@
 *.bin
 pythonenv
 __pycache__
+*.pyc
