@@ -221,7 +221,7 @@ Die Hue-Bridge ist neben der Steuerung durch die Hue-App auch über ein API steu
 
 Die Lampen selber werden von der Hue-Bridge über das ZigBee Protokoll gesteuert.
 
-###<a name="homeautomation"></a>Homeautomation 
+### <a name="homeautomation"></a>Homeautomation 
 Auf dem Raspberry PI [Homeautomation](http://192.168.1.237) laufen verschiedene Programme mit folgenden Funktionalitäten.
 
 * MQTT Broker (Port 1883) als zentrale Schaltstelle für MQTT Nachrichten.
@@ -303,7 +303,7 @@ Mit dem Befehl `sudo systemctl restart klatschschalter` wird beispielsweise der 
 
 In gleicher Form lassen sich die anderen Dienste wie **readxbeeserial** oder **huecontroller** neu starten.
 
-###<a name="klatschschalter"></a>Klatschschalter
+### <a name="klatschschalter"></a>Klatschschalter
 Der Klatschschalter ist eine elektronische Schaltung in einem Gehäuse mit den Funktionen
 
 * Klatschdetektor
@@ -315,7 +315,7 @@ Die Daten werden per ZigBee - Protokoll übertragen. Die einzelnen Sensoren sind
 
 Der Homeautomation Rechner dient als ZigBee Gateway. Hier ist über die serielle Schnittstelle ebenfalls ein Xbee angeschlossen. Über das Programm **MQTT_ReadXbeeserial.py** werden die Informationen gelesen und in Ausgangssignale an den IO-Pins des angeschlossenen Xbees umgesetzt bzw. in einer MySQL Datenbank gespeichert.
 Die Ausgangssignale des angeschlossenen Xbees sind in einer elektronischen Schaltung mit Kontakten (IO-Pins) des Raspberry verbunden.
-####Klatschdetektor
+#### Klatschdetektor
 Der Klatschschalter sendet mit jedem erkannten Klatsch ein einzelnes Signal über das ZigBee Protokoll.
 Dieses führt zu einzelnen Signalen an dem IO-Pin des Raspberries.
 Der relevante Pin (GPIO 18) wird vom Programm **MQTT_Klatschschalter.py** gelesen und in Klatschsequenzen umgewandelt.
@@ -330,7 +330,7 @@ Die Steuerung erfolgt über MQTT - Nachrichten an das Programm **MQTT_HueControl
 
 Klatschschalter -(ZigBee)-> MQTT_ReadXbeeserial -(GPIO 18)-> MQTT_Klatschschalter -(MQTT)-> MQTT_HueController -(API)-> Hue-Bridge
 
-####Bewegungsmelder
+#### Bewegungsmelder
 Wie bei dem Klatschschalter wird auch das Signal des Bewegungsmelders über das ZigBee-Gateway umgesetzt und als Signal an den Raspberry IO Pin 23 gesendet.
 
 In Abhängigkeit des Status der Wohnzimmer-Alarmanlage führt das Signal zu folgenden Aktivitäten.
@@ -351,7 +351,7 @@ Die Wohnzimmer-Alarmanlage kann über den RFID Reader oder die WebSeite <http://
 #### Temperatur und Licht
 Die Daten zu Temperatur und Licht werden in der MySQL Datenbank gespeichert.
 
-###<a name="auto-alarmanlage"></a>Auto Alarmanlage
+### <a name="auto-alarmanlage"></a>Auto Alarmanlage
 Im Auto ist eine selbstbebaute Alarmanlage installiert die folgende Sensoren beinhaltet:
 
 * Bewegungsmelder
@@ -373,7 +373,7 @@ Temperatur, Licht und Spannungswerte werden in der MySQL-Datenbank gespeichert.
 
 Die Auto-Alarmanlage kann über den RFID Reader oder die WebSeite <http://192.168.1.237/wsgi/showtemperature/index> aktiviert werden. Bei der Aktivierung über der WebSeite wird aktuell der Status auch in der Datenbank geändert, so dass bei einem Neustart der Status persistent ist. 
 
-###<a name="rfid-reader"></a>RFID Reader
+### <a name="rfid-reader"></a>RFID Reader
 Der [**RFid_Reader**](http://rfid_reader.local) besteht aus einem ESP8266 an dem ein RFID Kartenleser und ein Bewegungsmelder angeschlossen ist.
 
 Aktuell werden folgende Karten für folgende Informationen genutzt:
