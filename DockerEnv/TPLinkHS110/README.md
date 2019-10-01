@@ -6,6 +6,9 @@ https://www.softscheck.com/en/reverse-engineering-tp-link-hs110/
 
 https://github.com/softScheck/tplink-smartplug
 
+Clone:
+https://github.com/andreasgremm/HomeAutomation.git
+
 
 docker volume create non-git-local-includes
 

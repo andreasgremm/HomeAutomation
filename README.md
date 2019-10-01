@@ -3,11 +3,11 @@
 ## Komponenten
 Die Heimautomation besteht aus mehreren Elementen.
 
-* [dedizierten Controllern] (#dedizierte-controller)
-* [steuerbare Endgeräten] (#steuerbare-endgeräte)
-* [Sensoren] (#sensoren)
-* [Alexa] (#alexa)
-* [Klein-Computern mit aktiven Programmen] (#klein-computer)
+* [dedizierten Controllern](#dedizierte-controller)
+* [steuerbare Endgeräten](#steuerbare-endgeräte)
+* [Sensoren](#sensoren)
+* [Alexa](#alexa)
+* [Klein-Computern mit aktiven Programmen](#klein-computer)
 
 ### <a name="dedizierte-controller"></a>Dedizierte Controller
 
@@ -45,17 +45,17 @@ Die Heimautomation besteht aus mehreren Elementen.
 
 ### <a name="sensoren"></a>Sensoren
 
-* [**Klatschschalter**] (#klatschschalter) im Wohnzimmer
+* [**Klatschschalter**](#klatschschalter) im Wohnzimmer
 	* Klatschdetektor
 	* Bewegungsmelder
 	* Temperatursensor
 	* Lichtsensor
-* [**Auto-Alarmanlage**] (#auto-alarmanlage)
+* [**Auto-Alarmanlage**](#auto-alarmanlage)
 	* Bewegungsmelder
 	* Temperatursensor
 	* Lichtsensor
 	* Spannungssensor
-* [**RFID Reader**] (#rfid-reader) ESP8266 im Flur
+* [**RFID Reader**](#rfid-reader) ESP8266 im Flur
 	* Mifare RFID Kartenleser
 
 ### <a name="alexa"></a>Alexa
@@ -67,7 +67,7 @@ Die Heimautomation besteht aus mehreren Elementen.
 ### <a name="klein-computer"></a>Klein-Computer
 
 * [**Homeautomation**] (#homeautomation) Raspberry Pi
-* **OpenHAB** Raspberry Pi
+* [OpenHAB](OpenHAB) Raspberry Pi
 * **OpenElec** Raspberry Pi im Schlafzimmer
 
 ## Konzepte 
