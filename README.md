@@ -3,7 +3,7 @@
 ## Komponenten
 Die Heimautomation besteht aus mehreren Elementen.
 
-* [dedizierten Controllern](dedizierte-controller)
+* [dedizierten Controllern](#dedizierte-controller)
 * [steuerbare Endgeräten](#steuerbare-endgeräte)
 * [Sensoren](#sensoren)
 * [Alexa](#alexa)
@@ -66,7 +66,7 @@ Die Heimautomation besteht aus mehreren Elementen.
 
 ### <a name="klein-computer"></a>Klein-Computer
 
-* [**Homeautomation**] (#homeautomation) Raspberry Pi
+* [**Homeautomation**](#homeautomation) Raspberry Pi
 * [OpenHAB](OpenHAB) Raspberry Pi
 * **OpenElec** Raspberry Pi im Schlafzimmer
 
@@ -84,10 +84,10 @@ Nachrichten werden ebenfalls zur Kommunikation verwendet, unterliegen aber häuf
 Der Empfang der Nachrichten ist häufig nicht synchron mit der Versendung und es liegt ein Vermittler (Broker) im Kommunikationsweg.
 Desweiteren können Nachrichten auch an mehrere Empfänger versendet werden.
 #### Endanwenderinformation
-Um aus der Heimautomatiesierung heraus Nachrichten an einen oder mehreren Endanwendern zu versenden wird [**SLACK**] (https://slack.com/intl/de-de/) verwendet.
+Um aus der Heimautomatiesierung heraus Nachrichten an einen oder mehreren Endanwendern zu versenden wird [**SLACK**](https://slack.com/intl/de-de/) verwendet.
 
 #### Kommunikation zwischen Programmen
-Um innerhalb der Heimautomatisierung Nachrichten von einem Element zu anderen Elementen zu senden, wird [**MQTT**] (https://de.wikipedia.org/wiki/MQTT) verwendet.
+Um innerhalb der Heimautomatisierung Nachrichten von einem Element zu anderen Elementen zu senden, wird [**MQTT**](https://de.wikipedia.org/wiki/MQTT) verwendet.
 
 ### Kommunikationsnetzwerke
 Kommunikationsnetzwerke bilden die Basis für Kommunikation zwischen Geräten. Zwei oder mehrere Geräte können miteinander kommunizieren wenn sie durch ein Kommunikationsnetzwerk miteinander verbunden sind. Geräte in unterschiedlichen Netzwerken benötigen Vermittler um zueinander zu finden.
@@ -132,7 +132,7 @@ Die Internet-Router besitzen häufig einen ISDN-Basisanschluss, so dass bestehen
 Mit den Mobiltelefonen im Heimbereich wurde das DECT Protokoll eingeführt. DECT Basisstationen dienen als Gateway vom analogen Telefonanschluss zum mobilen Gerät.
 Heutzutage werden die Internet-Router bereits mit einer DECT Basisstation ausgeliefert und übersetzen dann in Voice-over-IP.
 #### ZigBee
-[ZigBee] (https://de.wikipedia.org/wiki/ZigBee) ist ein eigenständiges Protokoll zur Verbindung von Sensoren und Aktoren mit geringen Datenraten und gößeren Reichweiten als WLAN.
+[ZigBee](https://de.wikipedia.org/wiki/ZigBee) ist ein eigenständiges Protokoll zur Verbindung von Sensoren und Aktoren mit geringen Datenraten und gößeren Reichweiten als WLAN.
 
 ### IP Protokoll
 Das IP Protokoll besteht im Wesentlichen aus 3 unterschiedlichen Kommunikationsarten.
@@ -158,7 +158,7 @@ Eine IP-Kommunikation benötigt neben der IP-Adresse zusätzlich noch einen soge
 Der Router des Telekommunikationsanbieters bekommt auf der WAN-Seite eine offizielle IP-Adresse und auf der LAN-Seite werden private IP-Adressen verwendet. Über eine "Network-Address-Translation (NAT)" werden die internen Adressen gegen eine externe IP-Adresse mit einem entsprechenden Port umgesetzt.
 
 Zu den Ports:
-Es gibt sogenannte ["Well known Ports"] (https://de.wikipedia.org/wiki/Liste_der_standardisierten_Ports), diese sind z.B.: für HTTP Server der Port 80 oder bei Nutzung von HTTP-Secure (HTTPS) der Port 443. SSH Server hören standardmäß9g auf den Port 22.
+Es gibt sogenannte ["Well known Ports"](https://de.wikipedia.org/wiki/Liste_der_standardisierten_Ports), diese sind z.B.: für HTTP Server der Port 80 oder bei Nutzung von HTTP-Secure (HTTPS) der Port 443. SSH Server hören standardmäß9g auf den Port 22.
 
 Clients verbinden sich mit einem Port auf dem Zielrechner und öffenen dafür einen Quellport auf dem eigenen System.
 Beispiel: Web-Verbindung von Rechner a auf den Rechner b.
@@ -212,7 +212,7 @@ PING homeautomation.local (192.168.1.237): 56 data bytes
 ## Systemdetails
 
 ### Hue
-Die Hue-Lampen werden durch die [Phillips-Hue-Bridge] (http://192.168.1.127) im Wohnzimmerschrank gesteuert.
+Die Hue-Lampen werden durch die [Phillips-Hue-Bridge](http://192.168.1.127) im Wohnzimmerschrank gesteuert.
 Für die Steuerung kann die Hue-App des Handy genutzt werden. 
 Es lassen sich sowohl die Lampen Wohnzimmer1 bis Wohnzimmer3 einzeln steuern als auch Szenen einrichten.
 Aktuell sind drei Szenen eingerichtet: Wohnen1, Wohnen2 und Wohnen3.
@@ -222,13 +222,13 @@ Die Hue-Bridge ist neben der Steuerung durch die Hue-App auch über ein API steu
 Die Lampen selber werden von der Hue-Bridge über das ZigBee Protokoll gesteuert.
 
 ###<a name="homeautomation"></a>Homeautomation 
-Auf dem Raspberry PI [Homeautomation] (http://192.168.1.237) laufen verschiedene Programme mit folgenden Funktionalitäten.
+Auf dem Raspberry PI [Homeautomation](http://192.168.1.237) laufen verschiedene Programme mit folgenden Funktionalitäten.
 
 * MQTT Broker (Port 1883) als zentrale Schaltstelle für MQTT Nachrichten.
 * MySQL Datenbank zur Speicherung von Informationen
 * Apache WebServer 
-	* [Informationsanzeige zu Sensoren] (http://192.168.1.237/wsgi/showtemperature/index)
- 	* [MySql phpMyAdmin] (http://192.168.1.237/phpmyadmin/)
+	* [Informationsanzeige zu Sensoren](http://192.168.1.237/wsgi/showtemperature/index)
+ 	* [MySql phpMyAdmin](http://192.168.1.237/phpmyadmin/)
 * NodeRed System (Port 1880) zur Darstellung und Steuerung verschiedener Funktionen
 * Python Programme die sich per MQTT unterhalten:
 	* HueController
@@ -374,7 +374,7 @@ Temperatur, Licht und Spannungswerte werden in der MySQL-Datenbank gespeichert.
 Die Auto-Alarmanlage kann über den RFID Reader oder die WebSeite <http://192.168.1.237/wsgi/showtemperature/index> aktiviert werden. Bei der Aktivierung über der WebSeite wird aktuell der Status auch in der Datenbank geändert, so dass bei einem Neustart der Status persistent ist. 
 
 ###<a name="rfid-reader"></a>RFID Reader
-Der [**RFid_Reader**] (http://rfid_reader.local) besteht aus einem ESP8266 an dem ein RFID Kartenleser und ein Bewegungsmelder angeschlossen ist.
+Der [**RFid_Reader**](http://rfid_reader.local) besteht aus einem ESP8266 an dem ein RFID Kartenleser und ein Bewegungsmelder angeschlossen ist.
 
 Aktuell werden folgende Karten für folgende Informationen genutzt:
 
