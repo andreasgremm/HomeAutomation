@@ -3,7 +3,7 @@
 ## Komponenten
 Die Heimautomation besteht aus mehreren Elementen.
 
-* [dedizierten Controllern](#dedizierte-controller)
+* [dedizierten Controllern](dedizierte-controller)
 * [steuerbare Endgeräten](#steuerbare-endgeräte)
 * [Sensoren](#sensoren)
 * [Alexa](#alexa)
