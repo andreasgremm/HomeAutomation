@@ -5,3 +5,5 @@
 /tmp/*
 /run/*
 /mnt/*
+/var/lib/docker/*
+/lost+found/*

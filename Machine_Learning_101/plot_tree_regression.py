@@ -13,12 +13,14 @@ We can see that if the maximum depth of the tree (controlled by the
 `max_depth` parameter) is set too high, the decision trees learn too fine
 details of the training data and learn from the noise, i.e. they overfit.
 """
-print(__doc__)
 
 # Import the necessary modules and libraries
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 import matplotlib.pyplot as plt
+
+print(__doc__)
+
 
 # Create a random dataset
 rng = np.random.RandomState(1)
