@@ -30,7 +30,7 @@ from Security.Slacker import maschinenstatusKey
 from Security.MQTT import DefaultMQTTPassword, DefaultMQTTUser
 
 RUN = True
-debug = True
+debug = False
 client_id = ''
 hs110List = []
 hs110AllFound = False

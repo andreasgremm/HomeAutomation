@@ -78,7 +78,7 @@ class TplinkHS110(object):
     @staticmethod
     def hs110Discover(ip, cmd, debug):
         port_send = 9999
-        port_bind = 9998
+        # port_bind = 9998
         hs110 = []
         if debug:
             print("Raw Request:\t", cmd)

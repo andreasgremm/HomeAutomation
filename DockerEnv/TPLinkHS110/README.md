@@ -4,7 +4,7 @@ Die TPLINK HS110 Steckdosen lassen sich per WLAN steuern und der Energieverbrauc
 Das Protokoll wurde reverse engineered und findet sich [hier](
 https://www.softscheck.com/en/reverse-engineering-tp-link-hs110/).
 
-Die Basis des TPLINK HS110 Monitor basiert auf [softScheck/tplink-smartplug](https://github.com/softScheck/tplink-smartplug) 
+Die Basis des TPLINK HS110 Monitor basiert auf [softScheck/tplink-smartplug](https://github.com/softScheck/tplink-smartplug)
 
 ## Installation
 Clone: https://github.com/andreasgremm/HomeAutomation.git
@@ -51,7 +51,7 @@ DRIVER              VOLUME NAME
 local               non-git-local-includes
 ```
 
-Als nächster Schritt werden die benötigten "Include" Dateien mit den Security-Einstellungen für das Python-Programm in das erzeugte Volume kopiert. 
+Als nächster Schritt werden die benötigten "Include" Dateien mit den Security-Einstellungen für das Python-Programm in das erzeugte Volume kopiert.
 Hierfür wird ein Container benötigt. Wier bauen einen kleinen leichtgewichtigen Container auf.
 
 ### Temporärer Container Alternative 1
@@ -138,16 +138,19 @@ docker build --build-arg buildtime_IP_Brocker="<IP.Adresse>" --build-arg buildti
 Das Programm kann dann folgendermassen gestartet werden:
 
 ```
-docker run -d \
+docker run -d --network=host \
   --name=tplinkmonitor \
   --mount source=non-git-local-includes,destination=/non-git-local-includes,readonly \
-   --restart unless-stopped \
+  --restart unless-stopped \
   tplinkmonitor:prod
 ```
 
 IP Adresse des Brockers und/oder Client-Name können auch zur Laufzeit mittels der Umgebungsvariablen IP_Brocker oder Client_Name gesetzt werden.
 
 ```
-docker run -it -e "IP_Adress=<IP.Adresse" -e "Client_Name=<Client-Name>" --rm   --mount source=non-git-local-includes,destination=/non-git-local-includes,readonly   tplinkmonitor:prod
+docker run -d --network=host \
+  --name=tplinkmonitor -e "IP_Adress=<IP.Adresse" -e "Client_Name=<Client-Name>" \
+  --mount source=non-git-local-includes,destination=/non-git-local-includes,readonly \
+  --restart unless-stopped \
+  tplinkmonitor:prod
 ```
-
