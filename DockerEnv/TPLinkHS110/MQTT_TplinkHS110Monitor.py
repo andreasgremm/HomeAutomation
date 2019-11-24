@@ -258,13 +258,13 @@ if __name__ == '__main__':
                     tplink_rediscover(hs110)
                     print(hs110)
 
-        if not hs110AllFound:
-            tempnames = []
-            for hs110temp in hs110List:
-                tempnames.append(hs110temp.name)
+            if not hs110AllFound:
+                tempnames = []
+                for hs110temp in hs110List:
+                    tempnames.append(hs110temp.name)
 
-            for name in hs110NameList:
-                if name not in tempnames:
-                    hs110AllFound = tplink_find(name, hs110List)
+                for name in hs110NameList:
+                    if name not in tempnames:
+                        hs110AllFound = tplink_find(name, hs110List)
 
         time.sleep(timeout * 60)
