@@ -99,33 +99,33 @@ def tplink_set_status(hs110, jmetering):
     if jmetering["emeter"]["get_realtime"]["err_code"] == 0:
         hs110.currentPower = \
             jmetering["emeter"]["get_realtime"]["power"]
-    if debug:
-        print(hs110.name, hs110.currentPower)
+        if debug:
+            print(hs110.name, hs110.currentPower)
 
-    if hs110.currentPower != 0:
-        mqttc.publish('hs110/' + hs110.name + '/power',
-                      hs110.currentPower)
-    if hs110.currentPower > 0.5:
-        if (hs110.currentPower > lowPowerDetection[hs110.name]["lowpower"])\
-          and not hs110.systemRunning:
-            hs110.startSystem(lowPowerDetection[hs110.name]["lowpower"],
-                              lowPowerDetection[hs110.name]["period"])
-            rsp = maschinenstatus.chat.post_message(
-                '#maschinenstatus', hs110.name + ' ist angelaufen!',
-                username='TPLINK HS110',
-                icon_emoji=lowPowerDetection[hs110.name]["emoji"])
-            if debug:
-                print(rsp)
-        lowhighPeakCount, highlowPeakCount, finishDetected =\
-            hs110.calculatePeek()
-        if finishDetected:
-            rsp = maschinenstatus.chat.post_message(
-                '#maschinenstatus', hs110.name + ' ist fertig!',
-                username='TPLINK HS110',
-                icon_emoji=lowPowerDetection[hs110.name]["emoji"])
-            if debug:
-                print(rsp)
-            hs110.stopSystem()
+        if hs110.currentPower != 0:
+            mqttc.publish('hs110/' + hs110.name + '/power',
+                          hs110.currentPower)
+        if hs110.currentPower > 0.5:
+            if (hs110.currentPower > lowPowerDetection[hs110.name]["lowpower"])\
+              and not hs110.systemRunning:
+                hs110.startSystem(lowPowerDetection[hs110.name]["lowpower"],
+                                  lowPowerDetection[hs110.name]["period"])
+                rsp = maschinenstatus.chat.post_message(
+                  '#maschinenstatus', hs110.name + ' ist angelaufen!',
+                  username='TPLINK HS110',
+                  icon_emoji=lowPowerDetection[hs110.name]["emoji"])
+                if debug:
+                    print(rsp)
+            lowhighPeakCount, highlowPeakCount, finishDetected =\
+                hs110.calculatePeek()
+            if finishDetected:
+                rsp = maschinenstatus.chat.post_message(
+                    '#maschinenstatus', hs110.name + ' ist fertig!',
+                    username='TPLINK HS110',
+                    icon_emoji=lowPowerDetection[hs110.name]["emoji"])
+                if debug:
+                    print(rsp)
+                hs110.stopSystem()
 
 
 def on_connect(mosq, obj, flags, rc):
