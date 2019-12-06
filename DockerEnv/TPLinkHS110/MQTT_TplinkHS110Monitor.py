@@ -50,8 +50,7 @@ lowPowerDetection = {
 
 def tplink_discover(hs110List):
     hs110IPList = tplinkHS110.TplinkHS110.hs110Discover(
-        broadcastip,
-        '{"system":{"get_sysinfo":{}}}', debug)
+        broadcastip, '{"system":{"get_sysinfo":{}}}', debug)
     print('TPLink Discover: ')
     print(hs110IPList)
 
@@ -244,7 +243,10 @@ if __name__ == '__main__':
             if hs110.connected:
                 error, metering = hs110.request(hs110.commands['emeter'])
                 if error == 0:
-                    tplink_set_status(hs110, json.loads(metering))
+                    jmetering = json.loads(metering)
+                    if (debug):
+                        print(jmetering)
+                    tplink_set_status(hs110, jmetering)
                 elif error == 1:
                     print(hs110)
                     hs110.connected = False
