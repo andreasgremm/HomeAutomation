@@ -30,7 +30,7 @@ from Security.Slacker import maschinenstatusKey
 from Security.MQTT import DefaultMQTTPassword, DefaultMQTTUser
 
 RUN = True
-debug = False
+debug = True
 client_id = ''
 hs110List = []
 hs110AllFound = False
@@ -242,10 +242,10 @@ if __name__ == '__main__':
         for hs110 in hs110List:
             if hs110.connected:
                 error, metering = hs110.request(hs110.commands['emeter'])
+                if (debug):
+                    print(' Error = ', error, metering)
                 if error == 0:
                     jmetering = json.loads(metering)
-                    if (debug):
-                        print(jmetering)
                     tplink_set_status(hs110, jmetering)
                 elif error == 1:
                     print(hs110)
