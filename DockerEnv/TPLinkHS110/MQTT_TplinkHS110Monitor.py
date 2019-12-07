@@ -242,8 +242,8 @@ if __name__ == '__main__':
         for hs110 in hs110List:
             if hs110.connected:
                 error, metering = hs110.request(hs110.commands['emeter'])
-                if (debug):
-                    print(' Error = ', error, metering)
+#                if (debug):
+                print(' Error = ', error, metering)
                 if error == 0:
                     jmetering = json.loads(metering)
                     tplink_set_status(hs110, jmetering)
