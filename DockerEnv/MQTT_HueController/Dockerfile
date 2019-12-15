@@ -1,17 +1,15 @@
-FROM python:2.7-slim
+FROM huemodule:prod
 WORKDIR /app
-COPY MQTT_TplinkHS110Monitor.py .
+COPY MQTT_HueController.py .
 COPY requirements.txt .
-ADD HS110/*.py ./HS110
 RUN pip install --no-cache-dir --trusted-host pypi.python.org -r requirements.txt
-EXPOSE 9998/udp
 
 ENV PYTHONPATH=/non-git-local-includes/
 
 ARG buildtime_IP_Brocker="192.168.1.237"
 ENV IP_Brocker=$buildtime_IP_Brocker
 
-ARG buildtime_Client_Name="MQTT_HS110Monitor"
+ARG buildtime_Client_Name="MQTT_Hue"
 ENV Client_Name=$buildtime_Client_Name
 
-CMD ["sh", "-c", "python MQTT_TplinkHS110Monitor.py -b ${IP_Brocker} -c ${Client_Name}"]
+CMD ["sh", "-c", "python MQTT_HueController.py -b ${IP_Brocker} -c ${Client_Name}"]

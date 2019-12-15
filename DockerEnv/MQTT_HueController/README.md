@@ -1,15 +1,10 @@
-# TPLINK HS110 Monitor
-Die TPLINK HS110 Steckdosen lassen sich per WLAN steuern und der Energieverbrauch der angeschlossenen Geräte lässt sich messen.
-
-Das Protokoll wurde reverse engineered und findet sich [hier](
-https://www.softscheck.com/en/reverse-engineering-tp-link-hs110/).
-
-Die Basis des TPLINK HS110 Monitor basiert auf [softScheck/tplink-smartplug](https://github.com/softScheck/tplink-smartplug)
+# MQTT Hue Controller
+Dieses Programm dient als Mittler zwischen MQTT Messages und der Steuerung der Hue Lampen.
 
 ## Installation
 Clone: https://github.com/andreasgremm/HomeAutomation.git
 
-In den Programmen dieser Home-Automation-Serie werden diverse Sicherheitseinstellungen u.a. für MQTT und Slacker benötigt. Diese Einstellungen halte ich als Dateien in einem separaten Verzeichnis und natürlich nicht auf GitHub.
+In den Programmen dieser Home-Automation-Serie werden diverse Sicherheitseinstellungen u.a. für MQTT und Hue benötigt. Diese Einstellungen halte ich als Dateien in einem separaten Verzeichnis und natürlich nicht auf GitHub.
 
 Die Verzeichnisstruktur ist entsprechend einem Python Modul ***Security*** aufgebaut, im Python-Code steht folgender Abschnitt der dieses Modul verwendet:
 
@@ -18,12 +13,12 @@ Die Verzeichnisstruktur ist entsprechend einem Python Modul ***Security*** aufge
 #
 # Provide the following values
 #
-# maschinenstatusKey='<slackerKey'
+# DefaultHueUser = "<hue api key"
 # DefaultMQTTPassword = "<mqtt password"
 # DefaultMQTTUser = "<mqtt user"
 
-from Security.Slacker import *
-from Security.MQTT import *
+from Security.Hue import DefaultHueUser
+from Security.MQTT import DefaultMQTTUser, DefaultMQTTPassword
 ```
 
 Verzeichnisstruktur:
@@ -33,7 +28,7 @@ Verzeichnisstruktur:
 	Security/
 		__init__.py  # leere Datei
 		MQTT.py      # Security Einstellungen für MQTT
-		Slacker.py.  # Security Einstellungen für Slacker
+		Hue.py.  # Security Einstellungen für Slacker
 		...          # weitere Dateien für andere Programme
 ```
 
@@ -109,18 +104,7 @@ docker rm temp
 ## TPLINK Monitor Container erzeugen und starten
 Im Dockerfile werden beim Start des TPLINK Monitors verschiedene Parameter benötigt, die im Python-Programm als Aufrufparameter mit Defaults belegt sind.
 
-```
-	""" Define the Parser for the command line"""
-	parser = argparse.ArgumentParser(description='TPLINK Monitor.')
-	parser.add_argument('-b', '--broker', help="IP Adress des MQTT Brokers", dest="mqttBroker", default="localhost")
-	parser.add_argument('-p', '--port', help="Port des MQTT Brokers", dest="port", default="1883")
-	parser.add_argument('-c', '--client-id', help="Id des Clients", dest="clientID", default="MQTT_HS110Monitor")
-	parser.add_argument('-u', '--user', help="Broker-Benutzer", dest="user", default=DefaultMQTTUser)
-	parser.add_argument('-P', '--password', help="Broker-Password", dest="password", default=DefaultMQTTPassword)
-	parser.add_argument('-n', '--name', help="Namen des TPLINK HS110", dest="name", default='["Waschmaschine", "Trockner"]' )
-	parser.add_argument('-t', '--timeout', help="Schleifentimeout in Minuten", dest="timeout", default=2)
 
-```
 Ein Parameter der sicherlich auf jeden Fall zu ändern ist, ist die IP-Adresse des MQTT-Brokers. Diese sollte im Dockerfile richtig gesetzt werden.
 Auch ein eventueller andere Name für den MQTT-Client ist für Testzwecke (falls der produktive Client selber noch läuft) notwendig.
 
@@ -139,18 +123,18 @@ Das Programm kann dann folgendermassen gestartet werden:
 
 ```
 docker run -d --network=host \
-  --name=tplinkmonitor \
+  --name=huecontroller \
   --mount source=non-git-local-includes,destination=/non-git-local-includes,readonly \
   --restart unless-stopped \
-  tplinkmonitor:prod
+  huecontroller:prod
 ```
 
 IP Adresse des Brockers und/oder Client-Name können auch zur Laufzeit mittels der Umgebungsvariablen IP_Brocker oder Client_Name gesetzt werden.
 
 ```
 docker run -d --network=host \
-  --name=tplinkmonitor -e "IP_Broker=<IP.Adresse" -e "Client_Name=<Client-Name>" \
+  --name=huecontroller -e "IP_Brocker=<IP.Adresse" -e "Client_Name=<Client-Name>" \
   --mount source=non-git-local-includes,destination=/non-git-local-includes,readonly \
   --restart unless-stopped \
-  tplinkmonitor:prod
+  huecontroller:prod
 ```
