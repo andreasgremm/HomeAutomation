@@ -101,28 +101,31 @@ docker run --rm -it --mount source=non-git-local-includes,destination=/non-git-l
 docker rm temp
 ```
 
-## TPLINK Monitor Container erzeugen und starten
-Im Dockerfile werden beim Start des TPLINK Monitors verschiedene Parameter benötigt, die im Python-Programm als Aufrufparameter mit Defaults belegt sind.
+## MQTT HueController Container erzeugen und starten
+Im Dockerfile werden beim Start des Hue Controllers verschiedene Parameter benötigt, die im Python-Programm als Aufrufparameter mit Defaults belegt sind.
 
 
 Ein Parameter der sicherlich auf jeden Fall zu ändern ist, ist die IP-Adresse des MQTT-Brokers. Diese sollte im Dockerfile richtig gesetzt werden.
 Auch ein eventueller andere Name für den MQTT-Client ist für Testzwecke (falls der produktive Client selber noch läuft) notwendig.
 
+### Voraussetzung 
+Als Basis für das HueController-Image dient das HueModule-Image mit dem Tag [huemodule:prod](../Hue). Dieses sollte vorher fertiggestellt sein.
+
 Sind die Parameter richtig gesetzt, kann das Image gebaut werden.
 
 ```
-docker build --tag=tplinkmonitor:prod .
+docker build --tag=huecontroller:prod .
 ```
 Soll die IP-Adresse des Brockers und/oder der Client-Name erst während des Image Build gesetzt werden, kann folgender Befehl verwendet werden.
 
 ```
-docker build --build-arg buildtime_IP_Brocker="<IP.Adresse>" --build-arg buildtime_Client_Name="<Client-Name>" --tag=tplinkmonitor:prod .
+docker build --build-arg buildtime_IP_Brocker="<IP.Adresse>" --build-arg buildtime_Client_Name="<Client-Name>" --tag=huecontroller:prod .
 ```
 
 Das Programm kann dann folgendermassen gestartet werden:
 
 ```
-docker run -d --network=host \
+docker run -d  \
   --name=huecontroller \
   --mount source=non-git-local-includes,destination=/non-git-local-includes,readonly \
   --restart unless-stopped \
@@ -132,7 +135,7 @@ docker run -d --network=host \
 IP Adresse des Brockers und/oder Client-Name können auch zur Laufzeit mittels der Umgebungsvariablen IP_Brocker oder Client_Name gesetzt werden.
 
 ```
-docker run -d --network=host \
+docker run -d  \
   --name=huecontroller -e "IP_Brocker=<IP.Adresse" -e "Client_Name=<Client-Name>" \
   --mount source=non-git-local-includes,destination=/non-git-local-includes,readonly \
   --restart unless-stopped \
