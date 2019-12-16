@@ -228,7 +228,7 @@ if __name__ == "__main__":
     for sig in (SIGABRT, SIGINT, SIGTERM):
         signal(sig, cleanup)
     client_id = options["clientID"]
-    mqttc = paho.Client(client_id=client_id)
+    mqttc = paho.Client(client_id=client_id, clean_session=False)
     HueController = Hue.Hue(options["hueController"], options["hueUser"])
     # Assign event callbacks
     mqttc.on_message = on_message
