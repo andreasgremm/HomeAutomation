@@ -174,20 +174,27 @@ void wificonnect() {
 }
 
 void mqttconnect() {
-  while (!mqtt.connect(mqttClientId, mqttUser, mqttPass, "clientstatus/RFIDReader",1,1,"OFFLINE")) {
+  const char* message = "ONLINE";
+  const int laenge = strlen(message);
+  while (!mqtt.connect(mqttClientId, mqttUser, mqttPass, "clientstatus/RFIDReader",1,true,"OFFLINE")) {
     Serial.print(".");
     delay(500);
   }
   Serial.println("\n MQTT connected!");
   mqtt.subscribe("alarm/wohnzimmer/motion");
   mqtt.subscribe("alarm/auto/motion");
-  mqtt.publish("clientstatus/RFIDReader", "ONLINE");
+  mqtt.publish("clientstatus/RFIDReader", (byte*)message, laenge, true);
 }
 
 void handleRoot() {
   time_t tnow = time(nullptr);
-  String message = "<html><head><title>RFC Reader</title></head><body>\
+  String swohnzimmerAlarm = wohnzimmerAlarm ? "<font color='green'>Ein</font>" : "<font color='red'>Aus</font>";
+  String sautoAlarm = autoAlarm ? "<font color='green'>Ein</font>" : "<font color='red'>Aus</font>";
+  String message = "<html><head><style>table, th, td {border: 1px solid black;}</style><title>RFC Reader</title></head><body>\
 <h4>Uhrzeit: " + String(ctime(&tnow)) + "</h4>\
+<br /><table><caption>Alarmanlage Status</caption><tr><th>Wohnzimmer Alarm</th><th>Auto Alarm</th></tr>\
+<tr><td><center>" + swohnzimmerAlarm + "</center></td><td><center>" + sautoAlarm + "</center></td></tr>\
+</table><br />\
 <a href='/status'>Status</a><br />\
 <a href='/update'>Update</a><br />\
 </body></html>";
@@ -346,4 +353,3 @@ String macToString(byte mac[6]){
   }
   return s;
 }
-
