@@ -19,11 +19,13 @@ lamp_status = {
     "info": ["info"],
 }
 client_id = ""
+debug = False
 
 
 # Define event callbacks
 def on_connect(mosq, obj, flags, rc):
-    print("Connect client: " + mosq._client_id.decode() + ", rc: " + str(rc))
+    print("Connect client: " + mosq._client_id.decode() + ", rc: " + str(rc),
+          flush=True)
     mqttc.publish(
         "clientstatus/" + mosq._client_id.decode(), "ONLINE", 0, True
     )
@@ -39,19 +41,27 @@ def on_connect(mosq, obj, flags, rc):
 
 def on_disconnect(mosq, obj, rc):
     print(
-        "Disconnect client: " + mosq._client_id.decode() + ", rc: " + str(rc)
+        "Disconnect client: " + mosq._client_id.decode() + ", rc: " + str(rc),
+        flush=True
     )
 
 
 def on_message(mosq, obj, msg):
     rstatus = None
+    try:
+        HueConnection = HueController.connect()
+        if (debug):
+            print(HueConnection)
+    except Exception as e:
+        print(e, flush=True)
     print(
         "Message received: "
         + msg.topic
         + ", QoS = "
         + str(msg.qos)
         + ", Payload = "
-        + msg.payload.decode()
+        + msg.payload.decode(),
+        flush=True
     )
 
     if msg.topic == "hue/control":
@@ -141,6 +151,7 @@ def on_message(mosq, obj, msg):
                 rstatus = HueController.setLampsOff()
             except Exception as err:
                 print(err)
+    HueController.disconnect()
 
 
 def on_publish(mosq, obj, mid):

@@ -6,16 +6,19 @@
 # http://sourceforge.net/p/raspberry-gpio-python/wiki/Inputs/
 #
 
-import paho.mqtt.client as paho
-import time
-import atexit
-import urlparse
-import json
 import argparse
-from signal import signal, SIGABRT, SIGINT, SIGTERM
-from HS110 import tplinkHS110
-from datetime import timedelta
+import atexit
 import datetime as dt
+import json
+import time
+import urlparse
+from datetime import timedelta
+from signal import SIGABRT, SIGINT, SIGTERM, signal
+
+import paho.mqtt.client as paho
+from HS110 import tplinkHS110
+from Security.MQTT import DefaultMQTTPassword, DefaultMQTTUser
+from Security.Slacker import maschinenstatusKey
 from slacker import Slacker
 
 ###
@@ -26,8 +29,6 @@ from slacker import Slacker
 # DefaultMQTTPassword = "<mqtt password"
 # DefaultMQTTUser = "<mqtt user"
 
-from Security.Slacker import maschinenstatusKey
-from Security.MQTT import DefaultMQTTPassword, DefaultMQTTUser
 
 RUN = True
 debug = False
@@ -217,7 +218,7 @@ if __name__ == '__main__':
 
     client_id = options['clientID']
 
-    mqttc = paho.Client(client_id=client_id, clean_session=True)
+    mqttc = paho.Client(client_id=client_id, clean_session=False)
 
 # Assign event callbacks
     mqttc.on_message = on_message

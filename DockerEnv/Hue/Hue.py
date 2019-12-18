@@ -50,6 +50,13 @@ class Hue(object):
             self.__connection
         )
 
+    def connect(self):
+        self.__connection.connect()
+        return self.__connection
+
+    def disconnect(self):
+        self.__connection.close()
+
     def setUser(self, user):
         self.__user = user
 
