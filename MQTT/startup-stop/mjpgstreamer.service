@@ -1,0 +1,13 @@
+[Unit]
+Description=MJPG Streamer Service
+
+[Service]
+Type=simple
+ExecStartPre=/usr/local/bin/mount_mediencenter.sh
+ExecStart= /usr/local/bin/mjpg_streamer -i "/usr/local/lib/input_uvc.so -d /dev/video0 -n" -o "/usr/local/lib/output_http.so -n -w /usr/local/www -p 8080" --output "/usr/local/lib/output_file.so -d 5000 -f /mnt/mediencenter/Hochgeladen" 
+Restart=on-failure
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

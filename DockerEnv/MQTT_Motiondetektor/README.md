@@ -1,10 +1,10 @@
-# MQTT Client Kontrollprogramm
-Dieses Programm dient als Mittler zwischen MQTT Clients und der Information über deren Status an einen Slack-Channel.
+# MQTT Motion Detektor
+Dieses Programm dient zur Steuerung der Wohnzimmer-Alarm-Anlage
 
 ## Installation
 Clone: https://github.com/andreasgremm/HomeAutomation.git
 
-In den Programmen dieser Home-Automation-Serie werden diverse Sicherheitseinstellungen u.a. für MQTT und Slack benötigt. Diese Einstellungen halte ich als Dateien in einem separaten Verzeichnis und natürlich nicht auf GitHub.
+In den Programmen dieser Home-Automation-Serie werden diverse Sicherheitseinstellungen u.a. für MQTT und Hue benötigt. Diese Einstellungen halte ich als Dateien in einem separaten Verzeichnis und natürlich nicht auf GitHub.
 
 Die Verzeichnisstruktur ist entsprechend einem Python Modul ***Security*** aufgebaut, im Python-Code steht folgender Abschnitt der dieses Modul verwendet:
 
@@ -28,7 +28,7 @@ Verzeichnisstruktur:
 	Security/
 		__init__.py  # leere Datei
 		MQTT.py      # Security Einstellungen für MQTT
-		Slacker.py.  # Security Einstellungen für Slacker
+		Hue.py.  # Security Einstellungen für Hue
 		...          # weitere Dateien für andere Programme
 ```
 
@@ -101,40 +101,42 @@ docker run --rm -it --mount source=non-git-local-includes,destination=/non-git-l
 docker rm temp
 ```
 
-## MQTT Clientstatus2Slack Container erzeugen und starten
-Im Dockerfile werden beim Start des MQTT Clientstatus2Slack verschiedene Parameter benötigt, die im Python-Programm als Aufrufparameter mit Defaults belegt sind.
+## MQTT Motion Detektor Container erzeugen und starten
+Im Dockerfile werden beim Start des Motion Detektors verschiedene Parameter benötigt, die im Python-Programm als Aufrufparameter mit Defaults belegt sind.
 
 
 Ein Parameter der sicherlich auf jeden Fall zu ändern ist, ist die IP-Adresse des MQTT-Brokers. Diese sollte im Dockerfile richtig gesetzt werden.
 Auch ein eventueller andere Name für den MQTT-Client ist für Testzwecke (falls der produktive Client selber noch läuft) notwendig.
 
+### Voraussetzung
+
 Sind die Parameter richtig gesetzt, kann das Image gebaut werden.
 
 ```
-docker build --tag=clientstatus:prod .
+docker build --tag=motiondetektor:prod .
 ```
 Soll die IP-Adresse des Brockers und/oder der Client-Name erst während des Image Build gesetzt werden, kann folgender Befehl verwendet werden.
 
 ```
-docker build --build-arg buildtime_IP_Brocker="<IP.Adresse>" --build-arg buildtime_Client_Name="<Client-Name>" --tag=clientstatus:prod .
+docker build --build-arg buildtime_IP_Brocker="<IP.Adresse>" --build-arg buildtime_Client_Name="<Client-Name>" --tag=motiondetektor:prod .
 ```
 
 Das Programm kann dann folgendermassen gestartet werden:
 
 ```
 docker run -d  \
-  --name=clientstatus \
+  --name=motiondetektor \
   --mount source=non-git-local-includes,destination=/non-git-local-includes,readonly \
   --restart unless-stopped \
-  clientstatus:prod
+  motiondetektor:prod
 ```
 
 IP Adresse des Brockers und/oder Client-Name können auch zur Laufzeit mittels der Umgebungsvariablen IP_Brocker oder Client_Name gesetzt werden.
 
 ```
 docker run -d  \
-  --name=clientstatus -e "IP_Brocker=<IP.Adresse" -e "Client_Name=<Client-Name>" \
+  --name=motiondetektor -e "IP_Brocker=<IP.Adresse" -e "Client_Name=<Client-Name>" \
   --mount source=non-git-local-includes,destination=/non-git-local-includes,readonly \
   --restart unless-stopped \
-  clientstatus:prod
+  motiondetektor:prod
 ```

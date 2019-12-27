@@ -1,1 +1,0 @@
-mjpg = "mjpgstreamer.service"

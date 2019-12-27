@@ -183,7 +183,7 @@ void mqttconnect() {
   Serial.println("\n MQTT connected!");
   mqtt.subscribe("alarm/wohnzimmer/motion");
   mqtt.subscribe("alarm/auto/motion");
-  mqtt.publish("clientstatus/RFIDReader", (byte*)message, laenge, true);
+  mqtt.publish("clientstatus/RFIDReader", message, true);
 }
 
 void handleRoot() {
@@ -305,16 +305,16 @@ void handleRFID() {
   mqtt.publish("rfid_reader/uid", rfiduid.c_str());
   if (strcmp(rfiduid.c_str(),"c5d54c73") == 0) {
     if (wohnzimmerAlarm) {
-      mqtt.publish("alarm/wohnzimmer/motion",(const uint8_t *)"False",5,true);
+      mqtt.publish("alarm/wohnzimmer/motion", "False", true);
     } else {
-      mqtt.publish("alarm/wohnzimmer/motion",(const uint8_t *)"True",4,true);
+      mqtt.publish("alarm/wohnzimmer/motion", "True", true);
     }
   }
   if (strcmp(rfiduid.c_str(),"c6ebfe1f") == 0) {
     if (autoAlarm) {
-      mqtt.publish("alarm/auto/motion",(const uint8_t *)"False",5,true);
+      mqtt.publish("alarm/auto/motion", "False", true);
     } else {
-      mqtt.publish("alarm/auto/motion",(const uint8_t *)"True",4,true);
+      mqtt.publish("alarm/auto/motion", "True", true);
     }
   }
 }

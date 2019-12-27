@@ -1,0 +1,13 @@
+[Unit]
+Description=MQTT Hue Controller Service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/pi/MQTT/MQTT_HueController.py
+Restart=on-failure
+Environment=PYTHONPATH=/home/pi/Python3_Modules
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target
