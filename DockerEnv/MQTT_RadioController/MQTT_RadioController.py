@@ -3,19 +3,17 @@
 
 import argparse
 import atexit
-import json
-import os
-import time
-from signal import *
+from signal import SIGABRT, SIGINT, SIGTERM, signal
 from urllib.parse import urlparse
 
 import paho.mqtt.client as paho
 from FSAPI.fsapi import FSAPI
-from FSAPI.ssdp import *
-from Security.FSAPI import *
-from Security.MQTT import *
+from FSAPI.ssdp import discover
+from Security.FSAPI import DefaultFSAPIKey
+from Security.MQTT import DefaultMQTTUser, DefaultMQTTPassword
 
 radioKey = 0
+debug = True
 defaultService = ""
 volumeList = [
     "1",
@@ -35,9 +33,11 @@ volumeList = [
     "15",
 ]
 
+
 # Define event callbacks
 def on_connect(mosq, obj, flags, rc):
-    print("Connect client: " + mosq._client_id.decode() + ", rc: " + str(rc))
+    print("Connect client: " + mosq._client_id.decode() + ", rc: " + str(rc),
+          flush=True)
     mqttc.publish(
         "clientstatus/" + mosq._client_id.decode(), "ONLINE", 0, True
     )
@@ -51,16 +51,16 @@ def on_disconnect(mosq, obj, rc):
 
 
 def on_message(mosq, obj, msg):
-    rstatus = None
-
-    print(
-        "Message received: "
-        + msg.topic
-        + ", QoS = "
-        + str(msg.qos)
-        + ", Payload = "
-        + msg.payload.decode()
-    )
+    if debug:
+        print(
+            "Message received: "
+            + msg.topic
+            + ", QoS = "
+            + str(msg.qos)
+            + ", Payload = "
+            + msg.payload.decode(),
+            flush=True
+        )
     payload = msg.payload.decode()
 
     with FSAPI(defaultService, radioKey) as fs:
@@ -116,10 +116,6 @@ def on_log(mosq, obj, level, string):
 @atexit.register
 def cleanup_final():
     print("Cleaning up: " + client_id)
-    try:
-        HueController.disconnect()
-    except Exception as err:
-        pass
 
 
 def cleanup(sig, frame):
@@ -219,9 +215,10 @@ if __name__ == "__main__":
 
     services = discover("urn:schemas-frontier-silicon-com:undok:fsapi:1")
     if not len(services):
-        print("No device server found on network")
+        print("No device server found on network", flush=True)
     else:
-        print('Found device server at "%s".' % (services[0].location))
+        print('Found device server at "%s".' % (services[0].location),
+              flush=True)
         defaultService = services[0].location
 
     # Connect

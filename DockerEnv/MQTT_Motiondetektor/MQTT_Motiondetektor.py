@@ -42,7 +42,7 @@ threadactive = False
 
 hueControlData = {"on": True, "bri": 254, "hue": 34392}
 client_id = ""
-debug = True
+debug = False
 
 
 def background_alarm_activity():
