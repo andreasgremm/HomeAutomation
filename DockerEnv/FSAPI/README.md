@@ -26,3 +26,11 @@ print 'Play status: %s' % fs.play_status
 print 'Track name: %s' % fs.play_info_name
 print 'Track text: %s' % fs.play_info_text
 ```
+
+
+## Docker Image bauen
+Für die Nutzung mit dem MQTT_RadioController sollte das Image-Tag **fsapimodule:prod** lauten.
+
+```
+docker build --tag=fsapimodule:prod .
+```
