@@ -17,4 +17,4 @@ WORKDIR /home/appuser
 USER appuser
 
 COPY MQTT_AutoAlarmdetektor.py .
-CMD ["sh", "-c", "python MQTT_AutoAlarmdetektor.py  -b ${IP_Brocker} -c ${Client_Name}"]
+CMD python MQTT_AutoAlarmdetektor.py  -b ${IP_Brocker} -c ${Client_Name}

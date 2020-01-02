@@ -19,4 +19,4 @@ USER appuser
 
 COPY MQTT_HueController.py .
 
-CMD ["sh", "-c", "python MQTT_HueController.py -b ${IP_Brocker} -c ${Client_Name}"]
+CMD python MQTT_HueController.py -b ${IP_Brocker} -c ${Client_Name}

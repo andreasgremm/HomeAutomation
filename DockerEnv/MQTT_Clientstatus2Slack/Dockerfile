@@ -17,4 +17,4 @@ WORKDIR /home/appuser
 USER appuser
 
 COPY MQTT_Clientstatus2Slack.py .
-CMD ["sh", "-c", "python MQTT_Clientstatus2Slack.py  -b ${IP_Brocker} -c ${Client_Name}"]
+CMD python MQTT_Clientstatus2Slack.py  -b ${IP_Brocker} -c ${Client_Name}

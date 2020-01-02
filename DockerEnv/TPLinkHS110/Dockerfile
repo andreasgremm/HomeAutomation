@@ -18,4 +18,4 @@ WORKDIR /app
 ADD HS110/*.py ./HS110
 COPY MQTT_TplinkHS110Monitor.py .
 
-CMD ["sh", "-c", "python MQTT_TplinkHS110Monitor.py -b ${IP_Brocker} -c ${Client_Name}"]
+CMD python MQTT_TplinkHS110Monitor.py -b ${IP_Brocker} -c ${Client_Name}

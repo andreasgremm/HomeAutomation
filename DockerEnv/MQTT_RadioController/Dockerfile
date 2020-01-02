@@ -20,4 +20,4 @@ EXPOSE 1900/udp
 
 COPY MQTT_RadioController.py .
 
-CMD ["sh", "-c", "python MQTT_RadioController.py -b ${IP_Brocker} -c ${Client_Name}"]
+CMD python MQTT_RadioController.py -b ${IP_Brocker} -c ${Client_Name}
