@@ -1,11 +1,25 @@
 pipeline {
-    agent { 
-        dockerfile {
-            dir 'DockerEnv/MQTT_HueController'
-        }
-    }
+    agent none
+
     stages {
-        stage('Build') {
+        stage('Build HueModule') {
+            agent { 
+                dockerfile {
+                    dir 'DockerEnv/Hue'
+                    additionalBuildArgs  '--tag=huemodule:prod'
+                }
+            }
+            steps {
+                sh 'python --version'
+            }
+        }
+        stage('Build HueController') {
+            agent { 
+                dockerfile {
+                dir 'DockerEnv/MQTT_HueController'
+                additionalBuildArgs  '--tag=huecontroller:prod'
+                }
+            }
             steps {
                 sh 'python --version'
             }
