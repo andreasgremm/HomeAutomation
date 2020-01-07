@@ -70,7 +70,7 @@ Die Heimautomation besteht aus mehreren Elementen.
 * [OpenHAB](OpenHAB) Raspberry Pi
 * **OpenElec** Raspberry Pi im Schlafzimmer
 
-## Konzepte 
+## Konzepte
 ### Endbenutzerschnittstelle
 Die Endbenutzerschnittstelle ist bei den meisten Systemen als "WebSeite" aufgebaut.   
 Diese Webseite läuft entweder lokal auf den Systemen oder als Cloud-Anwendung bei einem Anbieter. Der Endanwender greift per Web-Browser mit dem HTTP oder HTTPS Protokoll auf die Anwendung zu.
@@ -94,7 +94,7 @@ Kommunikationsnetzwerke bilden die Basis für Kommunikation zwischen Geräten. Z
 In der gleichen Netzwerk-Art dienen **Router** als Vermittler, in unterschiedlichen Netzwerk-Arten dienen **Gateways** als Vermittler.
 Router sprechen auf "beiden Seiten" das gleiche Protokoll. Gateways vermitteln zwischen unterschiedlichen Protokollen.
 
-Kommunikationsnetzwerke bestehen aus mehreren [Schichten](https://de.wikipedia.org/wiki/OSI-Modell). 
+Kommunikationsnetzwerke bestehen aus mehreren [Schichten](https://de.wikipedia.org/wiki/OSI-Modell).
 
 #### Wide Area Network (WAN)
 Das Wide Area Network bezeichnet ein Netzwerk welches auf einer globalen Ebene agiert. Das Internet ist so ein Wide-Area-Network, in früheren Zeiten wurden durch Telekommunikationsprovider auch Firmenstandorte vernetzt. Bekannt ist vermutlich das X.25 Protokoll.
@@ -108,7 +108,7 @@ Unterschiedliche Generationen der Mobilfunkprotokolle ermöglichen unterschiedli
 Begriffe wie Edge, 3G, UMTS, LTE, 5G sind als Mobilfunkverbindung bekannt.
 
 ##### Sprache / SMS
-Über den Mobilfunk werden insbesondere Sprache und Text (SMS) übertragen. Seit der Verbreitung von Smart-Phones werden auch Datendienste genutzt. 
+Über den Mobilfunk werden insbesondere Sprache und Text (SMS) übertragen. Seit der Verbreitung von Smart-Phones werden auch Datendienste genutzt.
 ##### mobile Daten
 Eine weitere Verbindungsart für mobile Geräte ist die Datenverbindung auch als mobile Daten bekannt. Diese Datenverbindung wird vom Telekommunikationsbetreiber über ein Gateway mit dem Internet verbunden. Dieses ermöglicht die Nutzung von Internet Diensten (Web, Mail, ..) vom mobilen Gerät.
 #### Local Area Network (LAN)
@@ -123,7 +123,7 @@ Häufig werden durch den WAN-Router des Telekommunikationsbetreibers sowohl LAN 
 #### Analogtelefonie
 Analoge Telefone sind schnurgebundene Telefone, die über eine 2-Draht-Leitung mit der Telefon-Vermittlungsstelle verbunden sind.
 Bei einem Analoganschluss kann immer nur ein Gerät gleichzeitig genutzt werden.
-Im Rahmen der Ausbreitung des Internet werden heutzutage keine analogen Telefonanschlüsse mehr von den Telekommunikationsanbietern bereitgestellt. 
+Im Rahmen der Ausbreitung des Internet werden heutzutage keine analogen Telefonanschlüsse mehr von den Telekommunikationsanbietern bereitgestellt.
 Im Internet-Router wird die analoge Telefonie in Voice-Over-IP umgesetzt.
 #### ISDN
 Das ISDN Protokoll diente dem Anschluss von 2 Datenkanälen und einem Steuerkanal. Hierdurch konnten 2 Geräte gleichzeitig genutzt werden.
@@ -145,11 +145,11 @@ Um am IP Protokoll teilzunehmen benötigen Systeme eine eindeutige IP-Adresse. E
 Mehrere IP-Adressen teilen sich ein sogenanntes IP-Netzwerk. Innerhalb dieses Netzwerks können sich die Systeme gegenseitig sehen. Unterschiedliche Netze müssen über Gateways/Router miteinander verbunden werden.
 
 In der Home-Automation spielen im IP V4 Adressraum die "privaten" Adressen eine besondere Bedeutung.
-Eine IP V4 Adresse wird per Quadrupel (a.b.c.d) und einer Netzwerk-Unterteilung bestimmt. Die Bezeichner a, b, c, d können Werte zwischen 0 und 255 einnehmen. 
-Ein "privates" Netz ist im Internet nicht routbar weil es von vielen Netzwerken genutzt werden kann. 
+Eine IP V4 Adresse wird per Quadrupel (a.b.c.d) und einer Netzwerk-Unterteilung bestimmt. Die Bezeichner a, b, c, d können Werte zwischen 0 und 255 einnehmen.
+Ein "privates" Netz ist im Internet nicht routbar weil es von vielen Netzwerken genutzt werden kann.
 Privat werden häufig die Netze im Bereich 192.168.x.y mit einer einer Netzmaske von 255.255.255.0.
-In diesem Konstrukt teilen sich alle Rechner im Adressraum 192.168.x ein gemeinsames Netz. Ein konkreteres Beispiel: 
-Die IP-Adresse: 192.168.1.254/255.255.255.0 ist mit der IP-Adresse: 192.168.1.1/255.255.255.0 in einem gemeinsamen Netz. 
+In diesem Konstrukt teilen sich alle Rechner im Adressraum 192.168.x ein gemeinsames Netz. Ein konkreteres Beispiel:
+Die IP-Adresse: 192.168.1.254/255.255.255.0 ist mit der IP-Adresse: 192.168.1.1/255.255.255.0 in einem gemeinsamen Netz.
 Die IP-Adresse: 192.168.1.255/255.255.255.0 ist eine Broadcast-Adresse und ermöglicht die Versendung von Nachrichten an allen Rechnern im Netz.
 Die Netzmaske /255.255.255.0 wird auch oft mit /24 abgekürzt, da die ersten 24 Bit das Netz bestimmen und die nächsten 8 Bit die spezifische Adressierung eines Gerätes ist.
 
@@ -166,7 +166,7 @@ a(192.168.1.1, 55001) <-> b(192.168.1.241, 80)
 
 Zu den Hostnamen:
 Die Verwendung von IP-Adressen ist für Systeme "natürlich", für Menschen jedoch nicht sehr gut handhabbar.
-Hier hilft das Konzept der "Hostnamen". Ein weltweiter Dienst namens **Domain Name Service** enthält ein Verzeichnis von Hostnamen zu IP Adressen. 
+Hier hilft das Konzept der "Hostnamen". Ein weltweiter Dienst namens **Domain Name Service** enthält ein Verzeichnis von Hostnamen zu IP Adressen.
 
 Neben den Hostnamen gibt es noch die Domain-Namen, die sich per "." an den Hostnamen anreihen.
 Das Konstrukt www.google.de besteht aus einem Rechnernamen (wwww) und dem Domainnamen (google.de). Zusammen ergibt sich ein Fully-Qualified-Domain-Name (FQDN) von www.google.de.
@@ -213,7 +213,7 @@ PING homeautomation.local (192.168.1.237): 56 data bytes
 
 ### Hue
 Die Hue-Lampen werden durch die [Phillips-Hue-Bridge](http://192.168.1.127) im Wohnzimmerschrank gesteuert.
-Für die Steuerung kann die Hue-App des Handy genutzt werden. 
+Für die Steuerung kann die Hue-App des Handy genutzt werden.
 Es lassen sich sowohl die Lampen Wohnzimmer1 bis Wohnzimmer3 einzeln steuern als auch Szenen einrichten.
 Aktuell sind drei Szenen eingerichtet: Wohnen1, Wohnen2 und Wohnen3.
 
@@ -221,12 +221,12 @@ Die Hue-Bridge ist neben der Steuerung durch die Hue-App auch über ein API steu
 
 Die Lampen selber werden von der Hue-Bridge über das ZigBee Protokoll gesteuert.
 
-### <a name="homeautomation"></a>Homeautomation 
+### <a name="homeautomation"></a>Homeautomation
 Auf dem Raspberry PI [Homeautomation](http://192.168.1.237) laufen verschiedene Programme mit folgenden Funktionalitäten.
 
 * MQTT Broker (Port 1883) als zentrale Schaltstelle für MQTT Nachrichten.
 * MySQL Datenbank zur Speicherung von Informationen
-* Apache WebServer 
+* Apache WebServer
 	* [Informationsanzeige zu Sensoren](http://192.168.1.237/wsgi/showtemperature/index)
  	* [MySql phpMyAdmin](http://192.168.1.237/phpmyadmin/)
 * NodeRed System (Port 1880) zur Darstellung und Steuerung verschiedener Funktionen
@@ -260,9 +260,9 @@ root     12900     1  0 Mai21 ?        00:25:27 /usr/bin/python3 /home/pi/MQTT/M
 pi       27834 27814  0 17:14 pts/1    00:00:00 grep --color=auto MQTT
 ```
 Die obige Liste zeigt, dass zumindest alle Programme gestartet sind.
-Manchmal hängen sich einzelne Programme leider auch auf. 
+Manchmal hängen sich einzelne Programme leider auch auf.
 
-Gestartet werden die Programme als Systemdienst mittels  **systemctl** Kommando. 
+Gestartet werden die Programme als Systemdienst mittels  **systemctl** Kommando.
 
 Anmerkung: Das Kommando **systemctl** muss als Benutzer *root* ausgeführt werden. Dieses erreicht man, indem die Befehlszeile mit **sudo** gestartet wird. Beispiel aus einer Terminalsitzung:
 
@@ -296,7 +296,7 @@ Aus der obigen Liste werden die Zusammenhänge zwischen den Namen der Systemdien
 Wenn z.B.: die Klatschschalter Funktion zur Steuerung der Hue-Lampen nicht funktioniert, kann dieses an zwei Komponenten liegen.
 
 * Programm welches über die serielle Schnittstelle am Xbee angeschlossen ist.
-* Programm "Klatschschalter" 
+* Programm "Klatschschalter"
 * Programm "Huecontroller"
 
 Mit dem Befehl `sudo systemctl restart klatschschalter` wird beispielsweise der Systemdienst Klatschschalter neu gestartet, dieser beendet das Program MQTT_Klatschschalter.py und startet es danach neu.
@@ -322,11 +322,11 @@ Der relevante Pin (GPIO 18) wird vom Programm **MQTT_Klatschschalter.py** gelese
 
 * 2 Klatscher schalten die Hue-Szenen Wohnen1 bis ..3 wechselweise.
 * 3 Klatscher schalten die Lampen aus
-* Bei ausgeschalteten Lampen: 3 Klatscher zeigen den Status der "Auto-Alarmanlage" an. 
+* Bei ausgeschalteten Lampen: 3 Klatscher zeigen den Status der "Auto-Alarmanlage" an.
 	* grün: eingeschaltet
 	* rot: ausgeschaltet
 
-Die Steuerung erfolgt über MQTT - Nachrichten an das Programm **MQTT_HueController.py** welches wiederum das API der Hue-Bridge zur Steuerung der Lampen anspricht. 
+Die Steuerung erfolgt über MQTT - Nachrichten an das Programm **MQTT_HueController.py** welches wiederum das API der Hue-Bridge zur Steuerung der Lampen anspricht.
 
 Klatschschalter -(ZigBee)-> MQTT_ReadXbeeserial -(GPIO 18)-> MQTT_Klatschschalter -(MQTT)-> MQTT_HueController -(API)-> Hue-Bridge
 
@@ -346,7 +346,7 @@ Wird keine Bewegung mehr erkannt, werden die Aktionen nach zwei Minuten wieder b
 
 Bewegungsmelder -(ZigBee)-> MQTT_ReadXbeeserial -(GPIO 23)-> MQTT_Motiondetektor -(MQTT)-> MQTT_HueController -(API)-> Hue-Bridge
 
-Die Wohnzimmer-Alarmanlage kann über den RFID Reader oder die WebSeite <http://192.168.1.237/wsgi/showtemperature/index> aktiviert werden. Bei der Aktivierung über der WebSeite wird aktuell der Status auch in der Datenbank geändert, so dass bei einem Neustart der Status persistent ist. 
+Die Wohnzimmer-Alarmanlage kann über den RFID Reader oder die WebSeite <http://192.168.1.237/wsgi/showtemperature/index> aktiviert werden. Bei der Aktivierung über der WebSeite wird aktuell der Status auch in der Datenbank geändert, so dass bei einem Neustart der Status persistent ist.
 
 #### Temperatur und Licht
 Die Daten zu Temperatur und Licht werden in der MySQL Datenbank gespeichert.
@@ -371,7 +371,7 @@ Die Spannung für die Auto-Alarmanlage wird über eine Powerbank bereitgestellt,
 
 Temperatur, Licht und Spannungswerte werden in der MySQL-Datenbank gespeichert.
 
-Die Auto-Alarmanlage kann über den RFID Reader oder die WebSeite <http://192.168.1.237/wsgi/showtemperature/index> aktiviert werden. Bei der Aktivierung über der WebSeite wird aktuell der Status auch in der Datenbank geändert, so dass bei einem Neustart der Status persistent ist. 
+Die Auto-Alarmanlage kann über den RFID Reader oder die WebSeite <http://192.168.1.237/wsgi/showtemperature/index> aktiviert werden. Bei der Aktivierung über der WebSeite wird aktuell der Status auch in der Datenbank geändert, so dass bei einem Neustart der Status persistent ist.
 
 ### <a name="rfid-reader"></a>RFID Reader
 Der [**RFid_Reader**](http://rfid_reader.local) besteht aus einem ESP8266 an dem ein RFID Kartenleser und ein Bewegungsmelder angeschlossen ist.
@@ -385,4 +385,3 @@ Wenn die Wohnzimmer-Alarmanlage eingeschaltet ist, wird bei Bewegungserkennung e
 
 Der RFID Leser agiert per MQTT Nachrichten mit der Umwelt.
 Werden die Alarmfunktionen per Webseite geändert, wird dieses auch in den LEDs des RFID-Readers wiedergespiegelt.
-
