@@ -4,4 +4,11 @@ pipeline {
             dir 'DockerEnv/MQTT_HomeAutomation'
         }
     }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'python --version'
+            }
+        }
+    }
 }
