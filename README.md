@@ -386,5 +386,3 @@ Wenn die Wohnzimmer-Alarmanlage eingeschaltet ist, wird bei Bewegungserkennung e
 Der RFID Leser agiert per MQTT Nachrichten mit der Umwelt.
 Werden die Alarmfunktionen per Webseite geändert, wird dieses auch in den LEDs des RFID-Readers wiedergespiegelt.
 
-
-
