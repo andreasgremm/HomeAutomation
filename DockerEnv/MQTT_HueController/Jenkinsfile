@@ -2,22 +2,11 @@ pipeline {
     agent none
 
     stages {
-        stage('Build HueModule') {
+        stage('${params.BUILDSTAGE}') {
             agent { 
                 dockerfile {
-                    dir 'DockerEnv/Hue'
-                    additionalBuildArgs  '--tag=huemodule:prod'
-                }
-            }
-            steps {
-                sh 'python --version'
-            }
-        }
-        stage('Build HueController') {
-            agent { 
-                dockerfile {
-                dir 'DockerEnv/MQTT_HueController'
-                additionalBuildArgs  '--tag=huecontroller:prod'
+                    dir '${params.JENKINSPATH}'
+                    additionalBuildArgs  '--tag=${params.DOCKERTAG}'
                 }
             }
             steps {
