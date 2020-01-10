@@ -6,10 +6,10 @@ pipeline {
         string(name: 'DOCKERTAG', defaultValue: 'Not defined', description: 'Name of the Container: TAG')
     }
     stages {
-        stage(${BUILDSTAGE}) {
+        stage("${BUILDSTAGE}") {
             agent { 
                 dockerfile {
-                    dir ${JENKINSPATH}
+                    dir "${JENKINSPATH}"
                     additionalBuildArgs  "--tag=${DOCKERTAG}"
                 }
             }
