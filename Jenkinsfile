@@ -6,7 +6,7 @@ pipeline {
         string(name: 'DOCKERTAG', defaultValue: 'Not defined', description: 'Name of the Container: TAG')
     }
     stages {
-        stage("${BUILDSTAGE}") {
+        stage("Build Docker Container") {
             agent { 
                 dockerfile {
                     dir "${JENKINSPATH}"
