@@ -121,14 +121,14 @@
       "kind": "Phase"
     },
     {
-      "phase": "${ReleaseName}/1/QA Docker Images",
+      "phase": "${ReleaseName}/${ReleaseVersion}/QA Docker Images",
       "applicationVersions": [
         "Local|RadioController/${RadioControllerAppVersion}",
         "Local|HueController/${HueControllerAppVersion}"
       ],
       "isDisabled": false,
       "description": "<p>Sende eine Slack Message als Information\t</p>",
-      "name": "Inform Andreas",
+      "name": "Inform Andreas QA",
       "kind": "Task",
       "endpoint": "Slack EP",
       "plugin": "Slack/1.1",
@@ -140,7 +140,7 @@
       "type": "Post message"
     },
     {
-      "phase": "${ReleaseName}/1/QA Docker Images",
+      "phase": "${ReleaseName}/${ReleaseVersion}/QA Docker Images",
       "applicationVersions": [
         "Local|RadioController/${RadioControllerAppVersion}",
         "Local|HueController/${HueControllerAppVersion}"
@@ -150,14 +150,14 @@
         "Release-Manager"
       ],
       "previousTasks": [
-        "Inform Andreas"
+        "Inform Andreas QA"
       ],
       "description": "<p>Der Build ist zu genehmigen</p>",
       "name": "Build-Lauf genehmigen",
       "kind": "Task"
     },
     {
-      "phase": "${ReleaseName}/1/QA Docker Images",
+      "phase": "${ReleaseName}/${ReleaseVersion}/QA Docker Images",
       "applicationVersions": [
         "Local|RadioController/${RadioControllerAppVersion}",
         "Local|HueController/${HueControllerAppVersion}"
@@ -183,7 +183,7 @@
       "type": "Run Build"
     },
     {
-      "phase": "${ReleaseName}/1/QA Docker Images",
+      "phase": "${ReleaseName}/${ReleaseVersion}/QA Docker Images",
       "applicationVersions": [
         "Local|HueController/${HueControllerAppVersion}"
       ],
@@ -204,7 +204,7 @@
       "type": "Run Build"
     },
     {
-      "phase": "${ReleaseName}/1/QA Docker Images",
+      "phase": "${ReleaseName}/${ReleaseVersion}/QA Docker Images",
       "applicationVersions": [
         "Local|HueController/${HueControllerAppVersion}"
       ],
@@ -225,7 +225,7 @@
       "type": "Run Build"
     },
     {
-      "phase": "${ReleaseName}/1/QA Docker Images",
+      "phase": "${ReleaseName}/${ReleaseVersion}/QA Docker Images",
       "applicationVersions": [
         "Local|HueController/${HueControllerAppVersion}"
       ],
@@ -246,7 +246,7 @@
       "type": "Run Adaptive Testing"
     },
     {
-      "phase": "${ReleaseName}/1/QA Docker Images",
+      "phase": "${ReleaseName}/${ReleaseVersion}/QA Docker Images",
       "applicationVersions": [
         "Local|RadioController/${RadioControllerAppVersion}",
         "Local|HueController/${HueControllerAppVersion}"
@@ -268,20 +268,20 @@
       "type": "Post message"
     },
     {
-      "phase": "${ReleaseName}/1/Failure Phase",
+      "phase": "${ReleaseName}/${ReleaseVersion}/Failure Phase",
       "isDisabled": false,
       "name": "Failure Task",
       "kind": "Task"
     },
     {
-      "phase": "${ReleaseName}/1/RPI Docker Images",
+      "phase": "${ReleaseName}/${ReleaseVersion}/RPI Docker Images",
       "applicationVersions": [
         "Local|RadioController/${RadioControllerAppVersion}",
         "Local|HueController/${HueControllerAppVersion}"
       ],
       "isDisabled": false,
       "description": "<p>Sende eine Slack Message als Information\t</p>",
-      "name": "Inform Andreas",
+      "name": "Inform Andreas RPI",
       "kind": "Task",
       "endpoint": "Slack EP",
       "plugin": "Slack/1.1",
@@ -293,7 +293,7 @@
       "type": "Post message"
     },
     {
-      "phase": "${ReleaseName}/1/RPI Docker Images",
+      "phase": "${ReleaseName}/${ReleaseVersion}/RPI Docker Images",
       "applicationVersions": [
         "Local|HueController/${HueControllerAppVersion}"
       ],
@@ -302,7 +302,7 @@
         "andreas.gremm@broadcom.com"
       ],
       "previousTasks": [
-        "Inform Andreas"
+        "Inform Andreas RPI"
       ],
       "description": "<p>List Repository Content of the Applications (HueController, RadioController).</p>",
       "name": "List Repository Content",

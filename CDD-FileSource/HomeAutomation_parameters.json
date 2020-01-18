@@ -25,6 +25,7 @@
 			"value": "false"
 		}
 	],
+	
 	"reference": {
 		"fileName": "HomeAutomation_CDD-Release-with_parameter.json",
 		"fileSource": "Github Homeautomation"
