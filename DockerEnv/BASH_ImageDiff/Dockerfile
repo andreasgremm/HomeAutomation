@@ -2,6 +2,11 @@ FROM alpine:latest
 RUN apk add --no-cache ttf-liberation
 RUN apk add --no-cache imagemagick
 RUN apk add --no-cache bash
+RUN apk add tzdata
+
+ENV TZ=Europe/Berlin
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN mkdir /mnt/camera_input
 RUN mkdir /mnt/reduced_output
 
