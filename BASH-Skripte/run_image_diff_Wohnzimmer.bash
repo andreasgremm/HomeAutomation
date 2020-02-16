@@ -21,7 +21,12 @@ if [ ! -d "/mnt/synology/Wohnzimmer_Diffs" ]; then
   exit
 fi
 
-/usr/local/bin/Image_diff.bash /mnt/mediencenter/Hochgeladen /mnt/synology/Wohnzimmer_Diffs
+# /usr/local/bin/Image_diff.bash /mnt/mediencenter/Hochgeladen /mnt/synology/Wohnzimmer_Diffs
+docker run \
+	-it --rm \
+	-v "/mnt/mediencenter/Hochgeladen":"/mnt/camera_input" \
+	-v "/mnt/synology/Wohnzimmer_Diffs":"/mnt/reduced_output" \
+	imagediff:prod 
 
 umount /mnt/synology
 umount /mnt/mediencenter
