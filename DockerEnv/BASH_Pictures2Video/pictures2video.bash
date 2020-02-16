@@ -18,7 +18,7 @@ videoname=$3_`date +%F_%H-%M`.mp4
 pushd $imagedir
 
 ls *.jpg >alle_bilder.txt
-avconv  -framerate 1 -pattern_type glob  -i '*.jpg' -c:v libx264 -r 2 -pix_fmt yuv420p $videodir/$videoname
+ffmpeg  -framerate 1 -pattern_type glob  -i '*.jpg' -c:v libx264 -r 2 -pix_fmt yuv420p $videodir/$videoname
 
 for i in `cat alle_bilder.txt`
 do
