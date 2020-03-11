@@ -11,6 +11,7 @@ fi
 # /usr/local/bin/pictures2video.bash /mnt/synology/Wohnzimmer_Diffs /mnt/synology/video Wohnzimmer
 docker run \
     -it --rm \
+    --user `id -u`:`id -g` \
     -v "/mnt/synology/Wohnzimmer_Diffs":"/mnt/pictures_input" \
     -v "/mnt/synology/video":"/mnt/video_output" \
     pictures2video:prod \

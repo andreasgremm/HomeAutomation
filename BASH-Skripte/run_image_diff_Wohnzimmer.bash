@@ -24,6 +24,7 @@ fi
 # /usr/local/bin/Image_diff.bash /mnt/mediencenter/Hochgeladen /mnt/synology/Wohnzimmer_Diffs
 docker run \
     -it --rm \
+    --user `id -u`:`id -g` \
     -v "/mnt/mediencenter/Hochgeladen":"/mnt/camera_input" \
     -v "/mnt/synology/Wohnzimmer_Diffs":"/mnt/reduced_output" \
     imagediff:prod 

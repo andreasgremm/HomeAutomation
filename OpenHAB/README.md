@@ -2,7 +2,7 @@
 
 ## Vorbereitungen
 
-Basis für die Installation von OpenHAB in Dockerr ist folgende [Beschreibung](https://www.openhab.org/docs/installation/docker.html).
+Basis für die Installation von OpenHAB in Docker ist folgende [Beschreibung](https://www.openhab.org/docs/installation/docker.html).
 
 Auf dem Raspberry Pi: ```vi ~/.profile```
 Am Ende dann folgende Zeile einfügen:
@@ -116,3 +116,8 @@ Anschliessend zeigt ```show tables;```in *mysql* bereits eine Tabelle namens **I
 Nach der Konfiguration der Datei mysql.persist im conf Unterverzeichnis *persistence* erscheinen weitere Tabellen **Item1** .. **Itemn** für die persistierten Items.
 
 
+## Backup mit Synology implementieren
+
+- Authorized Keys in /root/.ssh 
+- ssh von Synology um Known-Hosts auf Synology zu implementieren
+- rsync installieren

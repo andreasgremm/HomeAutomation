@@ -25,7 +25,8 @@ Der Aufruf lautet:
 
 ```
 docker run \
-	-it --rm \
+	-it --rm 
+	--user `id -u`:`id -g` \
 	-v "<Quellverzeichnis>":"/mnt/pictures_input" \
 	-v "<Zielverzeichnis>":"/mnt/video_output" \
 	pictures2video:prod 
@@ -34,7 +35,8 @@ docker run \
 Um eine interaktive Shell im Image aufzurufen, kann folgender Befehl verwendet werden:
 
 ```
-docker run -it --rm --entrypoint=bash \
+docker run -it --rm --entrypoint=bash 
+	--user `id -u`:`id -g`\
 	-v "<Quellverzeichnis>":"/mnt/pictures_input" \
 	-v "<Zielverzeichnis>":"/mnt/video_output" \
 	pictures2video:prod

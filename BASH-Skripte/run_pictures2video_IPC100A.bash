@@ -10,6 +10,7 @@ fi
 # /usr/local/bin/pictures2video.bash /mnt/synology/IPC100A_Diffs /mnt/synology/video IPC100A
 docker run \
     -it --rm \
+    --user `id -u`:`id -g` \
     -v "/mnt/synology/IPC100A_Diffs":"/mnt/pictures_input" \
     -v "/mnt/synology/video":"/mnt/video_output" \
     pictures2video:prod \
