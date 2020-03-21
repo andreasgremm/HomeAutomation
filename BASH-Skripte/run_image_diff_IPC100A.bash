@@ -20,7 +20,7 @@ fi
 
 # /usr/local/bin/Image_diff.bash /mnt/synology/FTP /mnt/synology/IPC100A_Diffs
 docker run \
-    -it --rm \
+    -a stdout -a stderr  --rm \
     --user `id -u`:`id -g` \
     -v "/mnt/synology/FTP":"/mnt/camera_input" \
     -v "/mnt/synology/IPC100A_Diffs":"/mnt/reduced_output" \
