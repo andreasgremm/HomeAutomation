@@ -5,7 +5,7 @@ Im Rahmen der allgemeinen Überwachung ist es die Überwachungskamera IPC-100A i
 
 Im Rahmen der Hausalarmanlage ist es die WebCam am Raspberry im Wohnzimmer, die bei einer Bewegungserkennung über den [MQTT KameraController](../../MQTT/MQTT_KameraController/) gestartet wird und Bilder auf die Magenta-Cloud sendet.
 
-Diese Bilder sind jedoch oft statisch, d.h sie enthalten kaum Änderungen. Ausser es findet tatsächlich eine entsprechende Bewegung statt. [ImageDiff](../BASH_ImageDiff/) vergleicht aufeinanderfolgende Bilder in einem Quellverzeichnis und speichert nur Bilder im Zielverzeichnis wenn eine merkliche Bildänderung stattgefunden hat.
+Diese Bilder sind jedoch oft statisch, d.h sie enthalten kaum Änderungen. Ausser es findet tatsächlich eine entsprechende Bewegung statt. [ImageDiff](../DockerEnv/BASH_ImageDiff/) vergleicht aufeinanderfolgende Bilder in einem Quellverzeichnis und speichert nur Bilder im Zielverzeichnis wenn eine merkliche Bildänderung stattgefunden hat.
 
 Um die Anzahl der Dateien zu reduzieren und den benötigten Plattenplatz zu optimieren, kann aus den Bildern ein Video erstellt werden.
 
@@ -17,6 +17,14 @@ ImageDiff und Pictures2Video sind allgemeingültig, daher werden sie über Skrip
 Die Bash-Skripte aus diesem Verzeichnis sollten in das Verzeichnis ```/usr/local/bin``` der aktuellen Maschine kopiert werden. 
 
 ## Run ImageDiff
+Die RunImageDiff Skripte mounten die Aufnahmeverzeichnisse der Kameras und die Ausgabeverzeichnisse. Es wird ImageDiff entsprechend aufgerufen. 
+
+Folgender Cron-Job läuft morgens um 10:00 Uhr, um die Bilder der IPC100A zu verarbeiten.
+
+```
+# m h  dom mon dow   command
+0 10 * * * /usr/local/bin/run_image_diff_IPC100A.bash >$HOME/log/image_diff.log 2>&1
+```
 
 ### IPC-100A im Studio
 Die Ausgaben der IPC-100A im Studio werden regelmäßig per FTP auf das Verzeichnis ```/home/FTP``` geschrieben.
@@ -30,7 +38,7 @@ Das Ergebnis der Differenzbildung wird im Verzeichnis ```/home/IPC100A_Diffs``` 
 //192.168.1.241/home /mnt/synology  cifs rw,user,noauto,uid=pi,gid=pi,credentials=/home/pi/.cifs/secrets,vers=2.1 0 0
 ```
 
-Die Datei /home/pi/.cifs/secrets enthält den Benutzernamen und das Passwort für den SMB-Mount des entsprechenden verzeichnisses.
+Die Datei /home/pi/.cifs/secrets enthält den Benutzernamen und das Passwort für den SMB-Mount des entsprechenden Verzeichnisses.
 Wenn sich der genutzte Benutzername auf dem Raspberry Pi ändert, wird sich natürlich auch die Lage der **secrets** Datei ändern.
 
 ```

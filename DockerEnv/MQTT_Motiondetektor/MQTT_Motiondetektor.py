@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: latin-1 -*-
-###
-#
-# https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/robot/buttons_and_switches/
-# http://sourceforge.net/p/raspberry-gpio-python/wiki/Inputs/
-#
 
 import argparse
 import atexit
@@ -254,13 +249,6 @@ if __name__ == "__main__":
         default=DefaultMQTTPassword,
     )
     parser.add_argument(
-        "-sp",
-        "--sensor-pin",
-        help="Sensor Pin des Bewegungsmelders",
-        dest="motionPin",
-        default=23,
-    )
-    parser.add_argument(
         "-l", "--lamp", help="Lampen Nummer", dest="lamp", default=1
     )
     parser.add_argument(
@@ -275,7 +263,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     options = vars(args)
 
-    pinin = int(options["motionPin"])
     lamp = int(options["lamp"])
     timeout = int(options["timeout"])
 
