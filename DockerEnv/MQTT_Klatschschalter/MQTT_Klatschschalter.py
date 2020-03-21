@@ -138,12 +138,12 @@ def klatsch_detected(mosq, obj, msg):
             + msg.payload.decode(),
             flush=True,
         )
-        if msg.payload.decode() == "1":
-            if not threadactive:
-                threadactive = True
-                thread = threading.Thread(target=background_wait)
-                thread.start()
-            klatsch_klatsch += 1
+    if msg.payload.decode() == "1":
+        if not threadactive:
+            threadactive = True
+            thread = threading.Thread(target=background_wait)
+            thread.start()
+        klatsch_klatsch += 1
 
 
 def on_publish(mosq, obj, mid):
