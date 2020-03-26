@@ -1,0 +1,17 @@
+mkdir etc
+mkdir db
+
+docker run --rm \
+      -e INFLUXDB_DB=<openhab> \
+      -e INFLUXDB_HTTP_AUTH_ENABLED=true \
+      -e INFLUXDB_ADMIN_USER=admin -e INFLUXDB_ADMIN_PASSWORD=<secret1> \
+      -e INFLUXDB_USER=<openhab> -e INFLUXDB_USER_PASSWORD=<secret2> \
+      -v $PWD/db:/var/lib/influxdb \
+      influxdb /init-influxdb.sh
+
+pushd etc
+docker run --rm influxdb influxd config > influxdb.conf
+popd
+
+echo "###"
+echo "#  in etc/influxdb.conf 'auth-enabled = true' setzen."
