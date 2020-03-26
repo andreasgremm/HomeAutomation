@@ -205,7 +205,9 @@ Während der Migration ist die Periode für *four_weeks* allerdings auch auf 5 J
 ```
 alter retention policy "four_weeks" on "homeautomation" duration 4w replication 1 default
 
-CREATE CONTINUOUS QUERY "cq_15m_Helligkeit" ON "homeautomation" BEGIN SELECT mean("helligkeit") AS "mean_value"  INTO "a_year"."downsampled_Waschmaschine_Power" FROM "Waschmaschine_Power" GROUP BY time(15m) END
+CREATE CONTINUOUS QUERY "cq_30m_Helligkeit" ON "homeautomation" BEGIN SELECT mean("light") AS "mean_light"  INTO "five_years"."mean_light" FROM "Helligkeit" GROUP BY time(30m), room END
+
+CREATE CONTINUOUS QUERY "cq_30m_Temperatur" ON "homeautomation" BEGIN SELECT mean("temperatur") AS "mean_temperatur"  INTO "five_years"."mean_temperatur" FROM "Temperatur" GROUP BY time(30m), room END
 
 ```
 
