@@ -2,11 +2,16 @@
 # based on: https://github.com/ayush-sharma/infra_helpers
 #
 #  Removed the need for a specific auto increment column
+#  set localTZ below to the timezone the MYSQL Database has
+#       stored the timestamp for a conversion to UTC in InfluxDB
 #
 import datetime
+from pytz import timezone
 
 import MySQLdb
 from influxdb import InfluxDBClient
+
+localTZ = timezone('Europe/Berlin')
 
 
 def file_read(path: str):
@@ -165,9 +170,10 @@ if __name__ == "__main__":
                 for key, value in item.items():
 
                     if key == table["unix_timestamp_column"]:
-                        timestamp = datetime.datetime.fromtimestamp(
-                            value
-                        ).isoformat()
+                        nativets = datetime.datetime.fromtimestamp(value)
+                        timestampL = localTZ.localize(nativets)
+                        timestampN = localTZ.normalize(timestampL)
+                        timestamp = timestampN.isoformat()
                     else:
                         if key in tags_list:
                             tags[key] = value

@@ -127,7 +127,7 @@ def cleanup(sig, frame):
 if __name__ == "__main__":
 
     """ Define the Parser for the command line"""
-    parser = argparse.ArgumentParser(description="MQTT Hue-Controller.")
+    parser = argparse.ArgumentParser(description="MQTT RadioController.")
     parser.add_argument(
         "-b",
         "--broker",

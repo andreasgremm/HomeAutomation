@@ -1,4 +1,7 @@
 # InfluxDB
+InfluxDB ist auf die Speicherung von Zeitserien optimiert. Zeitstempel sind immer in Relation zur Zeitzone zu sehen. Siehe hierzu auch [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt). Dieser [Artikel](https://medium.com/easyread/understanding-about-rfc-3339-for-datetime-formatting-in-software-engineering-940aa5d5f68a) beschreibt es ganz gut.
+
+Für die Arbeit mit InfluxDB ist es daher wichtig Zeitstempel in UTC umzurechnen, bevor diese in der InfluxDB gespeichert werden. 
 
 
 ## InfluxDB Installation
@@ -238,8 +241,6 @@ Temperatur,room=AUTO
 Temperatur,room=Wohnzimmer
 ```
 
-
-
 Mittelwert von 30 Minuten berechnen (1) und in eine andere Retention Policy schreiben (2):
 
 ```
@@ -306,6 +307,10 @@ Write Consistency all
 Chunked           true
 Chunk Size        0
 ```
+
+### Python Beispiele zur Arbeit mit InfluxDB
+Python Beispiele zur Arbeit mit InfluxDB gibt es [hier](https://influxdb-python.readthedocs.io/en/latest/examples.html)
+
 
 ## OpenHAB
 Um Openhab mit InfluxDB zu nutzen sind folgende Punkte notwendig.
