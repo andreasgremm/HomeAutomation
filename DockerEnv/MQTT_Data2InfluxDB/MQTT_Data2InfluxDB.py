@@ -16,7 +16,7 @@ from Security.MQTT import DefaultMQTTPassword, DefaultMQTTUser
 
 influxdb_config = {}
 tr = {"auto": "AUTO", "wohnzimmer": "Wohnzimmer"}
-debug = True
+debug = False
 
 
 def write2DB(measurement, tags, timestamp, fields):
