@@ -1,4 +1,5 @@
 docker run -d --name influx \
+      --restart unless-stopped \
       -p 8086:8086 \
       -v $PWD/etc/influxdb.conf:/etc/influxdb/influxdb.conf:ro \
       -v $PWD/db:/var/lib/influxdb \

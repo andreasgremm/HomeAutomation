@@ -59,7 +59,7 @@ def background_wait():
     threadactive = False
 
 
-def alarm(anyLamp):
+def alarm():
     try:
         conn.connect()
         conn.request(method="GET", url="/api/alarmstatus", headers=header_data)
@@ -115,6 +115,7 @@ def on_message(mosq, obj, msg):
         )
 
     if msg.topic == "hue/any":
+        klatsch_klatsch = 0
         anyLamp = msg.payload.decode() == "True"
 
         if klatsch_klatsch >= 3 and anyLamp:
@@ -122,8 +123,8 @@ def on_message(mosq, obj, msg):
             sceneindex = 0
             lampindex = 0
         if klatsch_klatsch >= 3 and not anyLamp:
-            alarm(anyLamp)
-        klatsch_klatsch = 0
+            thread = threading.Thread(target=alarm)
+            thread.start()
 
 
 def klatsch_detected(mosq, obj, msg):
