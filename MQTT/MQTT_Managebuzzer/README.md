@@ -1,5 +1,5 @@
-# MQTT Kamera Controller
-Dieses Programm dient als Mittler zwischen MQTT Clients und dem Start einer Kamerafunktion.
+# MQTT Manage Controller
+Dieses Programm dient als Mittler zwischen MQTT Clients und dem Start einer Buzzerfunktion.
 ## Installation
 Clone: https://github.com/andreasgremm/HomeAutomation.git
 
@@ -32,7 +32,7 @@ Verzeichnisstruktur:
 
 ```
 cp -R $HOME/HomeAutomation/MQTT $HOME/MQTT
-cd $HOME/MQTT/MQTT_KameraController
+cd $HOME/MQTT/MQTT_Managebuzzer
 python3 -m venv pythonenv
 . pythonenv/bin/activate
 pip install --upgrade pip
@@ -40,9 +40,9 @@ pip install --upgrade setuptools
 pip install -r requirements.txt
 deactivate
 
-sudo cp kameracontroller.start_stop /etc/systemd/system/kameracontroller.service
+sudo cp managebuzzer.start_stop /etc/systemd/system/managebuzzer.service
 sudo cp mjpgstreamer.start_stop /etc/systemd/system/mjpgstreamer.service
-sudo systemctl enable kameracontroller
-sudo systemctl start kameracontroller
+sudo systemctl enable managebuzzer
+sudo systemctl start managebuzzer
 ```
 

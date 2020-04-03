@@ -1,0 +1,14 @@
+[Unit]
+Description=MQTT Manage Buzzer Service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/MQTT/MQTT_Managebuzzer/pythonenv/bin/python3 /home/pi/MQTT/MQTT_Managebuzzer/MQTT_Managebuzzer.py
+Restart=on-failure
+Environment=PYTHONPATH=/home/pi/non-git-local-includes
+WorkingDirectory=/home/pi/MQTT/MQTT_Managebuzzer/
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

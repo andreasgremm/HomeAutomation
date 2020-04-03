@@ -3,10 +3,10 @@ Description=MQTT Kamera Controller
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/pi/MQTT/MQTT_KameraController.py
+ExecStart=/home/pi/MQTT/MQTT_KameraController/pythonenv/bin/python3 /home/pi/MQTT/MQTT_KameraController/MQTT_KameraController.py
 Restart=on-failure
 Environment=PYTHONPATH=/home/pi/non-git-local-includes
-WorkingDirectory=/home/pi/MQTT/
+WorkingDirectory=/home/pi/MQTT/MQTT_KameraController
 StandardOutput=null
 StandardError=null
 
