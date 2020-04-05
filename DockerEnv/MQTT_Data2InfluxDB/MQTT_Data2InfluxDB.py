@@ -10,8 +10,11 @@ from urllib.parse import urlparse
 import paho.mqtt.client as paho
 from influxdb import InfluxDBClient
 
-from Security.InfluxDB import (DefaultInfluxDB, DefaultInfluxDBPassword,
-                               DefaultInfluxDBUser)
+from Security.InfluxDB import (
+    DefaultInfluxDB,
+    DefaultInfluxDBPassword,
+    DefaultInfluxDBUser,
+)
 from Security.MQTT import DefaultMQTTPassword, DefaultMQTTUser
 
 influxdb_config = {}
@@ -52,7 +55,15 @@ def on_connect(mosq, obj, flags, rc):
     mqttc.publish(
         "clientstatus/" + mosq._client_id.decode(), "ONLINE", 0, True
     )
-    mqttc.subscribe([("temperatur/+", 2), ("licht/+", 2)])
+    mqttc.subscribe(
+        [
+            ("temperatur/+", 2),
+            ("licht/+", 2),
+            ("rssi//+", 2),
+            ("spannung/+", 2),
+            ("temperatur_n/+", 2),
+        ]
+    )
 
 
 def on_disconnect(mosq, obj, rc):
@@ -110,6 +121,61 @@ def manage_temperatur(mosq, obj, msg):
         write2DB(
             "Temperatur", tags, datetime.datetime.utcnow().isoformat(), fields
         )
+
+
+def manage_temperatur_n(mosq, obj, msg):
+    if debug:
+        print(
+            "Message received (manage_temperatur_n): "
+            + msg.topic
+            + ", QoS = "
+            + str(msg.qos)
+            + ", Payload = "
+            + msg.payload.decode(),
+            flush=True,
+        )
+
+    fields = {"temperatur_n": int(msg.payload.decode())}
+    tags = {"room": tr[msg.topic.split("/")[1]]}
+    write2DB(
+        "Tempeatur_nativ", tags, datetime.datetime.utcnow().isoformat(), fields
+    )
+
+
+def manage_spannung(mosq, obj, msg):
+    if debug:
+        print(
+            "Message received (manage_spannung): "
+            + msg.topic
+            + ", QoS = "
+            + str(msg.qos)
+            + ", Payload = "
+            + msg.payload.decode(),
+            flush=True,
+        )
+
+    fields = {"power": int(msg.payload.decode())}
+    tags = {"room": tr[msg.topic.split("/")[1]]}
+    write2DB("Power", tags, datetime.datetime.utcnow().isoformat(), fields)
+
+
+def manage_rssi(mosq, obj, msg):
+    if debug:
+        print(
+            "Message received (manage_rssi): "
+            + msg.topic
+            + ", QoS = "
+            + str(msg.qos)
+            + ", Payload = "
+            + msg.payload.decode(),
+            flush=True,
+        )
+
+    fields = {"rssi": int(msg.payload.decode())}
+    tags = {"room": tr[msg.topic.split("/")[1]]}
+    write2DB(
+        "Feldstaerke", tags, datetime.datetime.utcnow().isoformat(), fields
+    )
 
 
 def on_publish(mosq, obj, mid):
@@ -232,6 +298,9 @@ if __name__ == "__main__":
     mqttc.on_message = on_message
     mqttc.message_callback_add("licht/+", manage_light)
     mqttc.message_callback_add("temperatur/+", manage_temperatur)
+    mqttc.message_callback_add("temperatur_n/+", manage_temperatur_n)
+    mqttc.message_callback_add("rssi/+", manage_rssi)
+    mqttc.message_callback_add("spannung/+", manage_spannung)
     mqttc.on_connect = on_connect
     mqttc.on_disconnect = on_disconnect
     #   mqttc.on_publish = on_publish
