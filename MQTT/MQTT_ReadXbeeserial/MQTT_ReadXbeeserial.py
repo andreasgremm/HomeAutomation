@@ -30,7 +30,7 @@ def cleanup_final():
 
 
 def cleanup(sig, frame):
-    global RUN, session
+    global RUN
     print("Signal: ", str(sig), " - Cleaning up", client_id)
     RUN = False
     mqttc.publish("clientstatus/" + client_id, "OFFLINE", 0, True)
@@ -230,7 +230,7 @@ if __name__ == "__main__":
                         print(" ", flush=True)
                         Xbee.printFrame(frame)
                         RSSIValue = Xbee.getRSSIValue(frame, frameLength)
-                        actsender.setLastRSSIValue(RSSIValue, session)
+                        actsender.setLastRSSIValue(RSSIValue)
 
                 # check for other Frames
                 else:
