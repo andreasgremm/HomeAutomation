@@ -50,7 +50,7 @@ class XbeeSender(object):
         print(XbeeSender.__xbeeList)
         print("", flush=True)
 
-    def setLastRSSIValue(self, value, session):
+    def setLastRSSIValue(self, value):
         self.__lastRSSIValue = value
         XbeeSender.MQTTpublish("rssi/" + self.__ni.lower(), str(value))
 
