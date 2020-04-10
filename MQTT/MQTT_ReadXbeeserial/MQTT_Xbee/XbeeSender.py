@@ -120,11 +120,10 @@ class XbeeSender(object):
                         # print (self.__ni)
                         # print ('alarm/'+self.__ni.lower()+'/detected',
                         # str(highlow))
-                        if highlow:
-                            XbeeSender.MQTTpublish(
-                                "alarm/" + self.__ni.lower() + "/detected",
-                                str(highlow),
-                            )
+                        XbeeSender.MQTTpublish(
+                            "alarm/" + self.__ni.lower() + "/detected",
+                            str(highlow),
+                        )
 
                     if self.__ni not in KlatschSchalter.keys():
                         pass
@@ -243,10 +242,10 @@ class XbeeSender(object):
                 self.__sender,
                 self.__ni,
                 time.strftime(
-                    "%Y-%M-%d %H:%M:%S", time.gmtime(self.__regtime)
+                    "%Y-%m-%d %H:%M:%S", time.localtime(self.__regtime)
                 ),
                 time.strftime(
-                    "%Y-%M-%d %H:%M:%S", time.gmtime(self.__lastcontact)
+                    "%Y-%m-%d %H:%M:%S", time.localtime(self.__lastcontact)
                 ),
                 self.__lastRSSIValue,
             )
