@@ -1,0 +1,15 @@
+[Unit]
+Description=Read Xbee Serial Service
+
+[Service]
+Type=simple
+ExecStart=/home/pi/MQTT/MQTT_ReadXbeeserial/pythonenv/bin/python3 /home/pi/MQTT/MQTT_ReadXbeeserial/MQTT_ReadXbeeserial.py
+Restart=on-failure
+Environment=PYTHONPATH=/home/pi/non-git-local-includes
+WorkingDirectory=/home/pi/MQTT/MQTT_ReadXbeeserial
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target
+

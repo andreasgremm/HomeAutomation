@@ -121,3 +121,36 @@ Nach der Konfiguration der Datei mysql.persist im conf Unterverzeichnis *persist
 - Authorized Keys in /root/.ssh 
 - ssh von Synology um Known-Hosts auf Synology zu implementieren
 - rsync installieren
+
+
+# Openhab hinter einem Reverse-Proxy
+
+Zugehörige NGINX Konfiguration:
+
+```
+
+   location /openhab/ {
+         return 301 http://openhabproxy/;
+    }
+```
+
+Dann in ...conf.d/openhab.conf:
+
+```
+server {
+    listen       80;
+    server_name  openhabproxy;
+
+    #charset koi8-r;
+    #access_log  /var/log/nginx/host.access.log  main;
+    server_tokens off;
+
+    location / {
+         proxy_pass                            http://<openhab>:8080/;
+         proxy_set_header Host                 $host;
+         proxy_set_header X-Real-IP            $remote_addr;
+         proxy_set_header X-Forwarded-For      $proxy_add_x_forwarded_for;
+         proxy_set_header X-Forwarded-Proto    $scheme;
+  
+    }
+```

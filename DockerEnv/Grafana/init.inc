@@ -1,3 +1,5 @@
+mkdir -p /usr/local/etc/grafana
+mkdir -p /var/lib/grafana
 docker run -it --rm --user root --name=grafana -p 3000:3000 \
     --entrypoint bash \
     -v /usr/local/etc/grafana/:/etc/grafana/ \
