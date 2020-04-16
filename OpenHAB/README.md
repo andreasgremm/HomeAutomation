@@ -141,6 +141,9 @@ server {
     listen       80;
     server_name  openhabproxy;
 
+    auth_basic             "Administrator's Area";
+    auth_basic_user_file   <z.B:> /usr/local/etc/nginx/conf.d/.htpasswd;
+
     #charset koi8-r;
     #access_log  /var/log/nginx/host.access.log  main;
     server_tokens off;
