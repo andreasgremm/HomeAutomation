@@ -1,0 +1,129 @@
+###
+#
+#	http://www.switchdoc.com/2016/02/tutorial-installing-and-testing-mosquitto-mqtt-on-raspberry-pi/
+
+#sudo wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key
+#sudo apt-key add mosquitto-repo.gpg.key
+#cd /etc/apt/sources.list.d/
+#sudo wget http://repo.mosquitto.org/debian/mosquitto-jessie.list
+#sudo apt-get update
+#sudo apt-get install mosquitto
+
+#sudo apt-get install mosquitto mosquitto-clients python-mosquitto
+
+
+sudo apt-get install mosquitto mosquitto-clients
+# sudo /etc/init.d/mosquitto stop
+systemctl stop mosquitto
+
+sudo nano /etc/mosquitto/mosquitto.conf
+
+------------------  /etc/mosquitto/mosquitto.conf
+# Place your local configuration in /etc/mosquitto/conf.d/
+#
+# A full description of the configuration file is at
+# /usr/share/doc/mosquitto/examples/mosquitto.conf.example
+
+pid_file /var/run/mosquitto.pid
+
+persistence true
+persistence_location /var/lib/mosquitto/
+
+log_dest topic
+
+
+log_type error
+log_type warning
+log_type notice
+log_type information
+
+connection_messages true
+log_timestamp true
+
+allow_anonymous false
+
+include_dir /etc/mosquitto/conf.d
+-------------------------------------------------
+
+###
+# Security:
+security.conf:
+password_file /etc/mosquitto/pwfile
+
+###
+# Passwort generieren
+mosquitto_passwd -c /etc/mosquitto/pwfile <user>
+
+###
+# WebSocket-Support:
+websocket.conf:
+port 1883
+protocol mqtt
+
+listener 9001
+protocol websockets
+
+autosave_interval 10
+autosave_on_changes false
+
+
+####
+#
+# Dokumentation: https://eclipse.org/paho/clients/python/docs/
+#                https://github.com/eclipse/paho.mqtt.python/blob/master/src/paho/mqtt/client.py
+#
+
+
+sudo /etc/init.d/mosquitto start
+export MQUSER=<mqtt user>
+export MQPASSWD=<mqtt password>
+mosquitto_sub -d -t hello/world
+mosquitto_sub -d -t hue/any  -u $MQUSER -P $MQPASSWD
+mosquitto_sub -d -t hue/lampstatus/#  -u $MQUSER -P $MQPASSWD
+mosquitto_sub -d -t hue/lampinfo/#  -u $MQUSER -P $MQPASSWD
+
+mosquitto_sub -d -t \$SYS/broker/#/#  -u $MQUSER -P $MQPASSWD
+
+mosquitto_sub -d -t buzzer/wohnzimmer  -u $MQUSER -P $MQPASSWD
+
+mosquitto_pub -d -t hello/world -m "Hello from Terminal window 2"
+
+mosquitto_pub -d -t hue/control -m '{"scene":"Wohnen1"}' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t hue/control -m '{"lamp":1, "data":{"on":false}}' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t hue/control -m '{"lamp":1, "data":{"on":true}}' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t hue/control -m '{"lamp":1, "data":{"on":true,"hue":50000}}' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t hue/control -m '{"all":"off"}' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t hue/control -m '{"any":"on"}' -u $MQUSER -P $MQPASSWD
+
+mosquitto_pub -d -t hue/lamp/1 -m '1' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t hue/lamp/1 -m '?' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t hue/lamp/1 -m 'info' -u $MQUSER -P $MQPASSWD
+
+mosquitto_pub -d -t hue/scene/on -m 'Wohnen1' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t hue/alarm/3 -m '50000' -u $MQUSER -P MdOijT3vGkXD43qAWT
+
+mosquitto_pub -d -t alarm/wohnzimmer/motion -m 'True' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t alarm/auto/motion -m 'True' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t alarm/auto/test -m 'anything' -u $MQUSER -P $MQPASSWD
+
+mosquitto_pub -d -t buzzer/wohnzimmer -m '6' -u $MQUSER -P $MQPASSWD
+
+mosquitto_sub -d -t klatsch/wohnzimmer/detected  -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t sound/simple -m 'Hallo Welt' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t sound/play -m '{"text": "Hallo Welt"}' -u $MQUSER -P $MQPASSWD
+
+mosquitto_pub -t sound/simple -m 'Wieviele Kilometer bist Du heute schon gelaufen?' -h 192.168.1.128 -u $MQUSER -P $MQPASSWD
+
+
+mosquitto_pub -d -t facerec/stop -m '' -u $MQUSER -P $MQPASSWD
+mosquitto_pub -d -t facerec/frames -m '7' -u $MQUSER -P $MQPASSWD
+
+###
+#
+#	Receive "Log" Infos:
+#	topic logs to the broker topic '$SYS/broker/log/<severity>', 
+#	where severity is one of D, E, W, N, I, M which are debug, error, warning, notice, information and message. 
+#	Message type severity is used by the subscribe and unsubscribe log_type options and 
+#	publishes log messages at $SYS/broker/log/M/subscribe and $SYS/broker/log/M/unsubscribe
+mosquitto_sub -d -t \$SYS/broker/log/+
+

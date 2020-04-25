@@ -17,12 +17,13 @@ from Security.InfluxDB import (
 )
 from Security.MQTT import DefaultMQTTPassword, DefaultMQTTUser
 
+client_id = ""
 influxdb_config = {}
 tr = {"auto": "AUTO", "wohnzimmer": "Wohnzimmer"}
 debug = False
 
 
-def write2DB(measurement, tags, timestamp, fields):
+def write2DB(measurement, tags, timestamp, fields, retention_policy=None):
     influxdb_client = InfluxDBClient(
         influxdb_config["influxdb_host"],
         influxdb_config["influxdb_port"],
@@ -42,7 +43,9 @@ def write2DB(measurement, tags, timestamp, fields):
         print(
             "Data: ", influxdb_data, flush=True,
         )
-    influxdb_client.write_points(influxdb_data)
+    influxdb_client.write_points(
+        influxdb_data, retention_policy=retention_policy
+    )
 
 
 # Define event callbacks
@@ -62,6 +65,7 @@ def on_connect(mosq, obj, flags, rc):
             ("rssi//+", 2),
             ("spannung/+", 2),
             ("temperatur_n/+", 2),
+            ("alarm/+/motion", 2),
         ]
     )
 
@@ -82,6 +86,30 @@ def on_message(mosq, obj, msg):
             + ", Payload = "
             + msg.payload.decode(),
             flush=True,
+        )
+
+
+def manage_alarm(mosq, obj, msg):
+    if debug:
+        print(
+            "Message received (manage_alarm): "
+            + msg.topic
+            + ", QoS = "
+            + str(msg.qos)
+            + ", Payload = "
+            + msg.payload.decode(),
+            flush=True,
+        )
+
+    if msg.payload.decode() == "False" or msg.payload.decode() == "True":
+        fields = {"status": int(msg.payload.decode() == "True")}
+        tags = {"room": tr[msg.topic.split("/")[1]]}
+        write2DB(
+            "Alarm",
+            tags,
+            datetime.datetime.utcnow().isoformat(),
+            fields,
+            retention_policy="five_years",
         )
 
 
@@ -301,6 +329,7 @@ if __name__ == "__main__":
     mqttc.message_callback_add("temperatur_n/+", manage_temperatur_n)
     mqttc.message_callback_add("rssi/+", manage_rssi)
     mqttc.message_callback_add("spannung/+", manage_spannung)
+    mqttc.message_callback_add("alarm/+/motion", manage_alarm)
     mqttc.on_connect = on_connect
     mqttc.on_disconnect = on_disconnect
     #   mqttc.on_publish = on_publish

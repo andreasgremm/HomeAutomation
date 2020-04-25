@@ -1,4 +1,4 @@
-FROM python:3.7-slim
+FROM python:3.8-slim
 COPY requirements.txt /tmp/
 RUN pip install --no-cache-dir --trusted-host pypi.python.org -r /tmp/requirements.txt
 
