@@ -15,7 +15,7 @@ ENV Client_Name=$buildtime_Client_Name
 EXPOSE 9998/udp
 
 WORKDIR /app
-ADD HS110/*.py ./HS110
+ADD HS110 HS110
 COPY MQTT_TplinkHS110Monitor.py .
 
 CMD python MQTT_TplinkHS110Monitor.py -b ${IP_Brocker} -c ${Client_Name}

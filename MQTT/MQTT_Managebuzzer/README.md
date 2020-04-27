@@ -41,7 +41,6 @@ pip install -r requirements.txt
 deactivate
 
 sudo cp managebuzzer.start_stop /etc/systemd/system/managebuzzer.service
-sudo cp mjpgstreamer.start_stop /etc/systemd/system/mjpgstreamer.service
 sudo systemctl enable managebuzzer
 sudo systemctl start managebuzzer
 ```

@@ -2,7 +2,7 @@ mkdir /var/lib/mosquitto
 mkdir /var/log/mosquitto
 mkdir /etc/mosquitto
 cp logrotate.conf /etc/logrotate.d/mosquitto
-cp -r ./conf /etc/mosquitto/
+cp -r ./conf/* /etc/mosquitto/
 
 docker run -it --entrypoint /bin/chown -p 1883:1883 -p 9001:9001 \
     -v /etc/mosquitto/:/mosquitto/config/:ro \

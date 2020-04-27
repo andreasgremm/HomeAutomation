@@ -8,8 +8,15 @@ Beispielsweise auf dem Raspberry mit ```docker pull grafana/grafana:master-ubunt
 Wenn Persistence für die Grafana-Installation benötigt wird, sollten die Berechtigungen richtig gesetzt werden. Hierzu folgende [Information](https://grafana.com/docs/grafana/latest/installation/docker/) beachten.
 
 ```
-mkdir -p /usr/local/etc/grafana
-. init.inc
+. init_0.inc
+###
+#
+#  In einer weiteren Session aus dem Container das Verzeichnis /etc/grafana in das lokale Dateisystem kopieren
+#
+#  docker cp grafana:/etc/grafana /usr/local/etc
+#
+
+. init_1.inc
 
 # in the container you just started:
 chown -R root:root /etc/grafana && \
@@ -18,6 +25,7 @@ chown -R grafana:grafana /var/lib/grafana && \
 chown -R grafana:grafana /usr/share/grafana
 exit
 ```
+Beim ersten Aufruf von Grafana über den Web-Browser wird für den Benutzer admin (initiales Passwort: admin) ein neues Passwort gesetzt.
 
 Alles weitere findet sich unter der [Grafana Dokumentation](https://grafana.com/docs/grafana/latest/).
 

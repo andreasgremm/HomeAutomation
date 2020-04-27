@@ -6,4 +6,6 @@
 /run/*
 /mnt/*
 /var/lib/docker/*
+/home/pi/HomeAutomation/*
+/home/pi/non-git-local-includes/*
 /lost+found/*

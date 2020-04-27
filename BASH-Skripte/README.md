@@ -26,10 +26,11 @@ Folgender Cron-Job läuft morgens um 10:00 Uhr, um die Bilder der IPC100A zu ver
 0 10 * * * /usr/local/bin/run_image_diff_IPC100A.bash >$HOME/log/image_diff.log 2>&1
 ```
 
+Hierfür noch das Log-Verzeichnis anlegen: ```mkdir $HOME/log```
 ### IPC-100A im Studio
-Die Ausgaben der IPC-100A im Studio werden regelmäßig per FTP auf das Verzeichnis ```/home/FTP``` geschrieben.
+Die Ausgaben der IPC-100A im Studio werden regelmäßig per FTP auf das Verzeichnis ```/home/FTP``` des Benutzers **camera** geschrieben.
 
-Das Ergebnis der Differenzbildung wird im Verzeichnis ```/home/IPC100A_Diffs``` abgelegt.
+Das Ergebnis der Differenzbildung wird im Verzeichnis ```/home/IPC100A_Diffs``` des Benutzers **camera** abgelegt.
 
 
 /etc/fstab - Eintrag:

@@ -14,8 +14,8 @@ Für die Persistenz wähle ich ein Basis-Verzeichnis, in dem die Unterverzeichni
 In folgendem Snippet müssen die Werte in spitzen Klammern ersetzt werden.
 
 ```
-mkdir etc
-mkdir db
+mkdir -p /usr/local/etc/influxdb
+mkdir -p /var/lib/influxdb
 
 docker run --rm \
       -e INFLUXDB_DB=<Datenbank> \
