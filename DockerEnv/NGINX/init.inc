@@ -1,3 +1,4 @@
+cp logrotate.conf /etc/logrotate.d/nginx
 mkdir -p /usr/local/etc/nginx/conf.d
 mkdir -p /var/log/nginx
 docker run --name tmp-nginx-container -d nginx

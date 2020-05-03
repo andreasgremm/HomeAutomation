@@ -10,7 +10,18 @@ Die von init.inc erzeugte Verzeichnisstruktur unter /usr/local/etc/ muss durch d
 
 Insbesondere wird ein Benutzerauthentifizierung für verschiedene Proxy-Pfade benötigt, z.B.: Openhab.
 
-Um die .httpasswd Datei anzulegen werden die Apache Utilities benötigt: ```apt-get install apache-utils```.
+Um die .httpasswd Datei anzulegen werden die Apache2 Utilities benötigt: 
+
+```
+apt-get install apache2-utils
+cd <Directory für .htpasswd>
+#1. Benutzer: -c erzeugt die Datei
+htpasswd -c .htpasswd <Benutzer1>
+
+#ab 2. Benutzer
+htpasswd .htpasswd <Benutzer>
+
+```
 
 ## Grafana Proxy
 In der Datei **grafana.ini** müssen folgende Änderungen durchgeführt werden:
@@ -26,9 +37,12 @@ In der Datei **grafana.ini** müssen folgende Änderungen durchgeführt werden:
 ```
 
 ## Openhab Proxy
-Für Openhab muss ein virtueller neuer Host eingerichtet werden. Dieses inst in der NGINX - Konfiguration in **conf.d/default** spezifiziert.
+Für Openhab muss ein virtueller neuer Host eingerichtet werden. Dieses inst in der NGINX - Konfiguration in **conf.d/homeautomation.conf** spezifiziert.
 
 Dieser Hostname muss dem **localhost** in /etc/hosts hinzugefügt werden.
+Weiterhin muss dieser im DNS auflösbar sein.
+
+
 
 
 
