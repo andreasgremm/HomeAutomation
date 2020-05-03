@@ -3,6 +3,8 @@
 
 Gegenüber dem Clone des genannten Repositories ist das Dockerfile verändert, um den Bedingungen der HomeAutomation zu genügen.
 
+In der Home-Automation wird der MJPEG-Streamer vom [MQTT_KameraController](../../MQTT/MQTT_KameraController/README.md) gestartet.
+
 ## Docker Image 
 
 ```
@@ -14,3 +16,4 @@ docker run -d --name mjpegstreamer  \
 
 ## Start des MJPG Prozesses mit Docker
 Bei der Umstellung des MJPEG-Streamers auf Docker die Steuerung per **systemctl** anzupassen. Eine gute Beschreibung findet sich [hier](https://blog.container-solutions.com/running-docker-containers-with-systemd).
+
