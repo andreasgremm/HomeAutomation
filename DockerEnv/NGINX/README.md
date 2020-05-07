@@ -2,9 +2,8 @@
 [Nginx](https://de.wikipedia.org/wiki/Nginx) ist unter anderem ein Reverse-Web-Proxy.
 Dieses Verzeichnis enthält die notwendigen "Inlcude" Dateien um eine [Docker-Installation](https://hub.docker.com/_/nginx) zu initiieren und im Host-System die relevanten Verzeichnisse anzulegen.
 
-* init.inc: Initialisiert die Verzeichnisstruktur und die Konfigurationsdateien werden im Host-System hinterlegt.
+* init.inc: Initialisiert die Verzeichnisstruktur  Desweiteren wird eine logrotate Konfiguration angelegt und die Konfigurationsdateien werden im Host-System hinterlegt.
 * run.inc: Start des NGINX-Containers zur Nutzung
-
 
 Die von init.inc erzeugte Verzeichnisstruktur unter /usr/local/etc/ muss durch die in diesem Verzeichnis hinterlegten Daten (Unterverzeichnis **usr\_local\_etc\_nginx** für die Home-Automation abgeglichen werden.
 

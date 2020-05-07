@@ -1,0 +1,6 @@
+docker run -d \
+   --name=uwsgi \
+   --network host \
+   --mount source=non-git-local-includes,destination=/non-git-local-includes,readonly \
+   --restart unless-stopped \
+    uwsgi:prod

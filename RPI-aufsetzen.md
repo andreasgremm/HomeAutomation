@@ -134,7 +134,120 @@ usermod -a -G davfs2 pi
 ```
  
 ## Node-Red installieren / konfigurieren
+**Todo: Node-Red in Docker Container laufen lassen**
+[Beschreibung: Node-Red in Docker](https://nodered.org/docs/getting-started/docker)
+
+In der für die Home-Automation genutzten Raspbian-Light Variante ist **Node-Red** nicht vorinstalliert.
+
+[Installation von Node-Red](https://nodered.org/docs/getting-started/raspberrypi#installing-node-red):
+
+```
+sudo apt install build-essential git
+bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
+```
+Hierbei wird folgende Ausgabe generiert:
+
+```
+Running Node-RED install for user pi at /home/pi on raspbian
+
+
+This can take 20-30 minutes on the slower Pi versions - please wait.
+
+  Stop Node-RED                       ✔
+  Remove old version of Node-RED      ✔
+  Remove old version of Node.js       ✔
+  Install Node.js LTS                 ✔   Node v12.16.3   Npm 6.14.4
+  Clean npm cache                     ✔
+  Install Node-RED core               ✔   1.0.6 
+  Move global nodes to local          -
+  Install extra Pi nodes              ✔
+  Npm rebuild existing nodes          -
+  Add shortcut commands               ✔
+  Update systemd script               ✔
+                                      
+
+Any errors will be logged to   /var/log/nodered-install.log
+All done.
+  You can now start Node-RED with the command  node-red-start
+  or using the icon under   Menu / Programming / Node-RED
+  Then point your browser to localhost:1880 or http://{your_pi_ip-address}:1880
+
+Started  So 3. Mai 19:01:11 CEST 2020  -  Finished  So 3. Mai 19:07:19 CEST 2020
+```
+
+In der Datei /var/log/nodered-install.log finden sich folgende Hinweise:
+
+```
+## You may also need development tools to build native addons:
+     sudo apt-get install gcc g++ make
+## To install the Yarn package manager, run:
+     curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+     sudo apt-get update && sudo apt-get install yarn
+
+```
+
+Auch für den automatischen Start ist Node-Red vorbereitet:
+
+```
+cp /library/systemd/system/nodered.service /etc/systemd/system/nodered.service
+## /etc/systemd/system/nodered.service editieren:
+#Environment="NODE_OPTIONS=--max-old-space-size=256"
+
+systemctl status nodered
+● nodered.service - Node-RED graphical event wiring tool
+   Loaded: loaded (/etc/systemd/system/nodered.service; disabled; vendor preset: enabled)
+   Active: inactive (dead)
+     Docs: http://nodered.org/docs/hardware/raspberrypi.html
+```
+
+Installation weiterer Module:
+
+```
+cd .node-red
+npm install node-red-dashboard
+```
+### Flows kopieren
+Die Flows aus dem alten Node-Red System exportieren (All Flows) und im neuen System importieren. Dieses geht auch gut direkt über die Zwischenablage.
+
+Die Sicherheitseinstellungen für MQTT müssen wieder eingerichtet werden.
+Dieses wird [hier](https://nodered.org/docs/user-guide/runtime/securing-node-red) beschrieben.
+### Security einstellen
+* adminAuth einstellen
+* httpRoot einstellen (/nodered)
+
+[NGINX für Node-Red](https://gist.github.com/boneskull/d418b7c871d2248cfeba) konfigurieren.
+
+```
+    location /nodered/ui/ {
+         proxy_pass http://localhost:1880/nodered/ui/;
+         proxy_http_version 1.1;
+         proxy_set_header Upgrade $http_upgrade;
+         proxy_set_header Connection "upgrade";
+	     auth_basic  "Node Red Dashboard";
+    	  auth_basic_user_file   /etc/nginx/conf.d/.htpasswd;
+    }
+
+    location /nodered/ {
+         proxy_pass http://localhost:1880/nodered/;
+         proxy_http_version 1.1;
+         proxy_set_header Upgrade $http_upgrade;
+         proxy_set_header Connection "upgrade";
+    }
+```
 
 ## certbot implementieren
 
 ## Alexa
+Für den [Alexa-Skill](Alexa/README.md) "Automation", der die Hue-Lampen kontrolliert, nutze ich einen uWSGI Server in Verbindung mit NGINX.
+
+In den entsprechenden NGINX Konfigurationen muss folgender Eintrag ergänzt werden:
+
+```
+    location /alexa  {
+        include uwsgi_params;
+        uwsgi_pass localhost:3031;
+    }
+
+```
+
