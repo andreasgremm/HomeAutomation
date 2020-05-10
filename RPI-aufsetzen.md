@@ -236,9 +236,61 @@ Dieses wird [hier](https://nodered.org/docs/user-guide/runtime/securing-node-red
     }
 ```
 
-## certbot implementieren
+## certbot in Docker implementieren
+LetsEncrypt ist ein freier Service und in diesem Zusammenhang ermögicht Certbot es Zertifikate für die Domäne zu implementieren.
 
-## Alexa
+CertBot mit Nginx in Docker ist [hier](https://github.com/wmnnd/nginx-certbot) beschrieben.
+
+Docker Image von Certbot für Raspbian herunterladen:
+```
+docker pull certbot/certbot:arm32v6-latest
+```
+
+Das dort vorgestellte Initialisierungsscript muss für die gewünschten DynDNS / DNS Domänen **UND** den lokalen Verzeichnisstrukturen angepasst werden. Die NGINX-Konfigurationsdateien müssen für SSL angepasst werden.
+
+Docker Compose muss installiert werden:
+
+```
+# Install required packages
+sudo apt update
+sudo apt install -y python3-pip libffi-dev
+
+sudo pip3 install docker-compose
+```
+
+Das Docker-Compose File:
+
+```
+version: '3'
+
+services:
+  nginx:
+    image: nginx
+    restart: unless-stopped
+    volumes:
+      - /usr/local/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /usr/local/etc/nginx/conf.d:/etc/nginx/conf.d:ro
+      - /var/log/nginx:/var/log/nginx
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /usr/local/etc/certbot/conf:/etc/letsencrypt
+      - /usr/local/etc/certbot/www:/usr/share/nginx/certbot
+    ports:
+      - "80:80"
+      - "443:443"
+    network_mode: host
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+  certbot:
+    image: certbot/certbot:arm32v6-latest
+    restart: unless-stopped
+    volumes:
+      - /usr/local/etc/certbot/conf:/etc/letsencrypt
+      - /usr/local/etc/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+```
+
+## Alexa Integration eigener Skills
 Für den [Alexa-Skill](Alexa/README.md) "Automation", der die Hue-Lampen kontrolliert, nutze ich einen uWSGI Server in Verbindung mit NGINX.
 
 In den entsprechenden NGINX Konfigurationen muss folgender Eintrag ergänzt werden:

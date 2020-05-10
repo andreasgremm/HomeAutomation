@@ -7,7 +7,16 @@ Dieses Verzeichnis enthält die notwendigen "Inlcude" Dateien um eine [Docker-In
 
 Die von init.inc erzeugte Verzeichnisstruktur unter /usr/local/etc/ muss durch die in diesem Verzeichnis hinterlegten Daten (Unterverzeichnis **usr\_local\_etc\_nginx** für die Home-Automation abgeglichen werden.
 
-Insbesondere wird ein Benutzerauthentifizierung für verschiedene Proxy-Pfade benötigt, z.B.: Openhab.
+## Nutzung in Verbindung mit LetsEncrypt / CertBot
+Bei der Nutzung in Verbindung mit [CertBot](../CertBot/README.md) wird das Script run.inc durch Docker-Compose ersetzt.
+
+Die Konfigurationsdateien in ..../conf.d/ müssen für SSL sinnvoll angepasst werden.
+Beispielsweise muss für den DynDNS-Domain-Eintrag der http Zugriff auf https umgelenkt werden und ein entsprechender **server** Eintrag für https Zugriff hinzugefügt werden.
+
+Die Aufteilung der Zugriffe aus dem Intranet und dem Internet müssen entsprechend sein.
+
+## Benutzerauthentifizierung / Authorisierung
+Insbesondere wird ein Benutzerauthentifizierung für verschiedene Proxy-Pfade benötigt, z.B.: Openhab. Nodered-UI
 
 Um die .httpasswd Datei anzulegen werden die Apache2 Utilities benötigt: 
 
@@ -21,7 +30,8 @@ htpasswd -c .htpasswd <Benutzer1>
 htpasswd .htpasswd <Benutzer>
 
 ```
-
+### Alternative (ToDo):
+Eine Alternative zur Nutzung einer **.htpasswd** kann auch ein LDAP-Verzeichnisdienst integriert werden. Dieses scheint mir für 2 Anwender etwas überzogen zu sein. Für andere Anwendungsumgebungen kann es jedoch eine lohnenswerte Alternative sein.
 ## Grafana Proxy
 In der Datei **grafana.ini** müssen folgende Änderungen durchgeführt werden:
 
@@ -40,7 +50,6 @@ Für Openhab muss ein virtueller neuer Host eingerichtet werden. Dieses inst in 
 
 Dieser Hostname muss dem **localhost** in /etc/hosts hinzugefügt werden.
 Weiterhin muss dieser im DNS auflösbar sein.
-
 
 
 
