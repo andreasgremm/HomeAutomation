@@ -94,20 +94,19 @@ user    admin
 admin   true
 openhab false
 
+> create database homeautomation
+> grant all on "homeautomation" to "openhab"
 > show databases
 name: databases
 name
 ----
 openhab
 _internal
-mydb
+homeautomation
 
-> use mydb
-Using database mydb
+> grant all on "homeautomation" to "openhab"
 
-> create user mydbuser with password 'mydb123'
-> grant all on "mydb" to "mydbuser"
-
+### einige andere Befehle / Beispiele
 > show  CONTINUOUS QUERIES
 name: _internal
 name query
@@ -203,15 +202,11 @@ Um diese Daten in eine InfluxDB zu migrieren um die Vorteile der automatisierten
 * *five_years*: enthält die heruntergerechneten Mittelwerte über 30 Minuten für 5 Jahre
 * *four_weeks*: enthält die Realtime-Werte für 4 Wochen. Diese wird zur "Default" Retention-Policy erklärt. Dieses führt dazu, dass alle in die Influx-DB geschriebenen Daten (ohne eine spezifische Retention Policy anzugeben) direkt in *four_weeks* geschrieben werden.
 
-Während der Migration ist die Periode für *four_weeks* allerdings auch auf 5 Jahre gesetzt und nach der erfolgten Migration mittels:
+
+Während der Migration ist die Periode für *four_weeks* allerdings auch auf 5 Jahre gesetzt und nach der erfolgten Migration mittels folendem Statement erst auf vier Wochen gesetzt.:
 
 ```
 alter retention policy "four_weeks" on "homeautomation" duration 4w replication 1 default
-
-CREATE CONTINUOUS QUERY "cq_30m_Helligkeit" ON "homeautomation" BEGIN SELECT mean("light") AS "mean_light"  INTO "five_years"."mean_light" FROM "Helligkeit" GROUP BY time(30m), room END
-
-CREATE CONTINUOUS QUERY "cq_30m_Temperatur" ON "homeautomation" BEGIN SELECT mean("temperatur") AS "mean_temperatur"  INTO "five_years"."mean_temperatur" FROM "Temperatur" GROUP BY time(30m), room END
-
 ```
 
 Die Migration füttert erst einmal alle Daten in die "Default" - Retention Policy, nach der erfolgreichen Migration der Daten wird der Mittelwert in die 5 Jahres Retention Policy gespeichert.
@@ -220,6 +215,18 @@ Die Migration füttert erst einmal alle Daten in die "Default" - Retention Polic
 create retention policy "five_years" on "homeautomation" duration 260w replication 1
 create retention policy "four_weeks" on "homeautomation" duration 260w replication 1 default
 ```
+
+Folgende "kontinuierlichen Abfragen" werden definiert um automatisiert die Mittelwerte einer 30 Minuten Periode dann dauerhaft abzuspeichern.
+```
+
+CREATE CONTINUOUS QUERY "cq_30m_Helligkeit" ON "homeautomation" BEGIN SELECT mean("light") AS "mean_light"  INTO "five_years"."mean_light" FROM "Helligkeit" GROUP BY time(30m), room END
+
+CREATE CONTINUOUS QUERY "cq_30m_Temperatur" ON "homeautomation" BEGIN SELECT mean("temperatur") AS "mean_temperatur"  INTO "five_years"."mean_temperatur" FROM "Temperatur" GROUP BY time(30m), room END
+
+CREATE CONTINUOUS QUERY "cq_30m_Temperatur_Nativ" ON "homeautomation" BEGIN SELECT mean("temperatur_n") AS "mean_temperatur_n"  INTO "five_years"."mean_temperatur_n" FROM "Temperatur_nativ" GROUP BY time(30m), room END
+
+```
+
 Wenn sich bereits Daten in der standard "Default" Retention Policy befinden, können diese in die neue Retention Policy "four_weeks" kopiert werden.
 
 ```

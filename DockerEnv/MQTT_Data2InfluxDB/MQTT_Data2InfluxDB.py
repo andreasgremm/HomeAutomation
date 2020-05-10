@@ -166,7 +166,8 @@ def manage_temperatur_n(mosq, obj, msg):
     fields = {"temperatur_n": int(msg.payload.decode())}
     tags = {"room": tr[msg.topic.split("/")[1]]}
     write2DB(
-        "Tempeatur_nativ", tags, datetime.datetime.utcnow().isoformat(), fields
+        "Temperatur_nativ", tags, datetime.datetime.utcnow().isoformat(),
+        fields
     )
 
 
