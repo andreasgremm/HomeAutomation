@@ -14,13 +14,9 @@ ENV IP_Brocker=$buildtime_IP_Brocker
 ARG buildtime_Client_Name="MQTT_Klatschschalter"
 ENV Client_Name=$buildtime_Client_Name
 
-ARG buildtime_API_Conn="192.168.1.237:81"
-ENV API_Conn=$buildtime_API_Conn
-
 RUN useradd --create-home appuser
 WORKDIR /home/appuser
 USER appuser
 
 COPY MQTT_Klatschschalter.py .
-# CMD ["sh", "-c", "python MQTT_Motiondetektor.py  -b ${IP_Brocker} -c ${Client_Name}"]
-CMD python MQTT_Klatschschalter.py  -b ${IP_Brocker} -c ${Client_Name} -a ${API_Conn}
+CMD python MQTT_Klatschschalter.py  -b ${IP_Brocker} -c ${Client_Name}

@@ -7,8 +7,6 @@ import json
 import threading
 import time
 
-# Zusatzfunktion
-from http.client import HTTPConnection
 from signal import SIGABRT, SIGINT, SIGTERM, signal
 from urllib.parse import urlparse
 import paho.mqtt.client as paho
@@ -20,12 +18,9 @@ import paho.mqtt.client as paho
 # DefaultMQTTUser = "<mqtt user"
 from Security.MQTT import DefaultMQTTUser, DefaultMQTTPassword
 
-debug = False
+debug = True
 lamps = [1, 2, 3]
 scenes = ["Wohnen1", "Wohnen2", "Jump"]
-# Zusatzfunktion - Status Alarm
-conn = HTTPConnection("127.0.0.1:81")
-header_data = {"Content-Type": "application/json"}
 
 threadactive = False
 klatsch_klatsch = 0
@@ -34,6 +29,8 @@ sceneindex = 0
 anyLamp = False
 anyRequest = json.dumps({"any": "on"})
 client_id = ""
+auto_alarm = 2
+auto_alarm_light = ['56000', '25500', '46920']
 
 
 def background_wait():
@@ -60,25 +57,28 @@ def background_wait():
 
 
 def alarm():
-    try:
-        conn.connect()
-        conn.request(method="GET", url="/api/alarmstatus", headers=header_data)
-        r1 = conn.getresponse()
-        returnmessage = json.load(r1)
-        conn.close()
-
-        if returnmessage["Alarm-Eingeschaltet"]["AUTO"]:
-            print(returnmessage["Alarm-Eingeschaltet"]["AUTO"], flush=True)
-            mqttc.publish("hue/alarm/1", "25500")
-        else:
-            mqttc.publish("hue/alarm/1", "56000")
-    except Exception as err:
-        if debug:
-            print(err, flush=True)
-        mqttc.publish("hue/alarm/1", "46920")
-
+    global auto_alarm, auto_alarm_light
+    mqttc.publish("hue/alarm/1",
+                  auto_alarm_light[auto_alarm])
     time.sleep(5)
     mqttc.publish("hue/lamp/1", "off")
+
+
+def manage_alarm(mosq, obj, msg):
+    global auto_alarm
+    if debug:
+        print(
+            "Message received (manage_alarm): "
+            + msg.topic
+            + ", QoS = "
+            + str(msg.qos)
+            + ", Payload = "
+            + msg.payload.decode(),
+            flush=True,
+        )
+
+    if msg.payload.decode() == "False" or msg.payload.decode() == "True":
+        auto_alarm = int(msg.payload.decode() == "True")
 
 
 def on_connect(mosq, obj, flags, rc):
@@ -93,6 +93,7 @@ def on_connect(mosq, obj, flags, rc):
 
     mqttc.subscribe("hue/any", 2)
     mqttc.subscribe("klatsch/wohnzimmer/detected", 2)
+    mqttc.subscribe("alarm/auto/motion", 2)
 
 
 def on_disconnect(mosq, obj, rc):
@@ -102,7 +103,7 @@ def on_disconnect(mosq, obj, rc):
 
 
 def on_message(mosq, obj, msg):
-    global sceneindex, lampindex, klatsch_klatsch
+    global sceneindex, lampindex, klatsch_klatsch, auto_alarm, auto_alarm_light
     if debug:
         print(
             "Message received (on_message): "
@@ -115,7 +116,6 @@ def on_message(mosq, obj, msg):
         )
 
     if msg.topic == "hue/any":
-        klatsch_klatsch = 0
         anyLamp = msg.payload.decode() == "True"
 
         if klatsch_klatsch >= 3 and anyLamp:
@@ -125,6 +125,8 @@ def on_message(mosq, obj, msg):
         if klatsch_klatsch >= 3 and not anyLamp:
             thread = threading.Thread(target=alarm)
             thread.start()
+
+        klatsch_klatsch = 0
 
 
 def klatsch_detected(mosq, obj, msg):
@@ -220,24 +222,17 @@ if __name__ == "__main__":
         dest="timeout",
         default=3,
     )
-    parser.add_argument(
-        "-a",
-        "--api",
-        help="IP:PORT für die Abfrage des Autoalarmanlagenstatus",
-        dest="conn",
-        default="127.0.0.1:81",
-    )
     args = parser.parse_args()
     options = vars(args)
     for sig in (SIGABRT, SIGINT, SIGTERM):
         signal(sig, cleanup)
     timeout = int(options["timeout"])
     client_id = options["clientID"]
-    conn = HTTPConnection(options["conn"])
     mqttc = paho.Client(client_id=client_id, clean_session=True)
     # Assign event callbacks
     mqttc.on_message = on_message
     mqttc.message_callback_add("klatsch/wohnzimmer/detected", klatsch_detected)
+    mqttc.message_callback_add("alarm/auto/motion", manage_alarm)
     mqttc.on_connect = on_connect
     mqttc.on_disconnect = on_disconnect
     #   mqttc.on_publish = on_publish
