@@ -7,7 +7,7 @@ from flask_ask import (Ask, context, convert_errors, question, request,
 from Security.MQTT import DefaultMQTTUser, DefaultMQTTPassword
 
 app = Flask(__name__)
-ask = Ask(app, "/")
+ask = Ask(app, "/wsgi/alexa/")
 log = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 

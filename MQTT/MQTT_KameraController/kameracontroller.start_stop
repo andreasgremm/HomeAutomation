@@ -1,6 +1,9 @@
 [Unit]
 Description=MQTT Kamera Controller
 
+After=docker.service
+Requires=docker.service
+
 [Service]
 Type=simple
 ExecStart=/home/pi/MQTT/MQTT_KameraController/pythonenv/bin/python3 /home/pi/MQTT/MQTT_KameraController/MQTT_KameraController.py

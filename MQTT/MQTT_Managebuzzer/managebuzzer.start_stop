@@ -1,6 +1,9 @@
 [Unit]
 Description=MQTT Manage Buzzer Service
 
+After=docker.service
+Requires=docker.service
+
 [Service]
 Type=simple
 ExecStart=/home/pi/MQTT/MQTT_Managebuzzer/pythonenv/bin/python3 /home/pi/MQTT/MQTT_Managebuzzer/MQTT_Managebuzzer.py
