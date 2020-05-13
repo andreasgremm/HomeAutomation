@@ -217,13 +217,18 @@ create retention policy "four_weeks" on "homeautomation" duration 260w replicati
 ```
 
 Folgende "kontinuierlichen Abfragen" werden definiert um automatisiert die Mittelwerte einer 30 Minuten Periode dann dauerhaft abzuspeichern.
+Da "kontinuierliche Abfragen" nur auf "Live-Werte" definiert sind, werden bei der Migration für die Füllung der "five_years" Retention die gleichen Queries verwendet. Also beispielsweise:
+
+```
+SELECT mean("light") AS "m_light"  INTO "five_years"."M_Helligkeit" FROM "four_weeks"."Helligkeit" GROUP BY time(30m), room
 ```
 
-CREATE CONTINUOUS QUERY "cq_30m_Helligkeit" ON "homeautomation" BEGIN SELECT mean("light") AS "mean_light"  INTO "five_years"."mean_light" FROM "Helligkeit" GROUP BY time(30m), room END
+```
+CREATE CONTINUOUS QUERY "cq_30m_Helligkeit" ON "homeautomation" BEGIN SELECT mean("light") AS "m_light"  INTO "five_years"."M_Helligkeit" FROM "four_weeks"."Helligkeit" GROUP BY time(30m), room END
 
-CREATE CONTINUOUS QUERY "cq_30m_Temperatur" ON "homeautomation" BEGIN SELECT mean("temperatur") AS "mean_temperatur"  INTO "five_years"."mean_temperatur" FROM "Temperatur" GROUP BY time(30m), room END
+CREATE CONTINUOUS QUERY "cq_30m_Temperatur" ON "homeautomation" BEGIN SELECT mean("temperatur") AS "m_temperatur"  INTO "five_years"."M_Temperatur" FROM "four_weeks"."Temperatur" GROUP BY time(30m), room END
 
-CREATE CONTINUOUS QUERY "cq_30m_Temperatur_Nativ" ON "homeautomation" BEGIN SELECT mean("temperatur_n") AS "mean_temperatur_n"  INTO "five_years"."mean_temperatur_n" FROM "Temperatur_nativ" GROUP BY time(30m), room END
+CREATE CONTINUOUS QUERY "cq_30m_Temperatur_Nativ" ON "homeautomation" BEGIN SELECT mean("temperatur_n") AS "m_temperatur_n"  INTO "five_years"."M_Temperatur_nativ" FROM "four_weeks"."Temperatur_nativ" GROUP BY time(30m), room END
 
 ```
 

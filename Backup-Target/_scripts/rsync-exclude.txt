@@ -8,10 +8,10 @@
 /lib/*
 /bin/*
 /sbin/*
+/var/cache*
 /var/swap
 /var/lib/apt*
 /var/lib/dpkg*
-/var/lib/cache*
 /var/lib/containerd*
 /var/lib/docker*
 /var/tmp/*
