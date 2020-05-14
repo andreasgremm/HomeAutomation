@@ -64,3 +64,20 @@ location /grafana/ {
     ....
 }
 ```
+
+## Fehler : Database locked
+Es werden für diverse Grafana Versionen über "database locked"-Fehler berichtet.
+
+Eine Korrekturmöglichkeit ist die SqLite-DB auf den **journal_mode=WAL** zu setzen.
+Hierzu muss Sqlite3 installiert und der Journal-Mode gesetzt werden:
+
+```
+apt-get update
+apt-get install sqlite3
+docker stop grafana
+cp <Grafana.db> <Grafana.db>.backup
+sqlite3 <Grafana.db>
+PRAGMA journal_mode=WAL;
+.exit
+docker start grafana
+```

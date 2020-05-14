@@ -14,7 +14,7 @@ ENV IP_Brocker=$buildtime_IP_Brocker
 ARG buildtime_Client_Name="MQTT_Data2InfluxDB"
 ENV Client_Name=$buildtime_Client_Name
 
-ARG buildtime_InfluxDB_Host="localhost"
+ARG buildtime_InfluxDB_Host="192.168.1.237"
 ENV InfluxDB_Host=$buildtime_InfluxDB_Host
 
 RUN useradd --create-home appuser

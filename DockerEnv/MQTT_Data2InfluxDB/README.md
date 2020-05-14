@@ -138,7 +138,7 @@ IP Adresse des Brockers, InfluxDB und/oder Client-Name können auch zur Laufzeit
 ```
 docker run -d  \
   --name=data2influxdb -e "IP_Brocker=<IP.Adresse" -e "Client_Name=<Client-Name>" \
-  -e "InfluxDB_Host=<InfluxDB Host> \
+  -e "InfluxDB_Host=<InfluxDB Host>" \
   --mount source=non-git-local-includes,destination=/non-git-local-includes,readonly \
   --restart unless-stopped \
   data2influxdb:prod
