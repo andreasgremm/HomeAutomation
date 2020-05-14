@@ -20,7 +20,7 @@ from Security.MQTT import DefaultMQTTPassword, DefaultMQTTUser
 client_id = ""
 influxdb_config = {}
 tr = {"auto": "AUTO", "wohnzimmer": "Wohnzimmer"}
-debug = True
+debug = False
 
 
 def write2DB(measurement, tags, timestamp, fields, retention_policy=None):
@@ -62,7 +62,7 @@ def on_connect(mosq, obj, flags, rc):
         [
             ("temperatur/+", 2),
             ("licht/+", 2),
-            ("rssi//+", 2),
+            ("rssi/+", 2),
             ("spannung/+", 2),
             ("temperatur_n/+", 2),
             ("alarm/+/motion", 2),
@@ -144,11 +144,11 @@ def manage_temperatur(mosq, obj, msg):
             flush=True,
         )
 
-        fields = {"temperatur": float(msg.payload.decode())}
-        tags = {"room": tr[msg.topic.split("/")[1]]}
-        write2DB(
-            "Temperatur", tags, datetime.datetime.utcnow().isoformat(), fields
-        )
+    fields = {"temperatur": float(msg.payload.decode())}
+    tags = {"room": tr[msg.topic.split("/")[1]]}
+    write2DB(
+        "Temperatur", tags, datetime.datetime.utcnow().isoformat(), fields
+    )
 
 
 def manage_temperatur_n(mosq, obj, msg):
