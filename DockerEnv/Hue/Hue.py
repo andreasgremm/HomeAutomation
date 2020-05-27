@@ -22,14 +22,15 @@ class Hue(object):
         self.__context = ssl.create_default_context()
         self.__context.load_verify_locations(cafile=certifi.where())
         try:
-            nupnp = HTTPSConnection("www.meethue.com",
+            nupnp = HTTPSConnection("discovery.meethue.com",
                                     context=self.__context
                                     )
             nupnp.connect()
-            nupnp.request(method="GET", url="/api/nupnp")
+            nupnp.request(method="GET", url="/")
             r1 = nupnp.getresponse()
             answer = json.loads(r1.read().decode())
             self.__controller = answer[0]["internalipaddress"]
+            print(answer[0]["internalipaddress"])
         except Exception as info:
             print(info)
             self.__controller = controller

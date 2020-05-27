@@ -35,6 +35,20 @@ Danach den Raspberry booten. ``` sudo reboot```.
 
 Nach dem Reboot testen, ob der SSH Zugang ```ssh pi@<eingestellter hostname>.local```funktionert.
 
+## AVAHI Daemon
+Folgende Einträge in /etc/avahi/services/ssh.service ermöglichen das "lokale Browsen" des SSH-Service über mDNS. (z.B: dns-sd -B _ssh)
+
+
+```
+<service-group>
+   <name replace-wildcards="yes">%h</name>
+   <service>
+      <type>_ssh._tcp</type>
+      <port>22</port>
+   </service>
+</service-group>
+```
+
 ## SWAP vergrößern
 Die Default-Einstellungen für SWAP sind nur 100MB, durch die Änderungen der Swap-Konfigurationsdatei **/etc/dphys-swapfile** setzen wir die doppelte Memorygröße als Swap-Size:
 
