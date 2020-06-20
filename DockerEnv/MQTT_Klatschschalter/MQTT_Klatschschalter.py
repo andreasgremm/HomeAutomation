@@ -26,6 +26,7 @@ threadactive = False
 klatsch_klatsch = 0
 lampindex = 0
 sceneindex = 0
+timeout = 3
 anyLamp = False
 anyRequest = json.dumps({"any": "on"})
 client_id = ""
@@ -34,7 +35,7 @@ auto_alarm_light = ['56000', '25500', '46920']
 
 
 def background_wait():
-    global sceneindex, lampindex, threadactive, klatsch_klatsch
+    global sceneindex, lampindex, threadactive, klatsch_klatsch, timeout
     if debug:
         print("background_wait started", flush=True)
     time.sleep(timeout)
