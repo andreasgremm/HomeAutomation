@@ -30,7 +30,7 @@
     Programm erhalten haben. Wenn nicht, siehe <http://www.gnu.org/licenses/>.
 */
 
-//#define WLANON
+#define WLANON
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -79,6 +79,7 @@ byte mySSID;
 byte mac[6];
 String smac;
 
+boolean wlanactive = false;
 char theOutput[80];
 
 Ticker inputTimer;
@@ -128,8 +129,10 @@ void setup(void){
 #endif
 
 #ifdef WLANON
-  WiFi.mode(WIFI_STA);
+  wlanactive = true;
   WiFi.disconnect();
+  WiFi.mode(WIFI_STA);
+
   delay(100);
   while (!networkConnected) {
     int n = WiFi.scanNetworks();
@@ -161,6 +164,7 @@ void setup(void){
   httpServer.on("/", handleRoot);
   httpServer.on("/status",handleStatus);
   httpServer.on("/DEFAULTANZAHL",handleDefaultAnzahl);
+  httpServer.on("/WIFIOFF",handleWifiOff);
   httpServer.begin();
 
   if (MDNS.begin(host)) {
@@ -184,10 +188,11 @@ void setup(void){
 
 void loop(void){
   delay(10);
+  //Serial.print(".");
   
-#ifdef WLANON
+  if (wlanactive) {
 // Allow MDNS processing
- MDNS.update();
+   MDNS.update();
 
 /*  if(!mqtt.connected()) {
     Serial.println("MQTT connection lost.");
@@ -196,9 +201,12 @@ void loop(void){
   }
 */
 
-  httpServer.handleClient();
+    httpServer.handleClient();
+    if (!wlanactive){
+      WiFi.mode(WIFI_OFF);
+    }
 //  mqtt.loop();
-#endif
+  }
 
   if (numberOfKlatsch>defaultAnzahl){
     time_t tnow = time(nullptr);
@@ -255,24 +263,33 @@ void handleRoot() {
   time_t tnow = time(nullptr);
   String message = "<html><head><title>Klingeldetektor</title></head><body>\
 <h4>Uhrzeit: " + String(ctime(&tnow)) + "</h4>\
-<a href='/status'>Status</a><br />\
-<a href='/update'>Update</a><br />\
 <form action='/DEFAULTANZAHL' method='post'>\
-Ausl&ouml;sung durch Anzahl Signale: <input type='number' min='1' max='12' name='Anzahl' value='"+String(defaultAnzahl)+"' >\
+Ausl&ouml;sung durch Anzahl Signale: <input type='number' min='1' max='20' name='Anzahl' value='"+String(defaultAnzahl)+"' >\
 <input type='submit' value='Default setzen'>\
 </form><br />\
+<a href='/status'>Status</a><br />\
+<a href='/update'>Update</a><br />\
 </body></html>";
 
   httpServer.send(200, "text/html", message);
 }
 
 void handleStatus() {
-  String theStatus = "<html><head></head><body>Verbunden mit: <b>" + String(ssid[mySSID]) + "</b><br />\
-MAC-Adresse: <b>" + smac + "</b><br />\
-IP-Adresse: <b>" + ipToString(WiFi.localIP()) + "</b><br />\
-Subnet Mask: <b>" + ipToString(WiFi.subnetMask()) + "</b><br />\
-Gateway-IP: <b>" + ipToString(WiFi.gatewayIP()) + "</b><br />\
-<a href='/'>Startseite</a></body></html>";
+  String theStatus = "<html><head><style>table, th, td {border: 1px solid black;}</style>\
+<title>Klingel Detektor</title></head><body>Verbunden mit: <b>" + String(ssid[mySSID]) + "</b><br />\
+<table><caption>Network Attributes</caption><tr><th>Attribut</th><th>Wert</th></tr>\
+<tr><td>MAC-Adresse</td><td><b>" + smac + "</b></td></tr>\
+<tr><td>IP-Adresse</td><td><b>" + ipToString(WiFi.localIP()) + "</b></td></tr>\
+<tr><td>Subnet Mask</td><td><b>" + ipToString(WiFi.subnetMask()) + "</b></td></tr>\
+<tr><td>Gateway-IP</td><td><b>" + ipToString(WiFi.gatewayIP()) + "</b></td></tr>\
+</table><br />\
+<a href='/'>Startseite</a><br />\
+<form action='/WIFIOFF' method='post'>\
+  <input type='checkbox' id='wifi' name='wifi' value='off'>\
+  <label for='wifi'>WLAN ausschalten</label><br>\
+  <input type='submit' value='Submit'>\
+</form>\
+</body></html>";
   httpServer.send(200, "text/html", theStatus);
 }
 
@@ -298,6 +315,22 @@ void handleDefaultAnzahl() {
   }
 }
 
+void handleWifiOff() {
+  char theStatus[180];
+  if (httpServer.args()>0) {
+    for ( uint8_t i = 0; i < httpServer.args(); i++ ) {
+      Serial.print(httpServer.argName(i));
+      Serial.print(" ");
+      Serial.println(httpServer.arg(i));
+      if (httpServer.argName(i) == "wifi") {
+         // do something here with value from server.arg(i);
+         wlanactive = !(httpServer.arg(i) == "off");
+      }
+   }
+  }
+  sprintf(theStatus, "<html><head></head><body>Wifi: %i <br /><a href='/'>Startseite</a></body></html>", wlanactive);
+  httpServer.send(200, "text/html", theStatus);
+}
 String ipToString(IPAddress ip){
   String s="";
   for (int i=0; i<4; i++)
@@ -343,4 +376,3 @@ String macToString(byte mac[6]){
     }
   }
 }*/
-
