@@ -19,17 +19,28 @@ komplett.add_NativeTemp("csvs/grafana_Temperatur-nativ.csv")
 X = august.get_X()
 y = august.get_y()
 la1 = linearAnalyst(X, y, "August")
-print(la1.predict([[20.947368, 135.000000]]))
+rt = 21.567669
+print("Real Temperatur:", rt)
+p1 = la1.predict([[20.947368, 135.000000]])
+d1 = [abs(i-rt) for i in p1]
+print(p1)
+print(d1)
 
 X1 = oktober.get_X()
 y1 = oktober.get_y()
 la2 = linearAnalyst(X1, y1, "Oktober")
-print(la2.predict([[20.947368, 135.000000]]))
+p2 = la2.predict([[20.947368, 135.000000]])
+d2 = [abs(i-rt) for i in p2]
+print(p2)
+print(d2)
 
 X2 = komplett.get_X()
 y2 = komplett.get_y()
 la3 = linearAnalyst(X2, y2, "Komplett")
-print(la3.predict([[20.947368, 135.000000]]))
+p3 = la3.predict([[20.947368, 135.000000]])
+d3 = [abs(i-rt) for i in p3]
+print(p3)
+print(d3)
 
 Xn = komplett.get_Xn()
 yn = komplett.get_yn()

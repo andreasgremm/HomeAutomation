@@ -1,11 +1,16 @@
 # Lineare Regression mit SKLEARN und PyTorch
 Im Rahmen der Home-Automation steht ein Temperatursensor in einem Gehäuse direkt am Fenster.
-Durch die Sonneneinstrahlung findet eine zusätzliche Temperaturerhöhung innerhalb des Gehäuses statt. Die vorhandene Gehäuselüftung (passiv durch Öffnungen im Gehäuse) vermag diese jedoch nicht auszugleichen.
+Durch die Sonneneinstrahlung findet eine zusätzliche Temperaturerhöhung innerhalb des Gehäuses statt. Die vorhandene Gehäuselüftung (passiv durch Öffnungen im Gehäuse) vermag diese jedoch nicht vollständig auszugleichen.
 
 Die Idee ist nun durch eine zweite Messung während eines bestimmten Zeitraums mit einem etwas abgesetzten Temperatursensor, der nicht der direkten Sonneneinstrahlung unterliegt, reale Vergleichswerte zu bekommen.
 Diese Messung habe ich mit der **Auto**-Alarmanlage durchgeführt, die während dieser Zeit eben nicht mehr im Auto platziert war und aufgrund der nativen Alarmanlage im Auto auch dort nicht mehr benötigt wird.
 
+Ein Ausschnitt aus dem August zeigt den Effekt sehr anschaulich:
+
+![](screenshots/Bildschirmfoto%202020-11-03%20um%2010.31.58.png)
+
 Über eine Lineare Regression müsste die reale Temperatur vorhersagbar sein.
+Diese reale Temperatur ist von den Variablen Helligkeit und gemessene Temperatur abhängig. Dieses sind die unten beschriebenen "X"-Werte, die "y"-Werte sind die gemessenen Temperatur-Vergleichswerte (ohne Sonneneinstrahlung). 
 
 Seit Mai 2020 ist der Vergleichsmechanismus platziert und die Daten sind in die Home-Automation integriert.
 
@@ -65,11 +70,11 @@ komplett.add_NativeTemp("csvs/grafana_Temperatur-nativ.csv")
 ```
 
 ## Lineare Regression mit SKLEARN
-SKLEARN hat mehrere Regressoren, für dieses Beispiel nutze ich den Multilinearen Regressor und den RANSAC Regressor um Vergleichswerte zu bekommen.
+[SKLEARN](https://scikit-learn.org/stable/modules/linear_model.html#multi-task-elastic-net) hat mehrere Regressoren, für dieses Beispiel nutze ich den Multilinearen Regressor und den RANSAC Regressor um Vergleichswerte zu bekommen.
 
-Die Funktionalitätne sind in der Datei **Linear_Analyst.py** in der Klasse ***linearAnalyst*** zusammengefasst.
+Die Funktionalitäten sind in der Datei **Linear_Analyst.py** in der Klasse ***linearAnalyst*** zusammengefasst.
 
-Die Regressionen lassen sich damit relativ einfach aufrufen:
+Die Regressionen lassen sich damit folgendermaßen aufrufen:
 
 ```
 X = august.get_X()
@@ -96,6 +101,10 @@ print(df)
 linearAnalyst.write_Excel("test.xlsx")
 ```
 
-Das Zusatzfeature die ermittelten Werte in eine Excel-Liste auszugeben, ermöglicht die Übersicht und den Vergleich der Werte:
+Das Zusatzfeature, die ermittelten Werte in eine Excel-Liste auszugeben, ermöglicht die Übersicht und den Vergleich der Werte:
 
 ![](screenshots/Bildschirmfoto%202020-11-02%20um%2019.09.36.png)
+
+### Pandas DataFrame 
+[Datums-Selektion](https://stackoverflow.com/questions/29370057/select-dataframe-rows-between-two-dates) 
+

@@ -3,3 +3,4 @@
 pythonenv
 __pycache__
 *.pyc
+*.csv

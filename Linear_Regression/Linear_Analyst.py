@@ -35,6 +35,11 @@ class linearAnalyst(object):
         self.ransac = linear_model.RANSACRegressor()
         self.ransac.fit(X, y)
         self.__ransacScore = self.ransac.score(X, y)
+        self.bayesianridge = linear_model.BayesianRidge()
+        self.bayesianridge.fit(X, y.values.ravel())
+        self.__bayesianridgeScore = self.bayesianridge.score(
+            X, y.values.ravel()
+        )
         if name:
             linearAnalyst.__linearAnalystNames.append(name)
             linearAnalyst.__linearAnalystValues.append(self.valuesJson)
@@ -47,9 +52,13 @@ class linearAnalyst(object):
             ransacScore=self.__ransacScore,
             ransacCoef=self.ransac.estimator_.coef_,
             ransacIntercept=self.ransac.estimator_.intercept_,
+            bayesianRidgeScore=self.__bayesianridgeScore,
+            bayesianRidgeCoef=self.bayesianridge.coef_,
+            bayesianRidgeIntercept=self.bayesianridge.intercept_,
         )
 
     def predict(self, P):
         p1 = self.regr.predict(P)
         p2 = self.ransac.predict(P)
-        return (p1, p2)
+        p3 = self.bayesianridge.predict(P)
+        return (p1, p2, p3)
