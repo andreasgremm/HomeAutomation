@@ -1,6 +1,5 @@
-import matplotlib.pyplot as plt
-import pandas as pd
-from sklearn import linear_model
+# import matplotlib.pyplot as plt
+
 from Linear_Analyst import linearAnalyst
 from Prepare_Light_Temp_Data import prepareLightTempData
 
