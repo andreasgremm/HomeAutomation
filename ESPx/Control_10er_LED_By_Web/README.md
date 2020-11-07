@@ -47,7 +47,8 @@ Wir haben dieses dann auch noch einprogrammiert.
 
 **Die minimalistische Webseite:**
 ![](screenshots/Bildschirmfoto%202020-11-07%20um%2011.06.51.png)
-##Zusammenfassung
+
+## Zusammenfassung
 Es ist doch immer wieder interessant zu sehen, wie sich spielerisch eine Anfangsidee weiterentwickelt.
 
 Nach einem Redesign auf heutige Verhältnisse würde das Konstrukt beispielsweise aus einem ESP8266 und Neopixel bestehen. Oder vielleicht ein ESP32 mit Bluetooth Steuerung statt WLAN ... oder .. 
