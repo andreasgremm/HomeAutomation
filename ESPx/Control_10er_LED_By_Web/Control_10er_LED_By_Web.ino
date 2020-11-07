@@ -1,6 +1,8 @@
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <time.h>
 // Remove this include which sets the below constants to my own conveniance
 #include </Users/andreas/Documents/git-github/non-git-local-includes/Control_10er_LED_By_Web.h>
 
@@ -8,6 +10,7 @@
 const char* ssid = "<ssid>";
 const char* password = "<password for ssid>";
  */
+const char* host = "wuerfel";
 
 int countPin = D7; // GPIO13
 int resetPin = D6; // GPIO12
@@ -17,8 +20,8 @@ int tempPin = D5; // GPIO14
 int flashPin = D3; // GPIO16
 int internalLED = D4; // GPIO2
 
-int wuerfel;
-int randval;
+int wuerfel = -1;
+int randval = -1;
 int volatile activate;
 int volatile showtemp=LOW;
 
@@ -78,6 +81,15 @@ void setup() {
   Serial.println("");
   Serial.println("WiFi connected");
 
+  if (MDNS.begin(host)) {
+       MDNS.addService("http", "tcp", 80);
+    }
+    else {
+       Serial.println("Error setting up MDNS responder!");
+    };
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 0);
+ 
   // Start the server
   server.begin();
   Serial.println("Server started");
@@ -97,6 +109,7 @@ void loop() {
     // save time
     previousMillis = currentMillis;
     temperature = getTemperature();
+    MDNS.update();
   }
 
   if (timerSet && (abs(currentMillis - timerBaseMillis) >= timerValue)) {
@@ -144,6 +157,7 @@ void loop() {
 
   // Match the request
   if (request.indexOf("/ACTIVATE=ON") != -1)  {
+    activate=softreset(HIGH);
     digitalWrite(activatePin, LOW);
     activate = LOW;
   }
@@ -182,11 +196,15 @@ void loop() {
   if (request.indexOf("/WUERFEL") != -1)  {
     activate = hardreset(HIGH);
     wuerfel = random(0,6);
+    Serial.print("Würfel: ");
+    Serial.println(wuerfel+1);
     count(wuerfel);
   }
   if (request.indexOf("/RANDOM") != -1)  {
     activate = hardreset(HIGH);
     randval = random(0,100);
+    Serial.print("Random: ");
+    Serial.println(randval+1);
     count(randval);
   }
   if (request.indexOf("/SHOWTEMP") != -1)  {
@@ -200,6 +218,10 @@ void loop() {
   client.println(""); //  do not forget this one
   client.println("<!DOCTYPE HTML>");
   client.println("<html>");
+  time_t tnow = time(nullptr);
+  client.print("Die Uhrzeit betr&auml;gt: ");
+  client.print(String(ctime(&tnow)));
+  client.println("<br><br>");
   client.print("Die Temperatur betr&auml;gt: ");
   client.print("<a href=\"/SHOWTEMP\"\"><button>");
   client.print(temperature);
@@ -214,15 +236,15 @@ void loop() {
   }
   client.println("<br><br>");
 
-  client.println("<a href=\"/ACTIVATE=ON\"\"><button>Turn On </button></a>");
-  client.println("<a href=\"/ACTIVATE=OFF\"\"><button>Turn Off </button></a><br />");
+  client.println("<a href='/ACTIVATE=ON'><button>Turn On </button></a>");
+  client.println("<a href='/ACTIVATE=OFF'><button>Turn Off </button></a><br />");
   client.println("<br><br>");
-  client.println("<a href=\"/WUERFEL\"\"><button>W&uuml;rfel </button></a><br />");
+  client.println("<a href='/WUERFEL'><button>W&uuml;rfel</button></a> ( "+String(wuerfel+1)+" )<br />");
   client.println("<br><br>");
-  client.println("<a href=\"/RANDOM\"\"><button>Random 1-99</button></a><br />");
+  client.println("<a href='/RANDOM'><button>Random (1-99)</button></a> ( "+String(randval+1)+" )<br />");
   client.println("<br><br>");
-  client.println("<a href=\"/RESET\"\"><button>Reset </button></a><br />");
-
+  client.println("<a href='/RESET'><button>Reset </button></a><br />");
+  client.println("<br><br>");
   client.println("<form action='/TIMER' method='get'>");
   client.println("Zeit in Minuten:");
   client.println("<input type='number' name='quantity' value='0' >");
@@ -237,12 +259,12 @@ void loop() {
 
 }
 
-void interruptCallback() {
+ICACHE_RAM_ATTR void interruptCallback() {
   Serial.println("manuelle Übernahme");
   activate=softreset(HIGH);
 }
 
-void startTempCallback() {
+ICACHE_RAM_ATTR void startTempCallback() {
   Serial.println("manuelle Temperaturanzeige");
   activate = hardreset(showtemp);
   showtemp=HIGH;
@@ -270,6 +292,8 @@ int softreset(uint8_t resetShowtemp){
   digitalWrite(countPin, HIGH);
   digitalWrite(activatePin, HIGH);
   digitalWrite(internalLED, LOW);
+  wuerfel = -1;
+  randval = -1;
   timerSet = false;
 
   if (resetShowtemp) {
