@@ -84,6 +84,16 @@ byte mac[6];
 String smac;
 char theOutput[80];
 
+int sleeptime_hour = 20;
+int sleeptime_min  = 30;
+int waketime_hour = 8;
+int waketime_min  = 30;
+struct tm * timeinfo;
+
+time_t tnow;
+int sleep, wake, actual;
+volatile bool detectactive = true;
+
 
 Ticker inputTimer;
 
@@ -194,6 +204,9 @@ void setup(void){
   timer1_attachInterrupt(handleTicker);
   timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE);
 
+  sleep = sleeptime_hour * 3600 + sleeptime_min * 60;
+  wake  = waketime_hour * 3600 + waketime_min * 60;
+
   Serial.println("Up and running!");
 }
 
@@ -224,12 +237,14 @@ void loop(void){
   }
 
   if (numberOfKlatsch>defaultAnzahl){
-    // time_t tnow = time(nullptr);
     // Serial.print(String(ctime(&tnow)));
     // sprintf(theOutput, " Number of Klatsch: %d",numberOfKlatsch);
     // Serial.println(theOutput);
+    calculateactive();
     anzausloeser++;
-    doklingel();
+    if (detectactive) {
+      doklingel();
+    }
     numberOfKlatsch=0;
   }
 
@@ -246,6 +261,17 @@ void loop(void){
     // Serial.println(theOutput);
 
   }
+}
+
+void calculateactive() {
+    tnow = time(nullptr);
+    timeinfo = localtime(&tnow);
+    actual = timeinfo->tm_hour * 3600 + timeinfo->tm_min * 60;
+    // detectactive berechnen wenn die timeinfo korrekt ist (Initialjahr = 1970)
+    if (timeinfo->tm_year > 70) {
+      detectactive = actual > wake and actual < sleep;
+    }
+
 }
 
 void doklingel() {
@@ -303,15 +329,22 @@ void wificonnect(const char * ssid, const char * password) {
 
 void handleRoot() {
   time_t tnow = time(nullptr);
-  String message = "<html><head><title>Klingeldetektor</title></head><body>\
+  calculateactive();
+  String detectactivestring = detectactive?"AKTIV":"NICHT AKTIV";
+  String message = "<html><head><style>\
+.button {background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;\
+display: inline-block;font-size: 16px;margin: 4px 2px;cursor: pointer;}</style><title>Klingeldetektor</title></head><body>\
  <h4>Uhrzeit: " + String(ctime(&tnow)) + "</h4>\
+ Reaktion auf Klingeln aktiv zwischen\
+ " + String(waketime_hour) + ":" + String(waketime_min) + " und\
+ " + String(sleeptime_hour) + ":" + String(sleeptime_min) +" : " + detectactivestring + "<br />\
  Anzahl Ausl&ouml;ser : " + String(anzausloeser) + "&nbsp;<a href='/set0'>Zur&uuml;cksetzen</a><br /><br />\
  Gong Nummer : " + String(gongNummer+1) + "&nbsp;<a href='/nextgong'>N&auml;chster Gong</a><br /><br />\
 <form action='/DEFAULTANZAHL' method='post'>\
 Ausl&ouml;sung durch Anzahl Signale: <input type='number' min='1' max='20' name='Anzahl' value='"+String(defaultAnzahl)+"' >\
 <input type='submit' value='Default setzen'>\
 </form><br /><br />\
-<a href='/klingel'><button>KLINGEL</button></a><br /><br />\
+<a href='/klingel'><button class='button'>KLINGEL</button></a><br /><br />\
 <a href='/status'>Status</a><br />\
 <a href='/update'>Update</a><br />\
 </body></html>";
