@@ -33,7 +33,7 @@
 #define WLANON
 
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h>
+// #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
@@ -42,10 +42,12 @@
 #include <Ticker.h>  //Ticker Library
 #include <EEPROM.h>
 #include <time.h>
- 
+
 #define LED 2
 #define internalLED 16 //On board LED
 #define KLINGEL D6
+#define FLASHPIN D3 // GPIO16
+#define GONGTYP D1 //GPIO5
 
 // Remove this include which sets the below constants to my own conveniance
 #include </Users/andreas/Documents/git-github/non-git-local-includes/ESP8266_klingeldetektor.h>
@@ -63,38 +65,36 @@ const char* mqttClientId = "MQTT Client Name";
 */
 
 size_t anzSSID = sizeof(ssid) / sizeof(ssid[0]);
-
 const byte interruptPin = 13;
 
 volatile byte interruptCounter = 0;
-volatile int numberOfInterrupts = 0;
+volatile byte numberOfInterrupts = 0;
 volatile int numberOfKlatsch = 0;
-// volatile int maxKlatsch = 0;
+volatile boolean wlanactive = false;
+volatile int gongNummer=0;
+volatile long anzausloeser = 0;
 
 // long mqttConnectionLost = 0;
 const byte eepromInitialized = 100;
 byte defaultAnzahl=6;
+
 boolean networkConnected = false;
 byte mySSID;
 byte mac[6];
 String smac;
-
-boolean wlanactive = false;
 char theOutput[80];
+
 
 Ticker inputTimer;
 
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 
-WiFiClient wifi;
-//PubSubClient mqtt(wifi);
+// WiFiClient wifi;
+// PubSubClient mqtt(wifi);
 
 void ICACHE_RAM_ATTR handleInterrupt() {
   interruptCounter++;
-/*  time_t tnow = time(nullptr);
-  Serial.println(String(ctime(&tnow)));
-  */
 }
 
 void ICACHE_RAM_ATTR handleTicker() {
@@ -104,15 +104,23 @@ void ICACHE_RAM_ATTR handleTicker() {
   digitalWrite(LED, LOW);
 }
 
+void ICACHE_RAM_ATTR startWlan() {
+#ifdef WLANON
+  wlanactive = true;
+#endif
+}
+
 void setup(void){
   pinMode(interruptPin, INPUT);
   pinMode(KLINGEL, OUTPUT);
   digitalWrite(KLINGEL, LOW);
-
+  pinMode(GONGTYP, OUTPUT);
+  digitalWrite(GONGTYP, LOW);
+  pinMode(FLASHPIN, INPUT);
   pinMode(LED, OUTPUT);
   digitalWrite(LED,LOW);
   pinMode(internalLED, OUTPUT);
-  digitalWrite(internalLED,HIGH); 
+  digitalWrite(internalLED,HIGH);
   Serial.begin(115200);
   Serial.println();
   Serial.println("Booting Sketch...");
@@ -149,13 +157,13 @@ void setup(void){
           }
         }
       }
-    }    
+    }
   delay(1000);
 //  WiFi.printDiag(Serial);
   WiFi.macAddress(mac);
   smac = macToString(mac);
   }
-  
+
 //  mqtt.setServer(brocker, 1883);
 //  mqtt.setCallback(messageReceived);
 //  mqttconnect();
@@ -165,6 +173,9 @@ void setup(void){
   httpServer.on("/status",handleStatus);
   httpServer.on("/DEFAULTANZAHL",handleDefaultAnzahl);
   httpServer.on("/WIFIOFF",handleWifiOff);
+  httpServer.on("/klingel",handleKlingel);
+  httpServer.on("/set0",resetAusloeser);
+  httpServer.on("/nextgong",triggerGong);
   httpServer.begin();
 
   if (MDNS.begin(host)) {
@@ -176,9 +187,9 @@ void setup(void){
 
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
   setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 0);
-
 #endif
 
+  attachInterrupt(FLASHPIN, startWlan, FALLING);
   attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, RISING);
   timer1_attachInterrupt(handleTicker);
   timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE);
@@ -189,10 +200,14 @@ void setup(void){
 void loop(void){
   delay(10);
   //Serial.print(".");
-  
+
   if (wlanactive) {
+     if (WiFi.status() != WL_CONNECTED) {
+        wificonnect(ssid[mySSID], password[mySSID]);
+    }
+
 // Allow MDNS processing
-   MDNS.update();
+    MDNS.update();
 
 /*  if(!mqtt.connected()) {
     Serial.println("MQTT connection lost.");
@@ -209,16 +224,12 @@ void loop(void){
   }
 
   if (numberOfKlatsch>defaultAnzahl){
-    time_t tnow = time(nullptr);
-    Serial.print(String(ctime(&tnow)));
-    sprintf(theOutput, " Number of Klatsch: %d",numberOfKlatsch);
-    Serial.println(theOutput);
-    digitalWrite(internalLED, LOW);
-    digitalWrite(KLINGEL, HIGH); 
-    delay(10);
-    digitalWrite(KLINGEL, LOW);
-    digitalWrite(internalLED, HIGH);
-
+    // time_t tnow = time(nullptr);
+    // Serial.print(String(ctime(&tnow)));
+    // sprintf(theOutput, " Number of Klatsch: %d",numberOfKlatsch);
+    // Serial.println(theOutput);
+    anzausloeser++;
+    doklingel();
     numberOfKlatsch=0;
   }
 
@@ -231,22 +242,53 @@ void loop(void){
     }
     interruptCounter--;
     numberOfInterrupts++;
-    sprintf(theOutput, "An interrupt has occurred. Total: %d\n",numberOfInterrupts);
-    Serial.println(theOutput);
+    // sprintf(theOutput, "An interrupt has occurred. Total: %d, (%d)\n",numberOfInterrupts, interruptCounter);
+    // Serial.println(theOutput);
 
   }
+}
+
+void doklingel() {
+    digitalWrite(internalLED, LOW);
+    digitalWrite(KLINGEL, HIGH);
+    delay(10);
+    digitalWrite(KLINGEL, LOW);
+    digitalWrite(internalLED, HIGH);
+
+}
+
+void nextgong() {
+    digitalWrite(GONGTYP, HIGH);
+    delay(10);
+    // Serial.println(" GNv = "+String(gongNummer));
+    gongNummer = (gongNummer + 1) % 8;
+    // Serial.println(" GNn = "+String(gongNummer));
+    digitalWrite(GONGTYP, LOW);
 }
 
 void wificonnect(const char * ssid, const char * password) {
+  int wifi_retry = 0;
   while(WiFi.waitForConnectResult() != WL_CONNECTED){
+    Serial.println("WiFi not connected. Connecting...");
+    wifi_retry++;
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
-    Serial.print(".");
-    delay(500);
+    delay(100);
+
+    if(wifi_retry >= 5) {
+      Serial.println("\nReboot");
+      ESP.restart();
+    }
   }
+
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+
   Serial.println("\n WiFi connected!");
 }
+
 
 /*void mqttconnect() {
   while (!mqtt.connect(mqttClientId, mqttUser, mqttPass, "clientstatus/Klatschschalter-1",1,1,"OFFLINE")) {
@@ -262,11 +304,14 @@ void wificonnect(const char * ssid, const char * password) {
 void handleRoot() {
   time_t tnow = time(nullptr);
   String message = "<html><head><title>Klingeldetektor</title></head><body>\
-<h4>Uhrzeit: " + String(ctime(&tnow)) + "</h4>\
+ <h4>Uhrzeit: " + String(ctime(&tnow)) + "</h4>\
+ Anzahl Ausl&ouml;ser : " + String(anzausloeser) + "&nbsp;<a href='/set0'>Zur&uuml;cksetzen</a><br /><br />\
+ Gong Nummer : " + String(gongNummer+1) + "&nbsp;<a href='/nextgong'>N&auml;chster Gong</a><br /><br />\
 <form action='/DEFAULTANZAHL' method='post'>\
 Ausl&ouml;sung durch Anzahl Signale: <input type='number' min='1' max='20' name='Anzahl' value='"+String(defaultAnzahl)+"' >\
 <input type='submit' value='Default setzen'>\
-</form><br />\
+</form><br /><br />\
+<a href='/klingel'><button>KLINGEL</button></a><br /><br />\
 <a href='/status'>Status</a><br />\
 <a href='/update'>Update</a><br />\
 </body></html>";
@@ -293,6 +338,36 @@ void handleStatus() {
   httpServer.send(200, "text/html", theStatus);
 }
 
+void handleKlingel() {
+  String theStatus = "<html><head><style>table, th, td {border: 1px solid black;}</style>\
+<title>Klingel Detektor</title></head><body>\
+<h4>Klingel ausgel&ouml;st!</h4>\
+<a href='/'>Startseite</a><br />\
+</body></html>";
+  doklingel();
+  httpServer.send(200, "text/html", theStatus);
+}
+
+void triggerGong() {
+  String theStatus = "<html><head><style>table, th, td {border: 1px solid black;}</style>\
+<title>Klingel Detektor</title></head><body>\
+<h4>Gong weitergeschaltet!</h4>\
+<a href='/'>Startseite</a><br />\
+</body></html>";
+  nextgong();
+  httpServer.send(200, "text/html", theStatus);
+}
+
+void resetAusloeser() {
+  String theStatus = "<html><head><style>table, th, td {border: 1px solid black;}</style>\
+<title>Klingel Detektor</title></head><body>\
+<h4>Anzahl Ausl&ouml;ser zur&uuml;ckgesetzt!</h4>\
+<a href='/'>Startseite</a><br />\
+</body></html>";
+  anzausloeser = 0;
+  httpServer.send(200, "text/html", theStatus);
+}
+
 void handleDefaultAnzahl() {
   char theStatus[180];
   if (httpServer.args()>0) {
@@ -300,11 +375,11 @@ void handleDefaultAnzahl() {
       if (httpServer.argName(i) == "Anzahl") {
          // do something here with value from server.arg(i);
          defaultAnzahl=httpServer.arg(i).substring(0,2).toInt();
-         Serial.print("Default Anzahl from HTTP POST:");
-         Serial.print(" Byte: ");
-         Serial.print(defaultAnzahl);
-         Serial.print(" String: ");
-         Serial.println(httpServer.arg(i));
+         // Serial.print("Default Anzahl from HTTP POST:");
+         // Serial.print(" Byte: ");
+         // Serial.print(defaultAnzahl);
+         // Serial.print(" String: ");
+         // Serial.println(httpServer.arg(i));
          EEPROM.write(0, eepromInitialized);
          EEPROM.write(1,defaultAnzahl);
          EEPROM.commit();
@@ -319,9 +394,9 @@ void handleWifiOff() {
   char theStatus[180];
   if (httpServer.args()>0) {
     for ( uint8_t i = 0; i < httpServer.args(); i++ ) {
-      Serial.print(httpServer.argName(i));
-      Serial.print(" ");
-      Serial.println(httpServer.arg(i));
+      // Serial.print(httpServer.argName(i));
+      // Serial.print(" ");
+      // Serial.println(httpServer.arg(i));
       if (httpServer.argName(i) == "wifi") {
          // do something here with value from server.arg(i);
          wlanactive = !(httpServer.arg(i) == "off");
@@ -331,6 +406,7 @@ void handleWifiOff() {
   sprintf(theStatus, "<html><head></head><body>Wifi: %i <br /><a href='/'>Startseite</a></body></html>", wlanactive);
   httpServer.send(200, "text/html", theStatus);
 }
+
 String ipToString(IPAddress ip){
   String s="";
   for (int i=0; i<4; i++)
