@@ -54,7 +54,7 @@ def background_alarm_activity():
         + "\n Siehe: https://familie-gremm.synology.me/camera/"
     )
     contentHtml = (
-        "<head></head><body><h2>Bewegung erkannt um: "
+        "<html><head></head><body><h2>Bewegung erkannt um: "
         + alarmtime
         + "</h2><br>Siehe: "
         + '<a href="http://andreas-gremm.selfhost.bz:8080">Kamera</a>'

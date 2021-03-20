@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import smtplib
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from Security.Mail import sender, smtpserver, smtpusername, smtppassword
@@ -24,17 +25,30 @@ usetls = True
 ########################################
 # function to send a mail              #
 ########################################
-def sendmail(recipient, subject, content):
+def sendmail(
+    recipient,
+    subject,
+    content,
+    sender=sender,
+    smtpserver=smtpserver,
+    smtpusername=smtpusername,
+    smtppassword=smtppassword,
+    multipart="alternative",
+    multicontent=["plain", "html"]
+):
 
     # generate a RFC 2822 message
     # 	msg = MIMEText(content)
-    msg = MIMEMultipart("alternative")
+    msg = MIMEMultipart(multipart)
     msg["From"] = sender
     msg["To"] = recipient
     msg["Subject"] = subject
 
-    part1 = MIMEText(content[0], "plain")
-    part2 = MIMEText(content[1], "html")
+    part1 = MIMEText(content[0], multicontent[0])
+    if multicontent[1] == "html":
+        part2 = MIMEText(content[1], multicontent[1])
+    elif multicontent[1] == "pdf":
+        part2 = MIMEApplication(content[1], _subtype=multicontent[1])
     msg.attach(part1)
     msg.attach(part2)
 

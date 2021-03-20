@@ -20,7 +20,7 @@ from Security.MQTT import DefaultMQTTUser, DefaultMQTTPassword
 
 debug = True
 lamps = [1, 2, 3]
-scenes = ["Wohnen1", "Wohnen2", "Jump"]
+scenes = ["Paradies", "Tropendämmerung", "Lesen"]
 
 threadactive = False
 klatsch_klatsch = 0

@@ -11,7 +11,7 @@ Die Heimautomation besteht aus mehreren Elementen.
 
 ### <a name="dedizierte-controller"></a>Dedizierte Controller
 
-* **SpeedPort W921V** Telekom Internet-WLAN-Router
+* **SpeedPort Smart3** Telekom Internet-WLAN-Router
 * **Hue** als Controller für programmierbare Lampen
 * **Somfy - Tahoma** als Controller für die Rolläden und Rauchmelder
 * **Synology DS215j** Network Attached Storage
