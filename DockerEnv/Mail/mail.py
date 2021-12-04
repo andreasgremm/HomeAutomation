@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import smtplib
+import ssl
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -19,7 +20,6 @@ from Security.Mail import sender, smtpserver, smtpusername, smtppassword
 # smtppassword = <Passwort für SMTP Authentication>
 
 # use TLS encryption for the connection
-usetls = True
 
 
 ########################################
@@ -33,8 +33,11 @@ def sendmail(
     smtpserver=smtpserver,
     smtpusername=smtpusername,
     smtppassword=smtppassword,
+    usetls=True,
+    usessl=False,
     multipart="alternative",
-    multicontent=["plain", "html"]
+    multicontent=["plain", "html"],
+    filename="noname.pdf"
 ):
 
     # generate a RFC 2822 message
@@ -49,11 +52,17 @@ def sendmail(
         part2 = MIMEText(content[1], multicontent[1])
     elif multicontent[1] == "pdf":
         part2 = MIMEApplication(content[1], _subtype=multicontent[1])
+        part2.add_header('content-disposition', 'attachment',
+                         filename=filename)
     msg.attach(part1)
     msg.attach(part2)
 
     # open SMTP connection
-    server = smtplib.SMTP(smtpserver)
+    if usessl:
+        context = ssl.create_default_context()
+        server = smtplib.SMTP_SSL(smtpserver, context=context)
+    else:
+        server = smtplib.SMTP(smtpserver)
 
     # start TLS encryption
     if usetls:

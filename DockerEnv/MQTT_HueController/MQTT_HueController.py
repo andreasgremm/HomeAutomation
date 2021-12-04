@@ -224,7 +224,7 @@ if __name__ == "__main__":
         "--hue-controller",
         help="IP Adress des Hue Controllers",
         dest="hueController",
-        default="192.168.1.106",
+        default="192.168.1.168",
     )
     parser.add_argument(
         "-hu",

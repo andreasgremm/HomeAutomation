@@ -19,8 +19,8 @@ import paho.mqtt.client as paho
 from Security.MQTT import DefaultMQTTUser, DefaultMQTTPassword
 
 debug = True
-lamps = [1, 2, 3]
-scenes = ["Paradies", "Tropendämmerung", "Lesen"]
+lamps = [1, 4, 3]
+scenes = ["Paradies", "Sonnenuntergang Savanne", "Lesen"]
 
 threadactive = False
 klatsch_klatsch = 0
