@@ -28,7 +28,7 @@ lampindex = 0
 sceneindex = 0
 timeout = 3
 anyLamp = False
-anyRequest = json.dumps({"any": "on"})
+anyRequest = json.dumps({"any": "on", "group": 1})  # group 1 = Wohnzimmer
 client_id = ""
 auto_alarm = 2
 auto_alarm_light = ['56000', '25500', '46920']

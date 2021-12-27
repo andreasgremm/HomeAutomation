@@ -100,8 +100,8 @@ class Hue(object):
             return daylight["state"]["daylight"]
         return False
 
-    def setLampsOff(self):
-        url = "/api/" + self.__user + "/groups/0/action"
+    def setLampsOff(self, group=0):
+        url = "/api/" + self.__user + "/groups/" + str(group) + "/action"
         self.__connection.request("PUT", url, json.dumps({"on": False}))
         r1 = self.__connection.getresponse()
         status = json.loads(r1.read().decode())
@@ -116,8 +116,8 @@ class Hue(object):
         light = json.loads(r1.read().decode())
         return light
 
-    def isAnyLightOn(self):
-        url = "/api/" + self.__user + "/groups/0"
+    def isAnyLightOn(self, group=0):
+        url = "/api/" + self.__user + "/groups/" + str(group)
         self.__connection.request(method="GET", url=url)
         r1 = self.__connection.getresponse()
         anylight = json.loads(r1.read().decode())

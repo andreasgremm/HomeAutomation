@@ -91,9 +91,13 @@ def on_message(mosq, obj, msg):
                 except Exception as err:
                     print(err)
         if "any" in json_load:
+            if "group" in json_load:
+                group = json_load["group"]
+            else:
+                group = 0
             if json_load["any"] == "on":
                 try:
-                    rstatus = HueController.isAnyLightOn()
+                    rstatus = HueController.isAnyLightOn(group)
                     mqttc.publish("hue/any", str(rstatus), 0, False)
                 except Exception as err:
                     print(err)
@@ -148,7 +152,7 @@ def on_message(mosq, obj, msg):
 
         if sceneStatus in lamp_status["off"]:
             try:
-                rstatus = HueController.setLampsOff()
+                rstatus = HueController.setLampsOff(1)  # Group 1 = Wohnzimmer
             except Exception as err:
                 print(err)
     HueController.disconnect()

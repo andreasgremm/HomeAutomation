@@ -1,7 +1,7 @@
 FROM alpine:latest
 RUN apk add --no-cache ffmpeg
 RUN apk add --no-cache bash
-RUN apk add tzdata
+RUN apk add --no-cache tzdata
 
 ENV TZ=Europe/Berlin
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
