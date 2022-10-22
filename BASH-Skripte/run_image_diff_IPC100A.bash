@@ -4,26 +4,26 @@
 #
 #     Start Image_Diff for IPC100A on the Homeautomation Server
 #
-mount /mnt/synology
+mount /mnt/synologyDS920
 
-if [ ! -d "/mnt/synology/FTP" ]; then
+if [ ! -d "/mnt/synologyDS920/FTP" ]; then
   echo "Input Directory not found"
-  umount /mnt/synology
+  umount /mnt/synologyDS920
   exit
 fi
 
-if [ ! -d "/mnt/synology/IPC100A_Diffs" ]; then
+if [ ! -d "/mnt/synologyDS920/IPC100A_Diffs" ]; then
   echo "Output Directory not found"
-  umount /mnt/synology
+  umount /mnt/synologyDS920
   exit
 fi
 
-# /usr/local/bin/Image_diff.bash /mnt/synology/FTP /mnt/synology/IPC100A_Diffs
+# /usr/local/bin/Image_diff.bash /mnt/synologyDS920/FTP /mnt/synologyDS920/IPC100A_Diffs
 docker run \
     -a stdout -a stderr  --rm \
     --user `id -u`:`id -g` \
-    -v "/mnt/synology/FTP":"/mnt/camera_input" \
-    -v "/mnt/synology/IPC100A_Diffs":"/mnt/reduced_output" \
+    -v "/mnt/synologyDS920/FTP":"/mnt/camera_input" \
+    -v "/mnt/synologyDS920/IPC100A_Diffs":"/mnt/reduced_output" \
     imagediff:prod 
 
-umount /mnt/synology
+umount /mnt/synologyDS920

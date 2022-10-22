@@ -1,6 +1,7 @@
 # Raspberry PI für Homeautomation aufsetzen
 
 ## Raspbian Lite installieren und konfigurieren
+### Alte Variante
 * [Noobs](https://www.raspberrypi.org/downloads/noobs/) (aktuellste Version) herunterladen 
 * SD-Karte formatieren
 * Inhalt des NOOBS Verzeichnis, nachdem die heruntergeladene Datei entpackt wurde, auf die SD-Karte kopieren
@@ -14,7 +15,14 @@
 	* RASPBIAN-Lite aussuchen (Desktop wird nicht benötigt)
 	* Installation starten (ev. Wlan noch einmal selektieren, oder mehrfach versuchen, wenn der Download zuerst nicht funktioniert.
 
-Nach der Installation sollte die durch DHCP vergebene **IP-Adresse** des Raspberry notiert werden (Konsolenoutput oder ```ifconfig```) und ein Update der installierten Pakete stattfinden.
+### Neue Variante
+* RPI Imager auf einem geeigneten Gerät installieren und eine SD-Karte oder einen Memory-Stick/SSD mit Raspberry OS Lite installieren.
+* Vor der Installation kann über die Einstellungen (Zahnradsymbol) bereits Hostname, Username, Passwort, WLAN, Sprache, Zeitzone, SSH Zugang u.a. eingestellt werden.
+* Um einen RPI2 von USB zu booten ist sowohl eine SD-Karte als auch das USB Device mit dem OS zu bespielen.
+ * Nach dem ersten Boot von der SD-Karte in /boot/cmdline.txt die UUID der großen Partition des bereits eingesteckten USB Sticks einstellen. Der Befehl ```blkid``` gibt diese PARTUUIDs aus. 
+ * Nach dem Neustart über ```raspi-config``` die Root-Partition erweitern
+
+Nach der Installation sollte die durch DHCP vergebene **IP-Adresse** des Raspberry notiert werden (Konsolenoutput oder ```ip a```) und ein Update der installierten Pakete stattfinden. Möglicherweise soll auch eine statische IP Adresse vergeben werden (/etc/dhcpcd.conf).
 
 ```
 sudo apt-get update
@@ -25,7 +33,7 @@ Nach der Installation sollten noch verschiedene Einstellungen getätigt werden, 
 
 * raspi-config ausführen (sudo!)
 	* den gewünschten Hostnamen einstellen
-	* das gewünschte Passwort für den Benutzer **pi** einstellen
+	* das gewünschte Passwort für den Benutzer (z.B.: für **pi**) einstellen
 	* SSH aktivieren
 	* Seriellen Konsolenausgang deaktivieren ABER
 	* Serielle Schnittstelle aktivieren (aktiviert halten)
@@ -33,7 +41,7 @@ Nach der Installation sollten noch verschiedene Einstellungen getätigt werden, 
 	
 Danach den Raspberry booten. ``` sudo reboot```.
 
-Nach dem Reboot testen, ob der SSH Zugang ```ssh pi@<eingestellter hostname>.local```funktionert.
+Nach dem Reboot testen, ob der SSH Zugang ```ssh <benutzer>@<eingestellter hostname>.local```funktionert.
 
 ## AVAHI Daemon
 Folgende Einträge in /etc/avahi/services/ssh.service ermöglichen das "lokale Browsen" des SSH-Service über mDNS. (z.B: dns-sd -B _ssh)
@@ -112,9 +120,9 @@ Mit den Befehlen
 
 ```
 sudo curl -fsSL https://get.docker.com | sh
-usermod -aG docker pi
+usermod -aG docker <benutzer>
 ``` 
-wird Docker installiert und der Benutzer pi wird ermächtigt Container zu verwalten.
+wird Docker installiert und der Benutzer (z.B. **pi**) wird ermächtigt Container zu verwalten.
 
 ### Docker Images
 

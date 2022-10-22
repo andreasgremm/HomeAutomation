@@ -36,10 +36,10 @@ Das Ergebnis der Differenzbildung wird im Verzeichnis ```/home/IPC100A_Diffs``` 
 /etc/fstab - Eintrag:
 
 ```
-//192.168.1.241/home /mnt/synology  cifs rw,user,noauto,uid=pi,gid=pi,credentials=/home/pi/.cifs/secrets,vers=2.1 0 0
+//192.168.2.2/home /mnt/synologyDS920  cifs rw,user,noauto,uid=andreas,gid=andreas,credentials=/home/andreas/.cifs/secrets,vers=2.1 0 0
 ```
 
-Die Datei /home/pi/.cifs/secrets enthält den Benutzernamen und das Passwort für den SMB-Mount des entsprechenden Verzeichnisses.
+Die Datei /home/pi/.cifs/secrets.neu enthält den Benutzernamen und das Passwort für den SMB-Mount des entsprechenden Verzeichnisses.
 Wenn sich der genutzte Benutzername auf dem Raspberry Pi ändert, wird sich natürlich auch die Lage der **secrets** Datei ändern.
 
 ```
@@ -54,7 +54,7 @@ Die Ausgaben der WebCam im Wohnzimmer werden per WebDav-Mount auf das Verzeichni
 /etc/fstab - Eintrag:
 
 ```
-https://webdav.magentacloud.de /mnt/mediencenter davfs rw,noexec,noauto,user,async,_netdev,uid=pi,gid=pi 0 0
+https://webdav.magentacloud.de /mnt/mediencenter davfs rw,noexec,noauto,user,async,_netdev,uid=andreas,gid=andreas 0 0
 ```
 
 Die Berechtigungen werden in der Datei $home/.davfs2/secrets hinterlegt.
