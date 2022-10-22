@@ -4,7 +4,7 @@ Cython==0.29.21
 et-xmlfile==1.0.1
 future==0.18.2
 jdcal==1.4.1
-joblib==0.17.0
+joblib==1.2.0
 kiwisolver==1.2.0
 matplotlib==3.3.2
 numpy==1.22.0
