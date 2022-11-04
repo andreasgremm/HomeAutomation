@@ -101,7 +101,7 @@ docker run --rm -it --mount source=non-git-local-includes,destination=/non-git-l
 docker rm temp
 ```
 
-## TPLINK Monitor Container erzeugen und starten
+## Radio Controler Container erzeugen und starten
 Im Dockerfile werden beim Start des TPLINK Monitors verschiedene Parameter benötigt, die im Python-Programm als Aufrufparameter mit Defaults belegt sind.
 
 ```

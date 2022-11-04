@@ -100,7 +100,7 @@ docker run --rm -it --mount source=non-git-local-includes,destination=/non-git-l
 docker rm temp
 ```
 
-## MQTT Klatschschalter Container erzeugen und starten
+## MQTT Data2InfluxDB Container erzeugen und starten
 Im Dockerfile werden beim Start des Data2InfluxDB verschiedene Parameter benötigt, die im Python-Programm als Aufrufparameter mit Defaults belegt sind.
 
 
