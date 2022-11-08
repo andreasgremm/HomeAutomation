@@ -6,10 +6,10 @@ Requires=docker.service
 
 [Service]
 Type=simple
-ExecStart=/home/pi/MQTT/MQTT_ReadXbeeserial/pythonenv/bin/python3 /home/pi/MQTT/MQTT_ReadXbeeserial/MQTT_ReadXbeeserial.py
+ExecStart=/home/andreas/MQTT/MQTT_ReadXbeeserial/pythonenv/bin/python3 /home/andreas/MQTT/MQTT_ReadXbeeserial/MQTT_ReadXbeeserial.py
 Restart=on-failure
-Environment=PYTHONPATH=/home/pi/non-git-local-includes
-WorkingDirectory=/home/pi/MQTT/MQTT_ReadXbeeserial
+Environment=PYTHONPATH=/home/andreas/non-git-local-includes
+WorkingDirectory=/home/andreas/MQTT/MQTT_ReadXbeeserial
 StandardOutput=null
 StandardError=null
 

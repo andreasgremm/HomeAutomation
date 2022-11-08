@@ -3,10 +3,10 @@ Description=MQTT Motion Detektor Service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/pi/MQTT/MQTT_Motiondetektor.py
+ExecStart=/usr/bin/python3 /home/andreas/MQTT/MQTT_Motiondetektor.py
 Restart=on-failure
-Environment=PYTHONPATH=/home/pi/Python3_Modules:/home/pi/non-git-local-includes
-WorkingDirectory=/home/pi/MQTT/
+Environment=PYTHONPATH=/home/andreas/Python3_Modules:/home/andreas/non-git-local-includes
+WorkingDirectory=/home/andreas/MQTT/
 StandardOutput=null
 StandardError=null
 

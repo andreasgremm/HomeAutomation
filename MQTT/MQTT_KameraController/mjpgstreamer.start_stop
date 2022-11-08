@@ -10,6 +10,7 @@ ExecStartPre=/usr/local/bin/mount_mediencenter.bash
 ExecStartPre=-/usr/bin/docker stop %n
 ExecStartPre=-/usr/bin/docker rm %n
 ExecStart=/usr/bin/docker run --rm --name %n -v /mnt/mediencenter/Hochgeladen:/mnt/pictures_out --device /dev/video0 -p 8080:8080 mjpegstreamer:prod
+ExecStop=/usr/bin/docker stop %n
 Restart=on-failure
 StandardOutput=null
 StandardError=null

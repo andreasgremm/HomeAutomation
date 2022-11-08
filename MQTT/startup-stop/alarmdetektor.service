@@ -3,9 +3,9 @@ Description=MQTT Alarm Detector Service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/pi/MQTT/MQTT_Alarmdetektor.py
+ExecStart=/usr/bin/python3 /home/andreas/MQTT/MQTT_Alarmdetektor.py
 Restart=on-failure
-Environment=PYTHONPATH=/home/pi/Python_Modules:/home/pi/non-git-local-includes
+Environment=PYTHONPATH=/home/andreas/Python_Modules:/home/andreas/non-git-local-includes
 StandardOutput=null
 StandardError=null
 

@@ -6,10 +6,10 @@ Requires=docker.service
 
 [Service]
 Type=simple
-ExecStart=/home/pi/MQTT/MQTT_Managebuzzer/pythonenv/bin/python3 /home/pi/MQTT/MQTT_Managebuzzer/MQTT_Managebuzzer.py
+ExecStart=/home/andreas/MQTT/MQTT_Managebuzzer/pythonenv/bin/python3 /home/andreas/MQTT/MQTT_Managebuzzer/MQTT_Managebuzzer.py
 Restart=on-failure
-Environment=PYTHONPATH=/home/pi/non-git-local-includes
-WorkingDirectory=/home/pi/MQTT/MQTT_Managebuzzer/
+Environment=PYTHONPATH=/home/andreas/non-git-local-includes
+WorkingDirectory=/home/andreas/MQTT/MQTT_Managebuzzer/
 StandardOutput=null
 StandardError=null
 

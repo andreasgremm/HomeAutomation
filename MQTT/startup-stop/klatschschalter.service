@@ -3,10 +3,10 @@ Description=MQTT Klatschschalter Service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/pi/MQTT/MQTT_Klatschschalter.py
+ExecStart=/usr/bin/python3 /home/andreas/MQTT/MQTT_Klatschschalter.py
 Restart=on-failure
-Environment=PYTHONPATH=/home/pi/Python3_Modules
-WorkingDirectory=/home/pi/MQTT/
+Environment=PYTHONPATH=/home/andreas/Python3_Modules
+WorkingDirectory=/home/andreas/MQTT/
 StandardOutput=null
 StandardError=null
 

@@ -3,9 +3,9 @@ Description=MQTT TpLink Monitor Service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python /home/pi/MQTT/MQTT_TplinkHS110Monitor.py
+ExecStart=/usr/bin/python /home/andreas/MQTT/MQTT_TplinkHS110Monitor.py
 Restart=on-failure
-Environment=PYTHONPATH=/home/pi/Python_Modules
+Environment=PYTHONPATH=/home/andreas/Python_Modules
 StandardOutput=null
 StandardError=null
 
