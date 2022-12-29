@@ -299,6 +299,7 @@ void setup(void){
   Serial.println("Booting Sketch...");
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  mqtt.setKeepAlive(60);
   mqtt.setServer(brocker, 1883);
   mqtt.setCallback(messageReceived);
 
