@@ -1,6 +1,7 @@
 # HomeAutomation
 
 ## Komponenten
+
 Die Heimautomation besteht aus mehreren Elementen.
 
 * [dedizierten Controllern](#dedizierte-controller)
@@ -15,48 +16,48 @@ Die Heimautomation besteht aus mehreren Elementen.
 * **Hue** als Controller für programmierbare Lampen
 * **Somfy - Tahoma** als Controller für die Rolläden und Rauchmelder
 * **Synology DS215j** Network Attached Storage
-	* File-Store
-	* git (Quellcode-Verwaltung, Versionskontrollsystem)
-	* Backup für Raspberries
-	* Surveillance-Station (Bewegungserkennung über Kamera)
-	* FTP-Server
+  * File-Store
+  * git (Quellcode-Verwaltung, Versionskontrollsystem)
+  * Backup für Raspberries
+  * Surveillance-Station (Bewegungserkennung über Kamera)
+  * FTP-Server
 
 ### <a name="steuerbare-endgeräte"></a>Steuerbare Endgeräte
 
 * programmierbare Lampen
 
   Hue Lampen
-	* Wohnzimmer1
-	* Wohnzimmer2
-	* Wohnzimmer3
+  * Wohnzimmer1
+  * Wohnzimmer2
+  * Wohnzimmer3
 * Rolläden
-	* Arbeitszimmer Links
-	* Arbeitszimmer Rechts
-	* Küche Links
-	* Küche Rechts
-	* Wohnzimmer Links
-	* Wohnzimmer Rechts
-	* Wohnzimmer Terasse
+  * Arbeitszimmer Links
+  * Arbeitszimmer Rechts
+  * Küche Links
+  * Küche Rechts
+  * Wohnzimmer Links
+  * Wohnzimmer Rechts
+  * Wohnzimmer Terasse
 * FS Internetradio
-	* Küche
+  * Küche
 * Web Kamera
-	* Studio
-	* Gästezimmer
+  * Studio
+  * Gästezimmer
 
 ### <a name="sensoren"></a>Sensoren
 
 * [**Klatschschalter**](#klatschschalter) im Wohnzimmer
-	* Klatschdetektor
-	* Bewegungsmelder
-	* Temperatursensor
-	* Lichtsensor
+  * Klatschdetektor
+  * Bewegungsmelder
+  * Temperatursensor
+  * Lichtsensor
 * [**Auto-Alarmanlage**](#auto-alarmanlage)
-	* Bewegungsmelder
-	* Temperatursensor
-	* Lichtsensor
-	* Spannungssensor
+  * Bewegungsmelder
+  * Temperatursensor
+  * Lichtsensor
+  * Spannungssensor
 * [**RFID Reader**](#rfid-reader) ESP8266 im Flur
-	* Mifare RFID Kartenleser
+  * Mifare RFID Kartenleser
 
 ### <a name="alexa"></a>Alexa
 
@@ -71,25 +72,33 @@ Die Heimautomation besteht aus mehreren Elementen.
 * **OpenElec** Raspberry Pi im Schlafzimmer
 
 ## Konzepte
+
 ### Endbenutzerschnittstelle
-Die Endbenutzerschnittstelle ist bei den meisten Systemen als "WebSeite" aufgebaut.   
+
+Die Endbenutzerschnittstelle ist bei den meisten Systemen als "WebSeite" aufgebaut.
 Diese Webseite läuft entweder lokal auf den Systemen oder als Cloud-Anwendung bei einem Anbieter. Der Endanwender greift per Web-Browser mit dem HTTP oder HTTPS Protokoll auf die Anwendung zu.
 
-###Anwendungsprogrammierschnittstellen (API)
-Heutzutage werden zur Kommunikation zwischen Programmen sogenannte Anwendungsprogrammierschnittstellen (Application Programming Interfaces, API) genutzt.   
+### Anwendungsprogrammierschnittstellen (API)
+
+Heutzutage werden zur Kommunikation zwischen Programmen sogenannte Anwendungsprogrammierschnittstellen (Application Programming Interfaces, API) genutzt.
 APIs basieren häufig ebenfalls auf dem HTTP/S Protokoll und können somit auch teilweise von einem Browser aufgerufen werden.
 
 ### Nachrichten (Messaging)
+
 Nachrichten werden ebenfalls zur Kommunikation verwendet, unterliegen aber häufig einer anderen Intention als Endbenutzerschnittstellen oder APIs.
 Der Empfang der Nachrichten ist häufig nicht synchron mit der Versendung und es liegt ein Vermittler (Broker) im Kommunikationsweg.
 Desweiteren können Nachrichten auch an mehrere Empfänger versendet werden.
+
 #### Endanwenderinformation
+
 Um aus der Heimautomatiesierung heraus Nachrichten an einen oder mehreren Endanwendern zu versenden wird [**SLACK**](https://slack.com/intl/de-de/) verwendet.
 
 #### Kommunikation zwischen Programmen
+
 Um innerhalb der Heimautomatisierung Nachrichten von einem Element zu anderen Elementen zu senden, wird [**MQTT**](https://de.wikipedia.org/wiki/MQTT) verwendet.
 
 ### Kommunikationsnetzwerke
+
 Kommunikationsnetzwerke bilden die Basis für Kommunikation zwischen Geräten. Zwei oder mehrere Geräte können miteinander kommunizieren wenn sie durch ein Kommunikationsnetzwerk miteinander verbunden sind. Geräte in unterschiedlichen Netzwerken benötigen Vermittler um zueinander zu finden.
 In der gleichen Netzwerk-Art dienen **Router** als Vermittler, in unterschiedlichen Netzwerk-Arten dienen **Gateways** als Vermittler.
 Router sprechen auf "beiden Seiten" das gleiche Protokoll. Gateways vermitteln zwischen unterschiedlichen Protokollen.
@@ -97,44 +106,62 @@ Router sprechen auf "beiden Seiten" das gleiche Protokoll. Gateways vermitteln z
 Kommunikationsnetzwerke bestehen aus mehreren [Schichten](https://de.wikipedia.org/wiki/OSI-Modell).
 
 #### Wide Area Network (WAN)
+
 Das Wide Area Network bezeichnet ein Netzwerk welches auf einer globalen Ebene agiert. Das Internet ist so ein Wide-Area-Network, in früheren Zeiten wurden durch Telekommunikationsprovider auch Firmenstandorte vernetzt. Bekannt ist vermutlich das X.25 Protokoll.
 Heutige Verbindungsarten sind typischerweise DSL (in unterschiedlichen Ausprägungen) und Glasfaser auf einer unteren Netzwerkschicht.
 
 Zur Kommunikation auf einer höheren Netzwerkschicht wird heute fast ausschliesslich die Internet-Technologie das Internet-Protokoll (IP) verwendet, die auch für "private Wide Area Networks", welche nicht mit dem Internet verbunden sind genutzt wird. Der WAN-Anschluss stellt somit die Verbindung zum Internet her.
 Die Teilnehmer am Internet werden mittels eines Routers am Internet angeschlossen. Diese Router werden entweder vom Provider (Telekom, UnityMedia, 1+1 ..) bereitgestellt oder durch den Endanwender gekauft (z.B.: Fritzbox). Auf der WAN Seite bedient der Router z.B.: DSL oder Glasfaser auf der untersten Protokolebene und IP auf Level 3 der Netzwerkschicht.
+
 #### Mobilfunk
+
 Mobilfunk basiert auf unterschiedlichen Technologien. Mobilfunkgeräte melden sich in sogenannten Zellen an und werden durch eine "Telefon-Nummer" identifiziert. Die Validierung basiert auf SIM-Karten, die bei dem Anbieter der Wahl erstanden werden. Über den Mobilfunk können mehrere Funktionlitäten genutzt werden.
 Unterschiedliche Generationen der Mobilfunkprotokolle ermöglichen unterschiedliche Verbindungsgeschwindigkeiten.
 Begriffe wie Edge, 3G, UMTS, LTE, 5G sind als Mobilfunkverbindung bekannt.
 
 ##### Sprache / SMS
+
 Über den Mobilfunk werden insbesondere Sprache und Text (SMS) übertragen. Seit der Verbreitung von Smart-Phones werden auch Datendienste genutzt.
+
 ##### mobile Daten
+
 Eine weitere Verbindungsart für mobile Geräte ist die Datenverbindung auch als mobile Daten bekannt. Diese Datenverbindung wird vom Telekommunikationsbetreiber über ein Gateway mit dem Internet verbunden. Dieses ermöglicht die Nutzung von Internet Diensten (Web, Mail, ..) vom mobilen Gerät.
+
 #### Local Area Network (LAN)
+
 Ein Local Area Network bezeichnet ein Netzwerk inerhalb eines eingeschränkten, abgegrenzten Bereichs. Beispiele hierfür sind Firmengelände, Hochschulcampus oder eine Wohnung.
 Ein LAN ist typischerweise "verkabelt" und ermöglicht so den Transport von Daten mit einer bestimmten Geschwindigkeit und einem oder mehreren Kommunikationsprotokollen.
 Heutzutage wird IP als Kommunikationsprotokoll in typischen LAN Umgebungen verwendet.
 Als Kabeltechnologie dienen häufig Ethernet-Kabel oder Glasfaser-Kabel.
+
 #### Wireless LAN (WLAN)
+
 In Zeiten von Laptops, Tablets, Smartphones entstand der Bedarf nicht nur per Kabel im LAN eingebunden zu werden. Die Wireless-LAN Technologie bindet Geräte über eine Funkschnittstelle in das Local Area Network ein.
 Häufig werden durch den WAN-Router des Telekommunikationsbetreibers sowohl LAN Schnittstellen als auch WLAN bereitgestellt.
 
 #### Analogtelefonie
+
 Analoge Telefone sind schnurgebundene Telefone, die über eine 2-Draht-Leitung mit der Telefon-Vermittlungsstelle verbunden sind.
 Bei einem Analoganschluss kann immer nur ein Gerät gleichzeitig genutzt werden.
 Im Rahmen der Ausbreitung des Internet werden heutzutage keine analogen Telefonanschlüsse mehr von den Telekommunikationsanbietern bereitgestellt.
 Im Internet-Router wird die analoge Telefonie in Voice-Over-IP umgesetzt.
+
 #### ISDN
+
 Das ISDN Protokoll diente dem Anschluss von 2 Datenkanälen und einem Steuerkanal. Hierdurch konnten 2 Geräte gleichzeitig genutzt werden.
 Die Internet-Router besitzen häufig einen ISDN-Basisanschluss, so dass bestehende ISDN Geräte angeschlossen werden können. Der Router verbindet dann die ISDN-Telefone mit Voice-over-IP.
+
 #### DECT
+
 Mit den Mobiltelefonen im Heimbereich wurde das DECT Protokoll eingeführt. DECT Basisstationen dienen als Gateway vom analogen Telefonanschluss zum mobilen Gerät.
 Heutzutage werden die Internet-Router bereits mit einer DECT Basisstation ausgeliefert und übersetzen dann in Voice-over-IP.
+
 #### ZigBee
+
 [ZigBee](https://de.wikipedia.org/wiki/ZigBee) ist ein eigenständiges Protokoll zur Verbindung von Sensoren und Aktoren mit geringen Datenraten und gößeren Reichweiten als WLAN.
 
 ### IP Protokoll
+
 Das IP Protokoll besteht im Wesentlichen aus 3 unterschiedlichen Kommunikationsarten.
 
 * TCP: Verbindungsorientiertes Protokoll. Die Kommunikationspartner haben eine 1:1 Verbindung. Im Rahmen der Netzwerkschichten wird die Auslieferung der Datenpakete sichergestellt.
@@ -173,20 +200,20 @@ Das Konstrukt www.google.de besteht aus einem Rechnernamen (wwww) und dem Domain
 
 Ein Beispiel für die Auflösung von www.google.de zu einer IP-Adresse, hierzu wird der Befehl **nslookup** verwendet.
 
-```
+```text
 C02WJ15LHV2Q:~ grean11$ nslookup www.google.de
-Server:		127.0.0.1
-Address:	127.0.0.1#53
+Server:  127.0.0.1
+Address: 127.0.0.1#53
 
 Non-authoritative answer:
-Name:	www.google.de
+Name: www.google.de
 Address: 172.217.17.227
 ```
 
-Bei jedem Aufruf eines Dienstes mit einem Hostnamen (z.B: https://www.google.de) wird per Domain-Namensauflösung eine IP-Adresse abgerufen mit der dann die finale Verbindung erfolgt.
+Bei jedem Aufruf eines Dienstes mit einem Hostnamen (z.B: <https://www.google.de>) wird per Domain-Namensauflösung eine IP-Adresse abgerufen mit der dann die finale Verbindung erfolgt.
 Der Befehl **netstat -na** listet die aktuellen Verbindungen auf.
 
-```
+```text
 C02WJ15LHV2Q:~ grean11$ netstat -na | more
 Active Internet connections (including servers)
 Proto Recv-Q Send-Q  Local Address          Foreign Address        (state)    
@@ -208,10 +235,10 @@ PING homeautomation.local (192.168.1.237): 56 data bytes
 64 bytes from 192.168.1.237: icmp_seq=1 ttl=64 time=3.719 ms
 ```
 
-
 ## Systemdetails
 
 ### Hue
+
 Die Hue-Lampen werden durch die [Phillips-Hue-Bridge](http://192.168.1.127) im Wohnzimmerschrank gesteuert.
 Für die Steuerung kann die Hue-App des Handy genutzt werden.
 Es lassen sich sowohl die Lampen Wohnzimmer1 bis Wohnzimmer3 einzeln steuern als auch Szenen einrichten.
@@ -222,24 +249,25 @@ Die Hue-Bridge ist neben der Steuerung durch die Hue-App auch über ein API steu
 Die Lampen selber werden von der Hue-Bridge über das ZigBee Protokoll gesteuert.
 
 ### <a name="homeautomation"></a>Homeautomation
+
 Auf dem Raspberry PI [Homeautomation](http://192.168.1.237) laufen verschiedene Programme mit folgenden Funktionalitäten.
 
 * MQTT Broker (Port 1883) als zentrale Schaltstelle für MQTT Nachrichten.
 * MySQL Datenbank zur Speicherung von Informationen
 * Apache WebServer
-	* [Informationsanzeige zu Sensoren](http://192.168.1.237/wsgi/showtemperature/index)
- 	* [MySql phpMyAdmin](http://192.168.1.237/phpmyadmin/)
+  * [Informationsanzeige zu Sensoren](http://192.168.1.237/wsgi/showtemperature/index)
+  * [MySql phpMyAdmin](http://192.168.1.237/phpmyadmin/)
 * NodeRed System (Port 1880) zur Darstellung und Steuerung verschiedener Funktionen
 * Python Programme die sich per MQTT unterhalten:
-	* HueController
-	* Alarmdetektor
-	* Motiondetektor
-	* Klatschschalter
-	* RadioController
-	* ReadXbeeserial
-	* Managebuzzer
-	* Clientstatus2Slack
-	* TplinkHS110Monitor (veraltet)
+  * HueController
+  * Alarmdetektor
+  * Motiondetektor
+  * Klatschschalter
+  * RadioController
+  * ReadXbeeserial
+  * Managebuzzer
+  * Clientstatus2Slack
+  * TplinkHS110Monitor (veraltet)
 
 Über folgenden Mechanismus lässt sich der Status der Python-Programme kontrollieren:
 Hierzu muss eine Terminal (SSH) Verbindung zu Homeautomation als Benutzer *pi* aufgebaut werden:
@@ -247,7 +275,7 @@ Hierzu muss eine Terminal (SSH) Verbindung zu Homeautomation als Benutzer *pi* a
 
 Mit folgendem Befehl werden alle relevanten Python-Programme aufgelistet `ps -ef  | grep MQTT`
 
-```
+```text
 root       318     1  0 Mai12 ?        00:24:57 /usr/bin/python3 /home/pi/MQTT/MQTT_HueController.py
 root       320     1  0 Mai12 ?        00:26:51 /usr/bin/python3 /home/pi/MQTT/MQTT_Alarmdetektor.py
 root       326     1  0 Mai12 ?        00:25:21 /usr/bin/python3 /home/pi/MQTT/MQTT_Clientstatus2Slack.py
@@ -259,6 +287,7 @@ root       351     1  0 Mai12 ?        00:38:56 /usr/bin/python /home/pi/MQTT/MQ
 root     12900     1  0 Mai21 ?        00:25:27 /usr/bin/python3 /home/pi/MQTT/MQTT_Klatschschalter.py
 pi       27834 27814  0 17:14 pts/1    00:00:00 grep --color=auto MQTT
 ```
+
 Die obige Liste zeigt, dass zumindest alle Programme gestartet sind.
 Manchmal hängen sich einzelne Programme leider auch auf.
 
@@ -266,7 +295,7 @@ Gestartet werden die Programme als Systemdienst mittels  **systemctl** Kommando.
 
 Anmerkung: Das Kommando **systemctl** muss als Benutzer *root* ausgeführt werden. Dieses erreicht man, indem die Befehlszeile mit **sudo** gestartet wird. Beispiel aus einer Terminalsitzung:
 
-```
+```text
 pi@homeautomation:~ $ sudo systemctl status klatschschalter
 ● klatschschalter.service - MQTT Klatschschalter Service
    Loaded: loaded (/etc/systemd/system/klatschschalter.service; enabled; vendor preset: enabled)
@@ -280,7 +309,7 @@ Warning: Journal has been rotated since unit was started. Log output is incomple
 
 Die Kontrolldateien liegen im Verzeichnis `/etc/systemd/system` und lassen sich mit `ls /etc/systemd/system`auflisten:
 
-```
+```text
 alarmdetektor.service               getty.target.wants       mysqld.service               sockets.target.wants
 autologin@.service                  getty@tty1.service.d     mysql.service                sysinit.target.wants
 bluetooth.target.wants              halt.target.wants        network-online.target.wants  syslog.service
@@ -291,6 +320,7 @@ default.target                      mjpgstreamer.service     readxbeeserial.serv
 dhcpcd5.service                     motiondetektor.service   reboot.target.wants
 display-manager.service             multi-user.target.wants  remote-fs.target.wants
 ```
+
 Aus der obigen Liste werden die Zusammenhänge zwischen den Namen der Systemdienste und den Programmnamen deutlich.
 
 Wenn z.B.: die Klatschschalter Funktion zur Steuerung der Hue-Lampen nicht funktioniert, kann dieses an zwei Komponenten liegen.
@@ -304,6 +334,7 @@ Mit dem Befehl `sudo systemctl restart klatschschalter` wird beispielsweise der 
 In gleicher Form lassen sich die anderen Dienste wie **readxbeeserial** oder **huecontroller** neu starten.
 
 ### <a name="klatschschalter"></a>Klatschschalter
+
 Der Klatschschalter ist eine elektronische Schaltung in einem Gehäuse mit den Funktionen
 
 * Klatschdetektor
@@ -315,7 +346,9 @@ Die Daten werden per ZigBee - Protokoll übertragen. Die einzelnen Sensoren sind
 
 Der Homeautomation Rechner dient als ZigBee Gateway. Hier ist über die serielle Schnittstelle ebenfalls ein Xbee angeschlossen. Über das Programm **MQTT_ReadXbeeserial.py** werden die Informationen gelesen und in Ausgangssignale an den IO-Pins des angeschlossenen Xbees umgesetzt bzw. in einer MySQL Datenbank gespeichert.
 Die Ausgangssignale des angeschlossenen Xbees sind in einer elektronischen Schaltung mit Kontakten (IO-Pins) des Raspberry verbunden.
+
 #### Klatschdetektor
+
 Der Klatschschalter sendet mit jedem erkannten Klatsch ein einzelnes Signal über das ZigBee Protokoll.
 Dieses führt zu einzelnen Signalen an dem IO-Pin des Raspberries.
 Der relevante Pin (GPIO 18) wird vom Programm **MQTT_Klatschschalter.py** gelesen und in Klatschsequenzen umgewandelt.
@@ -323,14 +356,15 @@ Der relevante Pin (GPIO 18) wird vom Programm **MQTT_Klatschschalter.py** gelese
 * 2 Klatscher schalten die Hue-Szenen Wohnen1 bis ..3 wechselweise.
 * 3 Klatscher schalten die Lampen aus
 * Bei ausgeschalteten Lampen: 3 Klatscher zeigen den Status der "Auto-Alarmanlage" an.
-	* grün: eingeschaltet
-	* rot: ausgeschaltet
+  * grün: eingeschaltet
+  * rot: ausgeschaltet
 
 Die Steuerung erfolgt über MQTT - Nachrichten an das Programm **MQTT_HueController.py** welches wiederum das API der Hue-Bridge zur Steuerung der Lampen anspricht.
 
 Klatschschalter -(ZigBee)-> MQTT_ReadXbeeserial -(GPIO 18)-> MQTT_Klatschschalter -(MQTT)-> MQTT_HueController -(API)-> Hue-Bridge
 
 #### Bewegungsmelder
+
 Wie bei dem Klatschschalter wird auch das Signal des Bewegungsmelders über das ZigBee-Gateway umgesetzt und als Signal an den Raspberry IO Pin 23 gesendet.
 
 In Abhängigkeit des Status der Wohnzimmer-Alarmanlage führt das Signal zu folgenden Aktivitäten.
@@ -349,9 +383,11 @@ Bewegungsmelder -(ZigBee)-> MQTT_ReadXbeeserial -(GPIO 23)-> MQTT_Motiondetektor
 Die Wohnzimmer-Alarmanlage kann über den RFID Reader oder die WebSeite <http://192.168.1.237/wsgi/showtemperature/index> aktiviert werden. Bei der Aktivierung über der WebSeite wird aktuell der Status auch in der Datenbank geändert, so dass bei einem Neustart der Status persistent ist.
 
 #### Temperatur und Licht
+
 Die Daten zu Temperatur und Licht werden in der MySQL Datenbank gespeichert.
 
 ### <a name="auto-alarmanlage"></a>Auto Alarmanlage
+
 Im Auto ist eine selbstbebaute Alarmanlage installiert die folgende Sensoren beinhaltet:
 
 * Bewegungsmelder
@@ -374,6 +410,7 @@ Temperatur, Licht und Spannungswerte werden in der MySQL-Datenbank gespeichert.
 Die Auto-Alarmanlage kann über den RFID Reader oder die WebSeite <http://192.168.1.237/wsgi/showtemperature/index> aktiviert werden. Bei der Aktivierung über der WebSeite wird aktuell der Status auch in der Datenbank geändert, so dass bei einem Neustart der Status persistent ist.
 
 ### <a name="rfid-reader"></a>RFID Reader
+
 Der [**RFid_Reader**](http://rfid_reader.local) besteht aus einem ESP8266 an dem ein RFID Kartenleser und ein Bewegungsmelder angeschlossen ist.
 
 Aktuell werden folgende Karten für folgende Informationen genutzt:
@@ -385,4 +422,3 @@ Wenn die Wohnzimmer-Alarmanlage eingeschaltet ist, wird bei Bewegungserkennung e
 
 Der RFID Leser agiert per MQTT Nachrichten mit der Umwelt.
 Werden die Alarmfunktionen per Webseite geändert, wird dieses auch in den LEDs des RFID-Readers wiedergespiegelt.
-

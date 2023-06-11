@@ -3,8 +3,8 @@ InfluxDB ist auf die Speicherung von Zeitserien optimiert. Zeitstempel sind imme
 
 Für die Arbeit mit InfluxDB ist es daher wichtig Zeitstempel in UTC umzurechnen, bevor diese in der InfluxDB gespeichert werden. 
 
-
 ## InfluxDB Installation
+
 InfluxDB gibt es in verschiedenen Ausprägungen (OpenSource, Commercial) auf [DockerHub](https://hub.docker.com/_/influxdb?tab=description).
 
 Nach dem "Pullen" der richtigen Version können initial die Datenbank, Admin- und Datenbankbenutzer initialisiert werden.
@@ -36,6 +36,7 @@ echo "#  in etc/influxdb.conf 'auth-enabled = true' setzen."
 Anschliessend muss noch der Parameter *auth-enabled = false* in der Datei *etc/influxdb.conf* im Abschnitt \[http\] auf *auth-enabled = true* geändert werden.
 
 ## InfluxDB Start
+
 Der Start des Containers kann mit folgendem Snippet erfolgen:
 
 ```
@@ -48,7 +49,53 @@ docker run -d --name influx \
       influxdb
 ```
 
-## InfluxDB Usage
+## InfluxDB V2 Usage
+
+Nach dem Backup und Restore einer aus Influxv1 gesicherten Datenbank ist ein V1 kompatibler Benutzer anzulegen.
+
+```text
+influx v1 auth create --help  
+NAME:
+   influx v1 auth create - Create authorization
+
+USAGE:
+   influx v1 auth create [command options] [arguments...]
+
+COMMON OPTIONS:
+   --host value                     HTTP address of InfluxDB [$INFLUX_HOST]
+   --skip-verify                    Skip TLS certificate chain and host name verification [$INFLUX_SKIP_VERIFY]
+   --configs-path value             Path to the influx CLI configurations [$INFLUX_CONFIGS_PATH]
+   --active-config value, -c value  Config name to use for command [$INFLUX_ACTIVE_CONFIG]
+   --http-debug                     
+   --json                           Output data as JSON [$INFLUX_OUTPUT_JSON]
+   --hide-headers                   Hide the table headers in output data [$INFLUX_HIDE_HEADERS]
+   --token value, -t value          Token to authenticate request [$INFLUX_TOKEN]
+   
+OPTIONS:
+   --org-id value                 The ID of the organization [$INFLUX_ORG_ID]
+   --org value, -o value          The name of the organization [$INFLUX_ORG]
+   --description value, -d value  Token description
+   --username value               The username to identify this token
+   --password value               The password to set on this token
+   --no-password                  Don't prompt for a password. You must use v1 auth set-password command before using the token.
+   --read-bucket value            The bucket id
+   --write-bucket value           The bucket id
+   
+root@b8a2a5d61e4e:/# influx v1 auth create --org familie-gremm --username telegraf --password <password> --read-bucket <bucket id> --write-bucket <bucket id>
+```
+
+Desweiteren ist ein DBRP Mapping anzulegen, um die Default Retention Policy aus Influxdb V1.x auf das neue Bucket-Konzept von Influxdb V2.x zu mappen.
+
+```bash
+# Beispiel 
+influx bucket list  # ermitteln der Bucket-ID für das Bucket telegraf/thirty_days
+# Anlegen eines expliziten Mappings (überschreiben des automatisch angelegten virtuellen mappings)
+influx v1 dbrp create --db telegraf --rp thirty_days --bucket-id cf8d47cbfd31c0ab --default
+# Im Test war das DBRP trotz --default Angabe nicht auf Default gesetzt. Daher:
+influx v1 dbrp update --id 0b528e493d763000 --rp thirty_days --default
+```
+
+## InfluxDB V1 Usage
 
 * [key concepts](https://docs.influxdata.com/influxdb/v1.7/concepts/key_concepts/)
 * [getting started](https://docs.influxdata.com/influxdb/v1.7/introduction/getting-started/)      
@@ -56,7 +103,7 @@ docker run -d --name influx \
 
 Beispiele und Schnellstart:
 
-```
+```bash
 docker exec -it influx bash
 root@fb22790cf099:/# influx -precision rfc3339
 > auth
@@ -146,7 +193,7 @@ Sollte die Anzahl der Datensätze in der MySQL-Datenbank überschritten werden w
 
 Und jetzt die Befehle:
 
-```
+```bash
 python3 -m venv pythonenv
 . pythonenv/bin/activate
 pip install -u pip
@@ -160,7 +207,7 @@ for i in `seq 1 10`; do python migrate_mysql_to_influxdb.py; done
 
 OpenHab Beispiel:
 
-```
+```text
 CREATE RETENTION POLICY "two_weeks" ON "openhab" DURATION 2w REPLICATION 1 DEFAULT
 CREATE RETENTION POLICY "a_year" ON "openhab" DURATION 52w REPLICATION 1
 
@@ -172,7 +219,7 @@ CREATE CONTINUOUS QUERY "cq_15m_Trockner" ON "openhab" BEGIN SELECT mean("value"
 
 Beispiele für Abfragen:
 
-```
+```sql
 > select * from "a_year"."downsampled_Waschmaschine_Power"
 name: downsampled_Waschmaschine_Power
 time                mean_value
@@ -205,13 +252,13 @@ Um diese Daten in eine InfluxDB zu migrieren um die Vorteile der automatisierten
 
 Während der Migration ist die Periode für *four_weeks* allerdings auch auf 5 Jahre gesetzt und nach der erfolgten Migration mittels folendem Statement erst auf vier Wochen gesetzt.:
 
-```
+```sql
 alter retention policy "four_weeks" on "homeautomation" duration 4w replication 1 default
 ```
 
 Die Migration füttert erst einmal alle Daten in die "Default" - Retention Policy, nach der erfolgreichen Migration der Daten wird der Mittelwert in die 5 Jahres Retention Policy gespeichert.
 
-```
+```sql
 create retention policy "five_years" on "homeautomation" duration 260w replication 1
 create retention policy "four_weeks" on "homeautomation" duration 260w replication 1 default
 ```
@@ -219,11 +266,11 @@ create retention policy "four_weeks" on "homeautomation" duration 260w replicati
 Folgende "kontinuierlichen Abfragen" werden definiert um automatisiert die Mittelwerte einer 30 Minuten Periode dann dauerhaft abzuspeichern.
 Da "kontinuierliche Abfragen" nur auf "Live-Werte" definiert sind, werden bei der Migration für die Füllung der "five_years" Retention die gleichen Queries verwendet. Also beispielsweise:
 
-```
+```sql
 SELECT mean("light") AS "m_light"  INTO "five_years"."M_Helligkeit" FROM "four_weeks"."Helligkeit" GROUP BY time(30m), room
 ```
 
-```
+```sql
 CREATE CONTINUOUS QUERY "cq_30m_Helligkeit" ON "homeautomation" BEGIN SELECT mean("light") AS "m_light"  INTO "five_years"."M_Helligkeit" FROM "four_weeks"."Helligkeit" GROUP BY time(30m), room END
 
 CREATE CONTINUOUS QUERY "cq_30m_Temperatur" ON "homeautomation" BEGIN SELECT mean("temperatur") AS "m_temperatur"  INTO "five_years"."M_Temperatur" FROM "four_weeks"."Temperatur" GROUP BY time(30m), room END
@@ -234,7 +281,7 @@ CREATE CONTINUOUS QUERY "cq_30m_Temperatur_Nativ" ON "homeautomation" BEGIN SELE
 
 Wenn sich bereits Daten in der standard "Default" Retention Policy befinden, können diese in die neue Retention Policy "four_weeks" kopiert werden.
 
-```
+```sql
 > SELECT * INTO "homeautomation"."four_weeks".:MEASUREMENT FROM "homeautomation"."autogen"./.*/ GROUP BY *
 name: result
 time written
@@ -255,7 +302,7 @@ Temperatur,room=Wohnzimmer
 
 Mittelwert von 30 Minuten berechnen (1) und in eine andere Retention Policy schreiben (2):
 
-```
+```sql
 (1)
 > SELECT mean("temperatur") FROM "Temperatur" WHERE $timeFilter GROUP BY time(30m), "room"
 
@@ -269,7 +316,7 @@ time written
 
 Beispiel-Queries:
 
-```
+```sql
 >select * from autogen.Helligkeit where room = 'AUTO'  LIMIT 10
 name: Helligkeit
 time                light room
@@ -333,11 +380,11 @@ Um Openhab mit InfluxDB zu nutzen sind folgende Punkte notwendig.
 * Editieren der Datei influxdb.persist (/var/OpenHAB/openhab_conf/persistence/influxdb.persist)
 * Editieren der *rules*, um die zusätzliche Datenbank in den Abfragen einzupflegen wenn InfluxDB nicht die einzige (default *definiert in PaperUI-Configuration-System:Persistence*) Datenbank ist. z.B.: Trockner_Power.averageSince(now.minusMinutes(averageTimeTrockner)**,"influxdb"**)
 
-
 ## MySQL hints ....
+
 Um einen einfachen Überblick über die MySQL Datenbanken zu bekommen hilft *PhpMyAdmin*.
 
-```
+```bash
 docker run --name myadmin -d -e PMA_HOST=<dbhost> -p 8080:80 phpmyadmin/phpmyadmin
 ```
 
@@ -346,7 +393,7 @@ Per Web-Browser dann den Port 8080 nutzen.
 ## Chronograf
 Chronograf ist ein Tool um Datenbanken zu verwalten und hat einen Daten-Explorer ... kurz getestet, hilft ein wenig die Übersicht zu bekommen.
 
-```
+```bash
 docker run -p 8888:8888 -v $PWD:/var/lib/chronograf chronograf --influxdb-url=http://openhab.local:8086
 ```
 
