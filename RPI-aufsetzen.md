@@ -1,30 +1,33 @@
 # Raspberry PI für Homeautomation aufsetzen
 
 ## Raspbian Lite installieren und konfigurieren
+
 ### Alte Variante
-* [Noobs](https://www.raspberrypi.org/downloads/noobs/) (aktuellste Version) herunterladen 
+
+* [Noobs](https://www.raspberrypi.org/downloads/noobs/) (aktuellste Version) herunterladen
 * SD-Karte formatieren
 * Inhalt des NOOBS Verzeichnis, nachdem die heruntergeladene Datei entpackt wurde, auf die SD-Karte kopieren
 * Eventuell ein USB-Stick (oder USB-Festplatte) >= 16GB bereithalten
 * SD-Karte + USB-Stick in den Raspberry einlegen/einstecken
 * Raspberry booten
 * Im Noobs Screen die notwendigen Parameter einstellen
-	* Sprache Deutsch
-	* ev. WLAN verbinden
-	* Installationsziel festlegen (/dev/sda bei USB-Stick)
-	* RASPBIAN-Lite aussuchen (Desktop wird nicht benötigt)
-	* Installation starten (ev. Wlan noch einmal selektieren, oder mehrfach versuchen, wenn der Download zuerst nicht funktioniert.
+  * Sprache Deutsch
+  * ev. WLAN verbinden
+  * Installationsziel festlegen (/dev/sda bei USB-Stick)
+  * RASPBIAN-Lite aussuchen (Desktop wird nicht benötigt)
+  * Installation starten (ev. Wlan noch einmal selektieren, oder mehrfach versuchen, wenn der Download zuerst nicht funktioniert.
 
 ### Neue Variante
+
 * RPI Imager auf einem geeigneten Gerät installieren und eine SD-Karte oder einen Memory-Stick/SSD mit Raspberry OS Lite installieren.
 * Vor der Installation kann über die Einstellungen (Zahnradsymbol) bereits Hostname, Username, Passwort, WLAN, Sprache, Zeitzone, SSH Zugang u.a. eingestellt werden.
 * Um einen RPI2 von USB zu booten ist sowohl eine SD-Karte als auch das USB Device mit dem OS zu bespielen.
- * Nach dem ersten Boot von der SD-Karte in /boot/cmdline.txt die UUID der großen Partition des bereits eingesteckten USB Sticks einstellen. Der Befehl ```blkid``` gibt diese PARTUUIDs aus. 
- * Nach dem Neustart über ```raspi-config``` die Root-Partition erweitern
+* Nach dem ersten Boot von der SD-Karte in /boot/cmdline.txt die UUID der großen Partition des bereits eingesteckten USB Sticks einstellen. Der Befehl ```blkid``` gibt diese PARTUUIDs aus.
+* Nach dem Neustart über ```raspi-config``` die Root-Partition erweitern
 
 Nach der Installation sollte die durch DHCP vergebene **IP-Adresse** des Raspberry notiert werden (Konsolenoutput oder ```ip a```) und ein Update der installierten Pakete stattfinden. Möglicherweise soll auch eine statische IP Adresse vergeben werden (/etc/dhcpcd.conf).
 
-```
+```bash
 sudo apt-get update
 sudo apt-get full-upgrade
 ```
@@ -32,22 +35,22 @@ sudo apt-get full-upgrade
 Nach der Installation sollten noch verschiedene Einstellungen getätigt werden, um das System vorzubereiten.
 
 * raspi-config ausführen (sudo!)
-	* den gewünschten Hostnamen einstellen
-	* das gewünschte Passwort für den Benutzer (z.B.: für **pi**) einstellen
-	* SSH aktivieren
-	* Seriellen Konsolenausgang deaktivieren ABER
-	* Serielle Schnittstelle aktivieren (aktiviert halten)
-	* Zeitzone Europe/Berlin einstellen
-	
-Danach den Raspberry booten. ``` sudo reboot```.
+  * den gewünschten Hostnamen einstellen
+  * das gewünschte Passwort für den Benutzer (z.B.: für **pi**) einstellen
+    * SSH aktivieren
+    * Seriellen Konsolenausgang deaktivieren ABER
+    * Serielle Schnittstelle aktivieren (aktiviert halten)
+    * Zeitzone Europe/Berlin einstellen
+
+Danach den Raspberry booten. ```sudo reboot```.
 
 Nach dem Reboot testen, ob der SSH Zugang ```ssh <benutzer>@<eingestellter hostname>.local```funktionert.
 
 ## AVAHI Daemon
+
 Folgende Einträge in /etc/avahi/services/ssh.service ermöglichen das "lokale Browsen" des SSH-Service über mDNS. (z.B: dns-sd -B _ssh)
 
-
-```
+```xml
 <service-group>
    <name replace-wildcards="yes">%h</name>
    <service>
@@ -58,9 +61,10 @@ Folgende Einträge in /etc/avahi/services/ssh.service ermöglichen das "lokale B
 ```
 
 ## SWAP vergrößern
+
 Die Default-Einstellungen für SWAP sind nur 100MB, durch die Änderungen der Swap-Konfigurationsdatei **/etc/dphys-swapfile** setzen wir die doppelte Memorygröße als Swap-Size:
 
-```
+```conf
 # /etc/dphys-swapfile - user settings for dphys-swapfile package
 # author Neil Franklin, last modification 2010.05.05
 # copyright ETH Zuerich Physics Departement
@@ -89,14 +93,13 @@ CONF_SWAPFACTOR=2
 #CONF_MAXSWAP=2048
 ```
 
-
 ## Serielle Schnittstelle konfigurieren
 
 Folgende [Beschreibung](http://www.netzmafia.de/skripten/hardware/RasPi/RasPi_Serial.html) zeigt die Aktionen zur Konfiguration der seriellen Schnittstelle für verschiedene PI / Raspbian -Versionen auf.
 
 Neben der Konfiguration der seriellen Schnittstelle während der Installation / Konfiguration mit **raspi-config** waren mit Raspbian-Buster noch folgende Befehle notwendig (sudo):
 
-```
+```bash
 systemctl status serial-getty@ttyAMA0.service
 systemctl stop serial-getty@ttyAMA0.service
 systemctl disable serial-getty@ttyAMA0.service
@@ -104,29 +107,33 @@ systemctl status serial-getty@ttyS0.service
 systemctl stop serial-getty@ttyS0.service
 systemctl disable serial-getty@ttyS0.service
 ```
-## Git Repository für HomeAutomation clonen
-Git installieren und Repository clonen sowie die richtige Branch einstellen: 
 
-```
+## Git Repository für HomeAutomation clonen
+
+Git installieren und Repository clonen sowie die richtige Branch einstellen:
+
+```bash
 sudo apt-get install git
 git clone https://github.com/andreasgremm/HomeAutomation.git
 git checkout MQTT_V2
 ```
+
 ## Docker installieren
 
 [Sebastian Brosch](https://sebastianbrosch.blog/docker-auf-einem-raspberry-pi-installieren/) hat die Installation von Docker auf Raspbian-Buster gut beschrieben.
 
 Mit den Befehlen
 
-```
+```bash
 sudo curl -fsSL https://get.docker.com | sh
 usermod -aG docker <benutzer>
-``` 
+```
+
 wird Docker installiert und der Benutzer (z.B. **pi**) wird ermächtigt Container zu verwalten.
 
 ### Docker Images
 
-Für die Installationen im HomeAutomation Umfeld werden verschiedene Docker-Images benötigt, deren Beschaffung und Nutzung in den jeweiligen README Dateien beschrieben ist. 
+Für die Installationen im HomeAutomation Umfeld werden verschiedene Docker-Images benötigt, deren Beschaffung und Nutzung in den jeweiligen README Dateien beschrieben ist.
 
 * [Grafana](DockerEnv/Grafana/README.md)
 * [InfluxDB](DockerEnv/InfluxDB/README.md)
@@ -134,16 +141,20 @@ Für die Installationen im HomeAutomation Umfeld werden verschiedene Docker-Imag
 * [NGINX](DockerEnv/NGINX/README.md)
 
 ## Telegraf installieren
+
 Für die Performance-Messung des Raspberry wird Telegraf verwendet. Die Beschreibung für das HomeAutomation Umfeld befindet sich [hier](DockerEnv/Telegraf/README.md).
 
 ## Backup auf die Synology vorbereiten
+
 * /root/.ssh/authorized_keys bereitstellen
 * ssh login von Synology interaktiv ausführen, um known_hosts zu ergänzen
 
 ## Login von Laptop/Workstation vorbereiten
+
 * /home/pi/.ssh/authorized_keys bereitstellen
 
 ## Docker-Images für die HomeAutomation installieren
+
 * [BASH_ImageDiff](DockerEnv/BASH_ImageDiff/README.md)
 * [BASH_Pictures2Video](DockerEnv/BASH_Pictures2Video/README.md)
 * [FSAPI](DockerEnv/FSAPI/README.md)
@@ -161,34 +172,39 @@ Für die Performance-Messung des Raspberry wird Telegraf verwendet. Die Beschrei
 * [MJPEG-Streamer](DockerEnv/MJPEG-Streamer/README.md)
 
 ## MQTT - Programme (non Docker) installieren
+
 Die Python-Programme laufen im Verzeichnis /home/pi/MQTT und werden über virtuelle Umgebungen voneinander unabhängig implementiert.
 Hierzu muss das Python-Modul für virtuelle Umgebungen installiert werden.
 
-```
+```bash
 sudo apt-get install python3-venv
 ```
+
 * [MQTT_KameraController](MQTT/MQTT_KameraController/README.md)
 * [MQTT_Managebuzzer](MQTT/MQTT_Managebuzzer/README.md)
 * [MQTT_ReadXbeeserial](MQTT/MQTT_ReadXbeeserial/README.md)
 
 ## Security Volume/Verzeichnis
+
 Die Security Informationen für die verschiedenen Programme liegen als Include-Dateien **NICHT** im GitHub. Innerhalb der Programme wird beschrieben wie damit umzugehen ist.
 
 ## Bash Skripte installieren
+
 Für verschiedene Funktionen werden [BASH-Scripte](BASH-Skripte/README.md) benötigt.
 
 Für die Ausführung der Batch-Skripte werden, wie oben beschrieben, Einträge in der **/etc/fstab** und weitere Security-Einstellungen zum Mounten der entsprechenden Verzeichnisse benötigt.
 Folgende Befehle mittels sudo ausführen:
 
-```
+```bash
 mkdir -p /mnt/synology
 mkdir -p /mnt/mediencenter
 apt-get install davfs2
 # unpriviligierten Benutzern erlauben WebDav Ressourcen einzubinden!
 usermod -a -G davfs2 pi
 ```
- 
+
 ## Node-Red installieren / konfigurieren
+
 **Todo: Node-Red in Docker Container laufen lassen**
 [Beschreibung: Node-Red in Docker](https://nodered.org/docs/getting-started/docker)
 
@@ -196,13 +212,14 @@ In der für die Home-Automation genutzten Raspbian-Light Variante ist **Node-Red
 
 [Installation von Node-Red](https://nodered.org/docs/getting-started/raspberrypi#installing-node-red):
 
-```
+```bash
 sudo apt install build-essential git
 bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
 ```
+
 Hierbei wird folgende Ausgabe generiert:
 
-```
+```text
 Running Node-RED install for user pi at /home/pi on raspbian
 
 
@@ -232,7 +249,7 @@ Started  So 3. Mai 19:01:11 CEST 2020  -  Finished  So 3. Mai 19:07:19 CEST 2020
 
 In der Datei /var/log/nodered-install.log finden sich folgende Hinweise:
 
-```
+```bash
 ## You may also need development tools to build native addons:
      sudo apt-get install gcc g++ make
 ## To install the Yarn package manager, run:
@@ -244,7 +261,7 @@ In der Datei /var/log/nodered-install.log finden sich folgende Hinweise:
 
 Auch für den automatischen Start ist Node-Red vorbereitet:
 
-```
+```bash
 cp /library/systemd/system/nodered.service /etc/systemd/system/nodered.service
 ## /etc/systemd/system/nodered.service editieren:
 #Environment="NODE_OPTIONS=--max-old-space-size=256"
@@ -258,29 +275,33 @@ systemctl status nodered
 
 Installation weiterer Module:
 
-```
+```bash
 cd .node-red
 npm install node-red-dashboard
 ```
+
 ### Flows kopieren
+
 Die Flows aus dem alten Node-Red System exportieren (All Flows) und im neuen System importieren. Dieses geht auch gut direkt über die Zwischenablage.
 
 Die Sicherheitseinstellungen für MQTT müssen wieder eingerichtet werden.
 Dieses wird [hier](https://nodered.org/docs/user-guide/runtime/securing-node-red) beschrieben.
+
 ### Security einstellen
+
 * adminAuth einstellen
 * httpRoot einstellen (/nodered)
 
 [NGINX für Node-Red](https://gist.github.com/boneskull/d418b7c871d2248cfeba) konfigurieren.
 
-```
+```conf
     location /nodered/ui/ {
          proxy_pass http://localhost:1880/nodered/ui/;
          proxy_http_version 1.1;
          proxy_set_header Upgrade $http_upgrade;
          proxy_set_header Connection "upgrade";
-	     auth_basic  "Node Red Dashboard";
-    	  auth_basic_user_file   /etc/nginx/conf.d/.htpasswd;
+      auth_basic  "Node Red Dashboard";
+       auth_basic_user_file   /etc/nginx/conf.d/.htpasswd;
     }
 
     location /nodered/ {
@@ -292,12 +313,14 @@ Dieses wird [hier](https://nodered.org/docs/user-guide/runtime/securing-node-red
 ```
 
 ## certbot in Docker implementieren
+
 LetsEncrypt ist ein freier Service und in diesem Zusammenhang ermögicht Certbot es Zertifikate für die Domäne zu implementieren.
 
 CertBot mit Nginx in Docker ist [hier](https://github.com/wmnnd/nginx-certbot) beschrieben.
 
 Docker Image von Certbot für Raspbian herunterladen:
-```
+
+```bash
 docker pull certbot/certbot:arm32v6-latest
 ```
 
@@ -305,7 +328,7 @@ Das dort vorgestellte Initialisierungsscript muss für die gewünschten DynDNS /
 
 Docker Compose muss installiert werden:
 
-```
+```bash
 # Install required packages
 sudo apt update
 sudo apt install -y python3-pip libffi-dev
@@ -315,7 +338,7 @@ sudo pip3 install docker-compose
 
 Das Docker-Compose File:
 
-```
+```yaml
 version: '3'
 
 services:
@@ -346,15 +369,15 @@ services:
 ```
 
 ## Alexa Integration eigener Skills
+
 Für den [Alexa-Skill](Alexa/README.md) "Automation", der die Hue-Lampen kontrolliert, nutze ich einen uWSGI Server in Verbindung mit NGINX.
 
 In den entsprechenden NGINX Konfigurationen muss folgender Eintrag ergänzt werden:
 
-```
+```text
     location /alexa  {
         include uwsgi_params;
         uwsgi_pass localhost:3031;
     }
 
 ```
-

@@ -21,8 +21,8 @@ Wenn Persistence für die Grafana-Installation benötigt wird, sollten die Berec
 # in the container you just started:
 chown -R root:root /etc/grafana && \
 chmod -R a+r /etc/grafana && \
-chown -R grafana:grafana /var/lib/grafana && \
-chown -R grafana:grafana /usr/share/grafana
+chown -R grafana:root /var/lib/grafana && \
+chown -R grafana:root /usr/share/grafana
 exit
 ```
 Beim ersten Aufruf von Grafana über den Web-Browser wird für den Benutzer admin (initiales Passwort: admin) ein neues Passwort gesetzt.

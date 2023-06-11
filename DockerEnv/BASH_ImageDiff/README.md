@@ -22,6 +22,7 @@ Der Aufruf lautet:
 ```
 docker run \
 	-it --rm \
+	--user `id -u`:`id -g` \
 	-v "<Quellverzeichnis>":"/mnt/camera_input" \
 	-v "<Zielverzeichnis>":"/mnt/reduced_output" \
 	imagediff:prod 
@@ -31,6 +32,7 @@ Um eine interaktive Shell im Image aufzurufen, kann folgender Befehl verwendet w
 
 ```
 docker run -it --rm --entrypoint=bash \
+    --user `id -u`:`id -g` \
 	-v "<Quellverzeichnis>":"/mnt/camera_input" \
 	-v "<Zielverzeichnis>":"/mnt/reduced_output" \
 	imagediff:prod

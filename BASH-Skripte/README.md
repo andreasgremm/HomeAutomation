@@ -32,34 +32,32 @@ Die Ausgaben der IPC-100A im Studio werden regelmäßig per FTP auf das Verzeich
 
 Das Ergebnis der Differenzbildung wird im Verzeichnis ```/home/IPC100A_Diffs``` des Benutzers **camera** abgelegt.
 
-
 /etc/fstab - Eintrag:
 
-```
+```text
 //192.168.2.2/home /mnt/synologyDS920  cifs rw,user,noauto,uid=andreas,gid=andreas,credentials=/home/andreas/.cifs/secrets,vers=2.1 0 0
 ```
 
 Die Datei /home/pi/.cifs/secrets.neu enthält den Benutzernamen und das Passwort für den SMB-Mount des entsprechenden Verzeichnisses.
 Wenn sich der genutzte Benutzername auf dem Raspberry Pi ändert, wird sich natürlich auch die Lage der **secrets** Datei ändern.
 
-```
+```text
 username=<user>
 password=<password>
 ```
-
 
 ### WebCam im Wohnzimmer
 Die Ausgaben der WebCam im Wohnzimmer werden per WebDav-Mount auf das Verzeichnis ***Hochgeladen*** in der Magenta-Cloud abgelegt.
 
 /etc/fstab - Eintrag:
 
-```
+```text
 https://webdav.magentacloud.de /mnt/mediencenter davfs rw,noexec,noauto,user,async,_netdev,uid=andreas,gid=andreas 0 0
 ```
 
 Die Berechtigungen werden in der Datei $home/.davfs2/secrets hinterlegt.
 
-```
+```text
 /mnt/mediencenter <MagentaCloud User> <MagentaCloud User password>
 ```
 
