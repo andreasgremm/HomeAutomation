@@ -2,7 +2,7 @@ aniso8601==1.2.0
 cffi==1.14.0
 click==7.1.2
 six==1.11.0
-cryptography==41.0.4
+cryptography==41.0.6
 itsdangerous==1.1.0
 Jinja2==2.11.3
 MarkupSafe==1.1.1
