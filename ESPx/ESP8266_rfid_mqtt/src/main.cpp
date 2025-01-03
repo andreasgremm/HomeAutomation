@@ -145,7 +145,7 @@ String macToString(byte mac[6]){
   String s="";
   for (byte i=0; i<6; i++){
     char buf[3];
-    sprintf(buf, "%2X", mac[i]);
+    sprintf(buf, "%.2X", mac[i]);
     s += buf;
     if (i < 5) s+=':';
   }
