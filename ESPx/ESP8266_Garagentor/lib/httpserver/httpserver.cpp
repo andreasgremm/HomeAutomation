@@ -27,15 +27,11 @@ String macToString(byte mac[6])
 void handleRoot()
 {
     time_t tnow = time(nullptr);
-    String swohnzimmerAlarm = wohnzimmerAlarm ? "<font color='green'>Ein</font>" : "<font color='red'>Aus</font>";
-    String sautoAlarm = autoAlarm ? "<font color='green'>Ein</font>" : "<font color='red'>Aus</font>";
     String message = "<html><head><style>table, th, td {border: 1px solid black;}</style><title>Garagentor</title>\
 <meta http-equiv='refresh' content='10'></head><body>\
 <h4>Uhrzeit: " + String(ctime(&tnow)) +
                      "</h4>\
 <br /><table><caption>Alarmanlage Status</caption><tr><th>Wohnzimmer Alarm</th><th>Auto Alarm</th></tr>\
-<tr><td><center>" + swohnzimmerAlarm +
-                     "</center></td><td><center>" + sautoAlarm + "</center></td></tr>\
 </table><br />\
 <a href='/status'>Status</a><br />\
 <a href='/update'>Update</a><br />\

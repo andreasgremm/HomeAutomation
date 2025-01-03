@@ -5,8 +5,6 @@
 String ipToString(IPAddress ip);
 String macToString(byte mac[6]);
 
-extern bool wohnzimmerAlarm;
-extern bool autoAlarm;
 extern String hostname;
 
 extern ESP8266WebServer httpServer;

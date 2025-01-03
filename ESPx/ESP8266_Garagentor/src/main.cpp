@@ -6,6 +6,7 @@
 #include <ESP8266HTTPUpdateServer.h>
 #include <time.h>
 #include <TZ.h>
+#include <Ticker.h>
 #include <PubSubClient.h>
 
 #include <wifimqtt.h>
@@ -26,21 +27,24 @@ const char* mqttPass = "MQTT Password";
 const char* mqttClientId = "MQTT Client Name";
 */
 
-unsigned long currentMillis;
-bool wohnzimmerAlarm = false;
-bool autoAlarm = false;
-String hostname = host; 
+Ticker blinker;
 
+unsigned long currentMillis;
+String hostname = host;
 
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 WiFiClient wifi;
 PubSubClient mqtt(wifi);
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
   Serial.println();
   Serial.println("Booting Sketch...");
+  pinMode(garagentorTriggerPin, OUTPUT);
+  pinMode(garagentorStatusPin, OUTPUT);
+  blinker.attach(0.2, blinkStatus);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   mqtt.setKeepAlive(60);
@@ -48,40 +52,42 @@ void setup() {
   mqtt.setCallback(messageReceived);
 
   wificonnect(ssid, password);
-  digitalWrite(autoAlarmPin, LOW);
-
   mqttconnect(mqtt, mqttClientId, mqttUser, mqttPass);
-  digitalWrite(wohnzimmerAlarmPin, LOW);
 
-  
-  //Attach handles for different pages.
+  // Attach handles for different pages.
   httpUpdater.setup(&httpServer);
-
   httpServer.on("/", handleRoot);
-  httpServer.on("/status",handleStatus);
-
+  httpServer.on("/status", handleStatus);
   httpServer.begin();
 
-  if (MDNS.begin(host)) {
-      MDNS.addService("http", "tcp", 80);
-   }
-   else {
-      Serial.println("Error setting up MDNS responder!");
-   };
+  if (MDNS.begin(host))
+  {
+    MDNS.addService("http", "tcp", 80);
+  }
+  else
+  {
+    Serial.println("Error setting up MDNS responder!");
+  };
   configTime(TZ_Europe_Berlin, "pool.ntp.org");
+  blinker.detach();
+  digitalWrite(garagentorStatusPin, HIGH);
 }
 
-void loop() {
+void loop()
+{
   // put your main code here, to run repeatedly:
   delay(10);
   currentMillis = millis();
 
-  if(!mqtt.connected()) {
+  if (!mqtt.connected())
+  {
     Serial.println("MQTT connection lost.");
+    blinker.attach(0.2, blinkStatus);
     mqttconnect(mqtt, mqttClientId, mqttUser, mqttPass);
+    blinker.detach();
+    digitalWrite(garagentorStatusPin, HIGH);
   }
   MDNS.update();
   mqtt.loop();
   httpServer.handleClient();
 }
-

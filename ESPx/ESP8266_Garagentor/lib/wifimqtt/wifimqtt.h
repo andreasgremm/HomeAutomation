@@ -2,12 +2,14 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-#define autoAlarmPin (D1)
-#define wohnzimmerAlarmPin (D2)
+#define garagentorTriggerPin (D1)
+#define garagentorMagnetPin  (D2)
+#define garagentorStatusPin  (D4) // internal LED
 
 #define topic_status_auto_motion ("home/status/auto/motion")
 #define topic_status_wohnzimmer_motion ("home/status/wohnzimmer/motion")
 #define topic_status_flur_motion ("home/status/flur/motion")
+#define topic_set_garagentor_trigger ("home/set/garage/tor/trigger")
 #define topic_status_client_garagentor ("clientstatus/Garagentor")
 
 #define topic_status_wohnzimmer_motion_old ("alarm/wohnzimmer/detected")
@@ -21,5 +23,4 @@ void mqttconnect(PubSubClient &mqtt, const char *mqttClientId, const char *mqttU
 
 void messageReceived(char *topic, unsigned char *payload, unsigned int length);
 
-extern bool wohnzimmerAlarm;
-extern bool autoAlarm;
+void blinkStatus();
