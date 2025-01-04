@@ -24,14 +24,21 @@ String macToString(byte mac[6])
     return s;
 }
 
-void handleRoot()
+String currentTime()
 {
     time_t tnow = time(nullptr);
+    return ctime(&tnow);
+}
+
+void handleRoot()
+{
+    String storstatus = torStatus ? "<font color='green'>Geschlossen</font>" : "<font color='red'>Ge&ouml;ffnet</font>";
     String message = "<html><head><style>table, th, td {border: 1px solid black;}</style><title>Garagentor</title>\
 <meta http-equiv='refresh' content='10'></head><body>\
-<h4>Uhrzeit: " + String(ctime(&tnow)) +
+<h4>Uhrzeit: " + currentTime() +
                      "</h4>\
-<br /><table><caption>Alarmanlage Status</caption><tr><th>Wohnzimmer Alarm</th><th>Auto Alarm</th></tr>\
+<br /><table><caption>Garagentor Status</caption><tr><th>Letzter Trigger</th><th>Torstatus</th></tr>\
+<tr><td><center>" + lastTrigger + "</center></td><td><center>" + storstatus + "</center></td></tr>\
 </table><br />\
 <a href='/status'>Status</a><br />\
 <a href='/update'>Update</a><br />\

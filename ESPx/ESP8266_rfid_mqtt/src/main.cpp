@@ -51,6 +51,8 @@ int wohnzimmerAlarmPin = D2;
 int irPin = A0;
 
 // Remove this include which sets the below constants to my own conveniance
+#include </Users/andreas/Documents/git-github/non-git-local-includes/ESPx_wlan.h>
+#include </Users/andreas/Documents/git-github/non-git-local-includes/ESPx_mqtt.h>
 #include </Users/andreas/Documents/git-github/non-git-local-includes/ESP8266_rfid_mqtt_local.h>
 
 // The following constants need to be set in the program

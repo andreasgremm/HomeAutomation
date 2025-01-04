@@ -4,6 +4,9 @@
 #include <PubSubClient.h>
 #include <wifimqtt.h>
 
+String lastTrigger = "None";
+bool torStatus = true;
+
 void wificonnect(String ssid, String password)
 {
     while (WiFi.waitForConnectResult() != WL_CONNECTED)
@@ -21,25 +24,22 @@ void wificonnect(String ssid, String password)
 
 void mqttconnect(PubSubClient &mqtt, const char *mqttClientId, const char *mqttUser, const char *mqttPass)
 {
-    while (!mqtt.connect(mqttClientId, mqttUser, mqttPass, topic_status_client_garagentor, 1, true, client_offline_message))
+    while (!mqtt.connect(mqttClientId, mqttUser, mqttPass, topic_status_garagentor_will, 1, true, client_offline_message))
     {
-        Serial.print("-");
+        Serial.println("MQTT failed, retrying.");
         delay(500);
     }
     Serial.println("\n MQTT connected!");
-    mqtt.subscribe(topic_status_auto_motion);
     mqtt.subscribe(topic_set_garagentor_trigger);
-    mqtt.subscribe(topic_status_wohnzimmer_motion_old);
-    mqtt.publish(topic_status_client_garagentor, client_online_message, true);
+    mqtt.publish(topic_status_garagentor_will, client_online_message, true);
 }
 
 void messageReceived(char *topic, unsigned char *payload, unsigned int length)
 {
-
     Serial.print("incoming: ");
     Serial.print(topic);
     Serial.print(" - ");
-    for (byte i = 0; i < length; i++)
+    for ( byte i = 0; i < length; i++)
     {
         Serial.print((const char)payload[i]);
     }
@@ -47,12 +47,12 @@ void messageReceived(char *topic, unsigned char *payload, unsigned int length)
 
     if (strcmp(topic, topic_set_garagentor_trigger) == 0)
     {
-        if (strncmp((const char *)payload, "True", length) == 0)
-        {
-            digitalWrite(garagentorTriggerPin, HIGH);
-            delay(500);
-            digitalWrite(garagentorTriggerPin, LOW);
-        }
+        // lastTrigger = FromUnsignedCharP(payload);
+        lastTrigger = String((char *) payload).substring(0, length) + " ( " + currentTime() + " ) ";
+
+        digitalWrite(garagentorTriggerPin, HIGH);
+        delay(500);
+        digitalWrite(garagentorTriggerPin, LOW);
     }
 }
 

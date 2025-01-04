@@ -13,6 +13,8 @@
 #include <httpserver.h>
 
 // Remove this include which sets the below constants to my own conveniance
+#include </Users/andreas/Documents/git-github/non-git-local-includes/ESPx_wlan.h>
+#include </Users/andreas/Documents/git-github/non-git-local-includes/ESPx_mqtt.h>
 #include </Users/andreas/Documents/git-github/non-git-local-includes/ESP8266_garagentor_local.h>
 
 // The following constants need to be set in the program
@@ -44,9 +46,12 @@ void setup()
   Serial.println("Booting Sketch...");
   pinMode(garagentorTriggerPin, OUTPUT);
   pinMode(garagentorStatusPin, OUTPUT);
+  pinMode(garagentorMagnetPin, INPUT);
+
   blinker.attach(0.2, blinkStatus);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+
   mqtt.setKeepAlive(60);
   mqtt.setServer(brocker, 1883);
   mqtt.setCallback(messageReceived);
@@ -81,7 +86,6 @@ void loop()
 
   if (!mqtt.connected())
   {
-    Serial.println("MQTT connection lost.");
     blinker.attach(0.2, blinkStatus);
     mqttconnect(mqtt, mqttClientId, mqttUser, mqttPass);
     blinker.detach();

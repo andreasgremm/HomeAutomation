@@ -4,10 +4,11 @@
 
 String ipToString(IPAddress ip);
 String macToString(byte mac[6]);
-
-extern String hostname;
-
-extern ESP8266WebServer httpServer;
-
+String currentTime();
 void handleStatus();
 void handleRoot();
+
+extern String hostname;
+extern ESP8266WebServer httpServer;
+extern String lastTrigger;
+extern bool torStatus;
