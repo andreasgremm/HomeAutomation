@@ -1,13 +1,10 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
 #include <WiFiClient.h>
-#include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
 #include <time.h>
 #include <TZ.h>
 #include <Ticker.h>
-#include <PubSubClient.h>
 
 #include <wifimqtt.h>
 #include <httpserver.h>
@@ -30,9 +27,14 @@ const char* mqttClientId = "MQTT Client Name";
 */
 
 Ticker blinker;
+Ticker tmp36;
 
 unsigned long currentMillis;
+
 String hostname = host;
+/// @brief Temperatur wird in Ticker tmp36 gesetzt.
+volatile float tempC = 0.0;
+volatile bool torStatus;
 
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
@@ -41,12 +43,16 @@ PubSubClient mqtt(wifi);
 
 void setup()
 {
-  Serial.begin(9600);
+  // system_update_cpu_freq(160);
+  Serial.begin(115200);
   Serial.println();
   Serial.println("Booting Sketch...");
   pinMode(garagentorTriggerPin, OUTPUT);
   pinMode(garagentorStatusPin, OUTPUT);
-  pinMode(garagentorMagnetPin, INPUT);
+  pinMode(garagentorMotionPin, INPUT);
+  pinMode(garagentorMagnetPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(garagentorMagnetPin), torInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(garagentorMotionPin), motionInterrupt, CHANGE);
 
   blinker.attach(0.2, blinkStatus);
   WiFi.mode(WIFI_STA);
@@ -63,6 +69,7 @@ void setup()
   httpUpdater.setup(&httpServer);
   httpServer.on("/", handleRoot);
   httpServer.on("/status", handleStatus);
+  httpServer.on("/trigger",handleTrigger);
   httpServer.begin();
 
   if (MDNS.begin(host))
@@ -76,6 +83,8 @@ void setup()
   configTime(TZ_Europe_Berlin, "pool.ntp.org");
   blinker.detach();
   digitalWrite(garagentorStatusPin, HIGH);
+  tmp36.attach(30.0, readTemperature);
+  torStatus = ! digitalRead(garagentorMagnetPin);
 }
 
 void loop()
@@ -94,4 +103,11 @@ void loop()
   MDNS.update();
   mqtt.loop();
   httpServer.handleClient();
+}
+
+void doTrigger()
+{
+  digitalWrite(garagentorTriggerPin, HIGH);
+  delay(500);
+  digitalWrite(garagentorTriggerPin, LOW);
 }

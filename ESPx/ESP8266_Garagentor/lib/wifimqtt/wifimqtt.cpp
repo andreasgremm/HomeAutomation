@@ -1,11 +1,11 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
 #include <WiFiClient.h>
-#include <PubSubClient.h>
 #include <wifimqtt.h>
 
 String lastTrigger = "None";
-bool torStatus = true;
+const int pinA0 = A0;
+const String offen = "Geöffnet";
+const String geschlossen = "Geschlossen";
 
 void wificonnect(String ssid, String password)
 {
@@ -49,14 +49,37 @@ void messageReceived(char *topic, unsigned char *payload, unsigned int length)
     {
         // lastTrigger = FromUnsignedCharP(payload);
         lastTrigger = String((char *) payload).substring(0, length) + " ( " + currentTime() + " ) ";
-
-        digitalWrite(garagentorTriggerPin, HIGH);
-        delay(500);
-        digitalWrite(garagentorTriggerPin, LOW);
+        doTrigger();
     }
 }
 
 void blinkStatus()
 {
     digitalWrite(garagentorStatusPin, !(digitalRead(garagentorStatusPin))); // Invert Current State of LED
+}
+
+void readTemperature()
+{
+    char msg[5];
+    float spannungA0 = analogRead(pinA0) * 3000.0 / 1024.0;
+    tempC = (spannungA0 - 500) / 10;
+    sprintf(msg, "%2.1f", tempC);
+    mqtt.publish(topic_status_garage_temperatur, (const char*)msg, false);
+}
+
+ICACHE_RAM_ATTR void torInterrupt()
+{
+    torStatus = !digitalRead(garagentorMagnetPin);
+    String storStatus = torStatus? geschlossen : offen ;
+    char ctorStatus[storStatus.length() + 1];
+    strcpy(ctorStatus, storStatus.c_str());
+    mqtt.publish(topic_status_garagentor_status, (const char*)ctorStatus, false);
+}
+
+ICACHE_RAM_ATTR void motionInterrupt()
+{
+    char msg[14];
+    bool motionStatus = digitalRead(garagentorMotionPin);
+    sprintf(msg, "{\"Motion\": %1i}", motionStatus);
+    mqtt.publish(topic_status_garage_motion, (const char*)msg, false);
 }

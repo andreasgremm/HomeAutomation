@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
 #include <httpserver.h>
 
 String ipToString(IPAddress ip)
@@ -37,8 +36,14 @@ void handleRoot()
 <meta http-equiv='refresh' content='10'></head><body>\
 <h4>Uhrzeit: " + currentTime() +
                      "</h4>\
+<br />Garagentor ausl&ouml;sen: <a href='/trigger'><button class='button'>Trigger</button></a><br /><br />\
 <br /><table><caption>Garagentor Status</caption><tr><th>Letzter Trigger</th><th>Torstatus</th></tr>\
-<tr><td><center>" + lastTrigger + "</center></td><td><center>" + storstatus + "</center></td></tr>\
+<tr><td><center>" + lastTrigger +
+                     "</center></td><td><center>" + storstatus + "</center></td></tr>\
+</table><br />\
+<br /><table>\
+<tr><td><center>Temperatur &ordm;C</center></td><td><center>" +
+                     tempC + "</center></td></tr>\
 </table><br />\
 <a href='/status'>Status</a><br />\
 <a href='/update'>Update</a><br />\
@@ -72,5 +77,16 @@ void handleStatus()
 </table><br />" + "\
 <a href='/'>Startseite</a></body></html>";
 
+    httpServer.send(200, "text/html", theStatus);
+}
+
+void handleTrigger()
+{
+    String theStatus = "<html><head><style>table, th, td {border: 1px solid black;}</style>\
+<title>Garagentor</title></head><body>\
+<h4>Garagentor ausgel&ouml;st!</h4>\
+<a href='/'>Startseite</a><br />\
+</body></html>";
+    doTrigger();
     httpServer.send(200, "text/html", theStatus);
 }
