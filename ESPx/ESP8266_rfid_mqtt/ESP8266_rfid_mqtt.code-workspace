@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "ESP8266_Garagentor",
+			"path": "../ESP8266_Garagentor"
+		},
+		{
+			"name": "RFID_Reader",
+			"path": "."
+		}
+	],
+	"settings": {}
+}

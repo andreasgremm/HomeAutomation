@@ -9,6 +9,9 @@
 #include <wifimqtt.h>
 #include <httpserver.h>
 
+#include <FS.h>        // File System for Web Server Files
+#include <LittleFS.h>  // This file system is used.
+
 // Remove this include which sets the below constants to my own conveniance
 #include </Users/andreas/Documents/git-github/non-git-local-includes/ESPx_wlan.h>
 #include </Users/andreas/Documents/git-github/non-git-local-includes/ESPx_mqtt.h>
@@ -25,6 +28,8 @@ const char* mqttUser = "MQTT User Name";
 const char* mqttPass = "MQTT Password";
 const char* mqttClientId = "MQTT Client Name";
 */
+
+#define TRACE(...) Serial.printf(__VA_ARGS__)
 
 Ticker blinker;
 Ticker tmp36;
@@ -43,10 +48,12 @@ PubSubClient mqtt(wifi);
 
 void setup()
 {
+  delay(3000);  // wait for serial monitor to start completely.
+
   // system_update_cpu_freq(160);
   Serial.begin(115200);
   Serial.println();
-  Serial.println("Booting Sketch...");
+  TRACE("Booting Sketch...\n");
   pinMode(garagentorTriggerPin, OUTPUT);
   pinMode(garagentorStatusPin, OUTPUT);
   pinMode(garagentorMotionPin, INPUT);
@@ -55,6 +62,14 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(garagentorMotionPin), motionInterrupt, CHANGE);
 
   blinker.attach(0.2, blinkStatus);
+
+  TRACE("Mounting the filesystem...\n");
+  if (!LittleFS.begin()) {
+    TRACE("could not mount the filesystem...\n");
+    delay(2000);
+    ESP.restart();
+  }
+
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
@@ -70,6 +85,12 @@ void setup()
   httpServer.on("/", handleRoot);
   httpServer.on("/status", handleStatus);
   httpServer.on("/trigger",handleTrigger);
+  // enable CORS header in webserver results
+  httpServer.enableCORS(true);
+  // enable ETAG header in webserver results from serveStatic handler
+  httpServer.enableETag(true);
+    // serve all static files
+  httpServer.serveStatic("/", LittleFS, "/");
   httpServer.begin();
 
   if (MDNS.begin(host))
@@ -78,7 +99,7 @@ void setup()
   }
   else
   {
-    Serial.println("Error setting up MDNS responder!");
+    TRACE("Error setting up MDNS responder!\n");
   };
   configTime(TZ_Europe_Berlin, "pool.ntp.org");
   blinker.detach();
