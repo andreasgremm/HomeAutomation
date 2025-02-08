@@ -2,6 +2,20 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
+#define HAVE_NETDUMP 0
+#include <lwip/napt.h>
+#include <lwip/dns.h>
+
+#define TRACE(...) Serial.printf(__VA_ARGS__)
+
+#define NAPT 1000
+#define NAPT_PORT 10
+
+#ifndef STASSID
+#define STASSID "garagentor"
+#define STAPSK "Not used"
+#endif
+
 #define garagentorTriggerPin (D1) // Relaisanschluss
 #define garagentorMagnetPin (D2)  // Magnetschalter
 #define garagentorStatusPin (D4)  // internal LED zur Statusanzeige des Systems
@@ -46,3 +60,4 @@ extern volatile float tempC;
 /// @brief torStatus = True => Geschlossen, torStatus = False => Geöffnet
 extern volatile bool torStatus;
 extern PubSubClient mqtt;
+extern String hostname;

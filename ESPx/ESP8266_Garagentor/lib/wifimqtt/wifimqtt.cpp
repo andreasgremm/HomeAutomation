@@ -1,6 +1,22 @@
 #include <Arduino.h>
-#include <WiFiClient.h>
 #include <wifimqtt.h>
+
+#if HAVE_NETDUMP
+
+#include <NetDump.h>
+
+void dump(int netif_idx, const char* data, size_t len, int out, int success) {
+  (void)success;
+  Serial.print(out ? F("out ") : F(" in "));
+  Serial.printf("%d ", netif_idx);
+
+  // optional filter example: if (netDump_is_ARP(data))
+  {
+    netDump(Serial, data, len);
+    // netDumpHex(Serial, data, len);
+  }
+}
+#endif
 
 String lastTrigger = "None";
 const int pinA0 = A0;
@@ -9,16 +25,37 @@ const String geschlossen = "Geschlossen";
 
 void wificonnect(String ssid, String password)
 {
-    while (WiFi.waitForConnectResult() != WL_CONNECTED)
+
+    // WiFi.printDiag(Serial);
+    WiFi.setOutputPower(20.5);  // Sets WiFi RF power output to highest level, highest RF power usage
+    WiFi.setHostname((const char*) hostname.c_str()); // allow to address the device by the given name
+    WiFi.begin();
+    WiFi.waitForConnectResult();
+
+    if (WiFi.status() != WL_CONNECTED)
     {
+        TRACE("Prepare WiFi\n"); // start WiFI
+        WiFi.persistent(true);
+        WiFi.setPhyMode(WIFI_PHY_MODE_11N); // Set radio type to N
+        WiFi.mode(WIFI_STA);
+        WiFi.setAutoReconnect(true);
+        WiFi.setAutoConnect(true);
+        TRACE("Wifi Begin (ssid)\n");
         WiFi.begin(ssid, password);
-        Serial.println("WiFi failed, retrying.");
-        delay(500);
+        WiFi.persistent(false);
+        delay(1000);
+        WiFi.waitForConnectResult();
     }
+
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        TRACE(".");
+    }
+    TRACE("connected.\n");
 
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
-
     Serial.println("\n WiFi connected!");
 }
 

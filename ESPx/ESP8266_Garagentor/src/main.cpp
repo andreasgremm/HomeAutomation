@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <WiFiClient.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
 #include <time.h>
@@ -28,8 +27,6 @@ const char* mqttUser = "MQTT User Name";
 const char* mqttPass = "MQTT Password";
 const char* mqttClientId = "MQTT Client Name";
 */
-
-#define TRACE(...) Serial.printf(__VA_ARGS__)
 
 Ticker blinker;
 Ticker tmp36;
@@ -70,14 +67,35 @@ void setup()
     ESP.restart();
   }
 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+#if HAVE_NETDUMP
+  phy_capture = dump;
+#endif
+
+  TRACE("Connect to WiFi...\n");
+  wificonnect(ssid, password);
+
+  auto& serverap = WiFi.softAPDhcpServer();
+  serverap.setDns(WiFi.dnsIP(0));
+
+  WiFi.softAPConfig(  // enable AP, with android-compatible google domain
+    IPAddress(192,168,4,1), IPAddress(192,168,4,1), IPAddress(255, 255, 255, 0));
+  WiFi.softAP(STASSID, password, 1, false);
+  TRACE("AP: %s\n", WiFi.softAPIP().toString().c_str());
+
+  TRACE("Heap before: %d\n", ESP.getFreeHeap());
+  err_t ret = ip_napt_init(NAPT, NAPT_PORT);
+  TRACE("ip_napt_init(%d,%d): ret=%d (OK=%d)\n", NAPT, NAPT_PORT, (int)ret, (int)ERR_OK);
+  if (ret == ERR_OK) {
+    ret = ip_napt_enable_no(SOFTAP_IF, 1);
+    TRACE("ip_napt_enable_no(SOFTAP_IF): ret=%d (OK=%d)\n", (int)ret, (int)ERR_OK);
+    if (ret == ERR_OK) { TRACE("WiFi Network '%s' with same password is now NATed behind '%s'\n", STASSID, STASSID); }
+  }
+  TRACE("Heap after napt init: %d\n", ESP.getFreeHeap());
+  if (ret != ERR_OK) { TRACE("NAPT initialization failed\n"); }
 
   mqtt.setKeepAlive(60);
   mqtt.setServer(brocker, 1883);
   mqtt.setCallback(messageReceived);
-
-  wificonnect(ssid, password);
   mqttconnect(mqtt, mqttClientId, mqttUser, mqttPass);
 
   // Attach handles for different pages.

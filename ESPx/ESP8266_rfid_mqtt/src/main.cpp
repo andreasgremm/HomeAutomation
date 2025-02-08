@@ -96,9 +96,9 @@ MFRC522 rfid(SS_PIN, RST_PIN);
 
 void handleRoot() {
   time_t tnow = time(nullptr);
-  String swohnzimmerAlarm = wohnzimmerAlarm ? "<font color='green'>Ein</font>" : "<font color='red'>Aus</font>";
-  String sautoAlarm = autoAlarm ? "<font color='green'>Ein</font>" : "<font color='red'>Aus</font>";
-  String message = "<!DOCTYPE html>\
+  String swohnzimmerAlarm = wohnzimmerAlarm ? F("<font color='green'>Ein</font>") : F("<font color='red'>Aus</font>");
+  String sautoAlarm = autoAlarm ? F("<font color='green'>Ein</font>") : F("<font color='red'>Aus</font>");
+  String message = F("<!DOCTYPE html>\
 <html lang=de><head>\
 <link rel='apple-touch-icon' sizes='57x57' href='/apple-icon-57x57.png'>\
 <link rel='apple-touch-icon' sizes='60x60' href='/apple-icon-60x60.png'>\
@@ -123,14 +123,14 @@ void handleRoot() {
 <meta http-equiv='refresh' content='10'>\
 <title>RFC Reader</title>\
 </head><body>\
-<h4>Uhrzeit: " + String(ctime(&tnow)) + "</h4>\
+<h4>Uhrzeit: ") + String(ctime(&tnow)) + F("</h4>\
 <br /><table><caption>Alarmanlage Status</caption><tr><th>Wohnzimmer Alarm</th><th>Auto Alarm</th></tr>\
-<tr><td><center>" + swohnzimmerAlarm + "</center></td><td><center>" + sautoAlarm + "</center></td></tr>\
+<tr><td><center>") + swohnzimmerAlarm + F("</center></td><td><center>") + sautoAlarm + F("</center></td></tr>\
 </table><br />\
 <a href='/status'>Status</a><br />\
 <a href='/update'>Update</a><br />\
-</body></html>";
-
+</body></html>");
+  httpServer.sendHeader("Cache-Control", "no-cache");
   httpServer.send(200, "text/html", message);
 }
 
@@ -202,7 +202,7 @@ void handleStatus()
 
   sprintf(theRfidStatus, "RFID-Selftest:<b> %s</b><br />MQTT-Reconnect:<b> %ld </b><br />", rfidStatus ? "True" : "False", mqttConnectionLost);
 
-  String theStatus = "<!DOCTYPE html>\
+  String theStatus = F("<!DOCTYPE html>\
 <html lang=de><head>\
 <link rel='apple-touch-icon' sizes='57x57' href='/apple-icon-57x57.png'>\
 <link rel='apple-touch-icon' sizes='60x60' href='/apple-icon-60x60.png'>\
@@ -226,25 +226,25 @@ void handleStatus()
 <style>table, th, td {border: 1px solid black;}</style>\
 <title>RFC Reader</title></head><body>\
 <table><caption>Network Attributes</caption><tr><th>Attribut</th><th>Wert</th></tr>\
-<tr><td>MAC-Adresse</td><td><b>" +
-                     smac + "</b></td></tr>\
-<tr><td>IP-Adresse</td><td><b>" +
-                     ipToString(WiFi.localIP()) + "</b></td></tr>\
-<tr><td>Subnet Mask</td><td><b>" +
-                     ipToString(WiFi.subnetMask()) + "</b></td></tr>\
-<tr><td>Gateway-IP</td><td><b>" +
-                     ipToString(WiFi.gatewayIP()) + "</b></td></tr>\
-<tr><td>flashSize</td><td><b>" +
-                     String(ESP.getFlashChipSize()) + "</b></td></tr>\
-<tr><td>freeHeap</td><td><b>" +
-                     String(ESP.getFreeHeap()) + "</b></td></tr>\
-<tr><td>fsTotalBytes</td><td><b>" +
-                     String(fs_info.totalBytes) + "</b></td></tr>\
-<tr><td>fsUsedBytes</td><td><b>" +
-                     String(fs_info.usedBytes) + "</b></td></tr>\
-</table><br />" + String(theRfidStatus) +
-                     mfrc522SoftwareVersion + "\
-<a href='/'>Startseite</a></body></html>";
+<tr><td>MAC-Adresse</td><td><b>") +
+                     smac + F("</b></td></tr>\
+<tr><td>IP-Adresse</td><td><b>") +
+                     ipToString(WiFi.localIP()) + F("</b></td></tr>\
+<tr><td>Subnet Mask</td><td><b>") +
+                     ipToString(WiFi.subnetMask()) + F("</b></td></tr>\
+<tr><td>Gateway-IP</td><td><b>") +
+                     ipToString(WiFi.gatewayIP()) + F("</b></td></tr>\
+<tr><td>flashSize</td><td><b>") +
+                     String(ESP.getFlashChipSize()) + F("</b></td></tr>\
+<tr><td>freeHeap</td><td><b>") +
+                     String(ESP.getFreeHeap()) + F("</b></td></tr>\
+<tr><td>fsTotalBytes</td><td><b>") +
+                     String(fs_info.totalBytes) + F("</b></td></tr>\
+<tr><td>fsUsedBytes</td><td><b>") +
+                     String(fs_info.usedBytes) + F("</b></td></tr>\
+</table><br />") + String(theRfidStatus) +
+                     mfrc522SoftwareVersion + F("\
+<a href='/'>Startseite</a></body></html>");
   httpServer.sendHeader("Cache-Control", "no-cache");
   httpServer.send(200, "text/html", theStatus);
 }
