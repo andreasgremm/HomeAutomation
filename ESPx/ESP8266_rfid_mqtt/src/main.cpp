@@ -94,6 +94,40 @@ PubSubClient mqtt(wifi);
 
 MFRC522 rfid(SS_PIN, RST_PIN);
 
+void wificonnect(String ssid, String password)
+{
+    WiFi.setHostname(host); // allow to address the device by the given name
+    WiFi.begin();
+    WiFi.waitForConnectResult();
+
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        Serial.print("Prepare WiFi\n"); // start WiFI
+        WiFi.persistent(true);
+        WiFi.mode(WIFI_STA);
+        WiFi.setPhyMode(WIFI_PHY_MODE_11N); // Set radio type to N
+        WiFi.setOutputPower(20.5);  // Sets WiFi RF power output to highest level, highest RF power usage
+        WiFi.setAutoReconnect(true);
+        WiFi.setAutoConnect(true);
+        Serial.print("Wifi Begin (ssid)\n");
+        WiFi.begin(ssid, password);
+        WiFi.persistent(false);
+        delay(1000);
+        WiFi.waitForConnectResult();
+        Serial.print("connected.\n");
+    }
+
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        Serial.print(".");
+    }
+
+    Serial.print("\nIP address: ");
+    Serial.println(WiFi.localIP());
+    Serial.println("WiFi connected!");
+}
+
 void handleRoot() {
   time_t tnow = time(nullptr);
   String swohnzimmerAlarm = wohnzimmerAlarm ? F("<font color='green'>Ein</font>") : F("<font color='red'>Aus</font>");
@@ -226,6 +260,12 @@ void handleStatus()
 <style>table, th, td {border: 1px solid black;}</style>\
 <title>RFC Reader</title></head><body>\
 <table><caption>Network Attributes</caption><tr><th>Attribut</th><th>Wert</th></tr>\
+<tr><td>Host-Name</td><td><b>") +
+                      String(host) + F("</b></td></tr>\
+<tr><td>Connected-To</td><td><b>") +
+                      WiFi.SSID() + F("</b></td></tr>\
+<tr><td>RSSI</td><td><b>") +
+                      WiFi.RSSI() + F("</b></td></tr>\
 <tr><td>MAC-Adresse</td><td><b>") +
                      smac + F("</b></td></tr>\
 <tr><td>IP-Adresse</td><td><b>") +
@@ -326,34 +366,23 @@ void handleRFID() {
   }
 }
 
-void wificonnect() {
-  while(WiFi.waitForConnectResult() != WL_CONNECTED){
-    WiFi.begin(ssid, password);
-    Serial.println("WiFi failed, retrying.");
-    delay(500);
-  }
-
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  Serial.println("\n WiFi connected!");
-}
-
 void mqttconnect() {
   const char* message = "ONLINE";
   const int laenge = strlen(message);
+
   while (!mqtt.connect(mqttClientId, mqttUser, mqttPass, "clientstatus/RFIDReader",1,true,"OFFLINE")) {
-    Serial.print(".");
+    Serial.print("failed, rc=");
+    Serial.println(mqtt.state());
     delay(500);
   }
-  Serial.println("\n MQTT connected!");
+  Serial.println("MQTT connected!");
   mqtt.subscribe("alarm/wohnzimmer/motion");
   mqtt.subscribe("alarm/auto/motion");
   mqtt.publish("clientstatus/RFIDReader", message, true);
 }
 
 void setup(void){
-   
+  delay(3000);  // wait for serial monitor to start completely. 
   Serial.begin(115200);
 
   Serial.println("Booting Sketch...");
@@ -374,15 +403,12 @@ void setup(void){
   SPI.begin();
   rfid.PCD_Init();
 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  wificonnect(ssid, password);
+  digitalWrite(autoAlarmPin, LOW);
+
   mqtt.setKeepAlive(60);
   mqtt.setServer(brocker, 1883);
   mqtt.setCallback(messageReceived);
-
-  wificonnect();
-  digitalWrite(autoAlarmPin, LOW);
-
   mqttconnect();
   digitalWrite(wohnzimmerAlarmPin, LOW);
 
