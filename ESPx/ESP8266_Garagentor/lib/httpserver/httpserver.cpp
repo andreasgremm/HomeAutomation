@@ -167,6 +167,7 @@ void handleTrigger()
 <h4>Garagentor ausgel&ouml;st!</h4>\
 <a href='/'>Startseite</a><br />\
 </body></html>");
+    lastTrigger = "WebTrigger ( " + currentTime() + " ) ";
     doTrigger();
     httpServer.send(200, "text/html", theStatus);
 }

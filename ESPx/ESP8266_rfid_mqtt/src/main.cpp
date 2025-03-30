@@ -41,17 +41,11 @@
 
 #include <FS.h>        // File System for Web Server Files
 #include <LittleFS.h>
+#include <httpserver.h>
 
 #include <PubSubClient.h>
 
-#include <SPI.h>
-#include <MFRC522.h>
-
-#define SS_PIN D4
-#define RST_PIN D3
-int autoAlarmPin = D1;
-int wohnzimmerAlarmPin = D2;
-int irPin = A0;
+#include </Users/andreas/Documents/git-github/HomeAutomation/ESPx/ESP_MQTT_Definitions.h>
 
 // Remove this include which sets the below constants to my own conveniance
 #include </Users/andreas/Documents/git-github/non-git-local-includes/ESPx_wlan.h>
@@ -70,6 +64,11 @@ const char* mqttPass = "MQTT Password";
 const char* mqttClientId = "MQTT Client Name";
 */
 
+int autoAlarmPin = D1;
+int wohnzimmerAlarmPin = D2;
+int irPin = A0;
+
+MFRC522 rfid(SS_PIN, RST_PIN);
 
 int irValue;
 bool wohnzimmerAlarm = false;
@@ -83,6 +82,10 @@ String smac;
 unsigned long previousMillis = 0;  
 unsigned long currentMillis;
 const long interval = 60000;   
+String hostname = host;
+
+bool motionStatus = false;
+bool irTriggered = false;
 
 String mfrc522SoftwareVersion;
 
@@ -92,7 +95,18 @@ ESP8266HTTPUpdateServer httpUpdater;
 WiFiClient wifi;
 PubSubClient mqtt(wifi);
 
-MFRC522 rfid(SS_PIN, RST_PIN);
+
+bool handleRfidStatus() {
+  bool rfidStatus = rfid.PCD_PerformSelfTest();
+  rfid.PCD_Init();
+  if (rfidStatus) {
+      blinkLed(wohnzimmerAlarmPin, 2, wohnzimmerAlarm);
+  }
+  else {
+      blinkLed(autoAlarmPin, 2, autoAlarm);
+  }
+  return rfidStatus;
+}
 
 void wificonnect(String ssid, String password)
 {
@@ -128,46 +142,6 @@ void wificonnect(String ssid, String password)
     Serial.println("WiFi connected!");
 }
 
-void handleRoot() {
-  time_t tnow = time(nullptr);
-  String swohnzimmerAlarm = wohnzimmerAlarm ? F("<font color='green'>Ein</font>") : F("<font color='red'>Aus</font>");
-  String sautoAlarm = autoAlarm ? F("<font color='green'>Ein</font>") : F("<font color='red'>Aus</font>");
-  String message = F("<!DOCTYPE html>\
-<html lang=de><head>\
-<link rel='apple-touch-icon' sizes='57x57' href='/apple-icon-57x57.png'>\
-<link rel='apple-touch-icon' sizes='60x60' href='/apple-icon-60x60.png'>\
-<link rel='apple-touch-icon' sizes='72x72' href='/apple-icon-72x72.png'>\
-<link rel='apple-touch-icon' sizes='76x76' href='/apple-icon-76x76.png'>\
-<link rel='apple-touch-icon' sizes='114x114' href='/apple-icon-114x114.png'>\
-<link rel='apple-touch-icon' sizes='120x120' href='/apple-icon-120x120.png'>\
-<link rel='apple-touch-icon' sizes='144x144' href='/apple-icon-144x144.png'>\
-<link rel='apple-touch-icon' sizes='152x152' href='/apple-icon-152x152.png'>\
-<link rel='apple-touch-icon' sizes='180x180' href='/apple-icon-180x180.png'>\
-<link rel='icon' type='image/png' sizes='192x192'  href='/android-icon-192x192.png'>\
-<link rel='icon' type='image/png' sizes='32x32' href='/favicon-32x32.png'>\
-<link rel='icon' type='image/png' sizes='96x96' href='/favicon-96x96.png'>\
-<link rel='icon' type='image/png' sizes='16x16' href='/favicon-16x16.png'>\
-<link rel='icon' type='image/vnd.microsoft.icon' href='/favicon.ico'>\
-<link rel='manifest' href='/manifest.json'>\
-<meta name='msapplication-TileColor' content='#ffffff'>\
-<meta name='msapplication-TileImage' content='/ms-icon-144x144.png'>\
-<meta name='theme-color' content='#ffffff'>\
-<meta name='viewport' content='width=device-width, initial-scale=1'>\
-<style>table, th, td {border: 1px solid black;}</style>\
-<meta http-equiv='refresh' content='10'>\
-<title>RFC Reader</title>\
-</head><body>\
-<h4>Uhrzeit: ") + String(ctime(&tnow)) + F("</h4>\
-<br /><table><caption>Alarmanlage Status</caption><tr><th>Wohnzimmer Alarm</th><th>Auto Alarm</th></tr>\
-<tr><td><center>") + swohnzimmerAlarm + F("</center></td><td><center>") + sautoAlarm + F("</center></td></tr>\
-</table><br />\
-<a href='/status'>Status</a><br />\
-<a href='/update'>Update</a><br />\
-</body></html>");
-  httpServer.sendHeader("Cache-Control", "no-cache");
-  httpServer.send(200, "text/html", message);
-}
-
 void blinkLed(int led, int nr, bool ledstatus) {
   if (nr == 0) {
     return;
@@ -196,113 +170,39 @@ double mapDouble(double x, double in_min, double in_max, double out_min, double 
   return (double) temp/4;
 }
 
-String ipToString(IPAddress ip){
-  String s="";
-  for (int i=0; i<4; i++)
-    s += i  ? "." + String(ip[i]) : String(ip[i]);
-  return s;
-}
-
-String macToString(byte mac[6]){
-  String s="";
-  for (byte i=0; i<6; i++){
-    char buf[3];
-    sprintf(buf, "%.2X", mac[i]);
-    s += buf;
-    if (i < 5) s+=':';
-  }
-  return s;
-}
-
-bool handleRfidStatus() {
-  bool rfidStatus = rfid.PCD_PerformSelfTest();
-  rfid.PCD_Init();
-  if (rfidStatus) {
-      blinkLed(wohnzimmerAlarmPin, 2, wohnzimmerAlarm);
-  }
-  else {
-      blinkLed(autoAlarmPin, 2, autoAlarm);
-  }
-  return rfidStatus;
-}
-
-void handleStatus()
+void handleIR()
 {
-  char theRfidStatus[80];
-  bool rfidStatus = handleRfidStatus();
-
-  FSInfo fs_info;
-  LittleFS.info(fs_info);
-
-  sprintf(theRfidStatus, "RFID-Selftest:<b> %s</b><br />MQTT-Reconnect:<b> %ld </b><br />", rfidStatus ? "True" : "False", mqttConnectionLost);
-
-  String theStatus = F("<!DOCTYPE html>\
-<html lang=de><head>\
-<link rel='apple-touch-icon' sizes='57x57' href='/apple-icon-57x57.png'>\
-<link rel='apple-touch-icon' sizes='60x60' href='/apple-icon-60x60.png'>\
-<link rel='apple-touch-icon' sizes='72x72' href='/apple-icon-72x72.png'>\
-<link rel='apple-touch-icon' sizes='76x76' href='/apple-icon-76x76.png'>\
-<link rel='apple-touch-icon' sizes='114x114' href='/apple-icon-114x114.png'>\
-<link rel='apple-touch-icon' sizes='120x120' href='/apple-icon-120x120.png'>\
-<link rel='apple-touch-icon' sizes='144x144' href='/apple-icon-144x144.png'>\
-<link rel='apple-touch-icon' sizes='152x152' href='/apple-icon-152x152.png'>\
-<link rel='apple-touch-icon' sizes='180x180' href='/apple-icon-180x180.png'>\
-<link rel='icon' type='image/png' sizes='192x192'  href='/android-icon-192x192.png'>\
-<link rel='icon' type='image/png' sizes='32x32' href='/favicon-32x32.png'>\
-<link rel='icon' type='image/png' sizes='96x96' href='/favicon-96x96.png'>\
-<link rel='icon' type='image/png' sizes='16x16' href='/favicon-16x16.png'>\
-<link rel='icon' type='image/vnd.microsoft.icon' href='/favicon.ico'>\
-<link rel='manifest' href='/manifest.json'>\
-<meta name='msapplication-TileColor' content='#ffffff'>\
-<meta name='msapplication-TileImage' content='/ms-icon-144x144.png'>\
-<meta name='theme-color' content='#ffffff'>\
-<meta name='viewport' content='width=device-width, initial-scale=1'>\
-<style>table, th, td {border: 1px solid black;}</style>\
-<title>RFC Reader</title></head><body>\
-<table><caption>Network Attributes</caption><tr><th>Attribut</th><th>Wert</th></tr>\
-<tr><td>Host-Name</td><td><b>") +
-                      String(host) + F("</b></td></tr>\
-<tr><td>Connected-To</td><td><b>") +
-                      WiFi.SSID() + F("</b></td></tr>\
-<tr><td>RSSI</td><td><b>") +
-                      WiFi.RSSI() + F("</b></td></tr>\
-<tr><td>MAC-Adresse</td><td><b>") +
-                     smac + F("</b></td></tr>\
-<tr><td>IP-Adresse</td><td><b>") +
-                     ipToString(WiFi.localIP()) + F("</b></td></tr>\
-<tr><td>Subnet Mask</td><td><b>") +
-                     ipToString(WiFi.subnetMask()) + F("</b></td></tr>\
-<tr><td>Gateway-IP</td><td><b>") +
-                     ipToString(WiFi.gatewayIP()) + F("</b></td></tr>\
-<tr><td>flashSize</td><td><b>") +
-                     String(ESP.getFlashChipSize()) + F("</b></td></tr>\
-<tr><td>freeHeap</td><td><b>") +
-                     String(ESP.getFreeHeap()) + F("</b></td></tr>\
-<tr><td>fsTotalBytes</td><td><b>") +
-                     String(fs_info.totalBytes) + F("</b></td></tr>\
-<tr><td>fsUsedBytes</td><td><b>") +
-                     String(fs_info.usedBytes) + F("</b></td></tr>\
-</table><br />") + String(theRfidStatus) +
-                     mfrc522SoftwareVersion + F("\
-<a href='/'>Startseite</a></body></html>");
-  httpServer.sendHeader("Cache-Control", "no-cache");
-  httpServer.send(200, "text/html", theStatus);
-}
-
-void handleIR() {
+  char msg[14];
   irValue = analogRead(irPin);
-  if (irValue > 100) {
-    if (wohnzimmerAlarm and buzzer){
+  if (irValue > 100)
+  {
+    if (wohnzimmerAlarm and buzzer)
+    {
       buzzer = false;
-      mqtt.publish("buzzer/wohnzimmer", "2");
+      mqtt.publish(topic_set_wohnzimmer_buzzer_old, "2");
     }
-    if ((currentMillis - previousMillis) >= interval) {
+    if ((currentMillis - previousMillis) >= interval)
+    {
       // save time
       previousMillis = currentMillis;
-      // bool rfidStatus = 
+      // bool rfidStatus =
       handleRfidStatus();
     }
-  } else {
+    if (motionStatus == false)
+    {
+      motionStatus = true;
+      sprintf(msg, "{\"Motion\": %1i}", motionStatus);
+      mqtt.publish(topic_status_flur_motion, (const char *)msg, false);
+    }
+  }
+  else
+  {
+    if (motionStatus == true)
+    {
+      motionStatus = false;
+      sprintf(msg, "{\"Motion\": %1i}", motionStatus);
+      mqtt.publish(topic_status_flur_motion, (const char *)msg, false);
+    }
     buzzer = true;
   }
 }
@@ -316,7 +216,7 @@ void messageReceived(char * topic, unsigned char * payload, unsigned int length)
      Serial.print((const char)payload[i]);
   }
 */
-  if (strcmp(topic,"alarm/wohnzimmer/motion") == 0) {
+  if (strcmp(topic, topic_set_wohnzimmer_alarmanlage_old) == 0) {
     if (strncmp((const char *)payload, "False", length) == 0) {
       digitalWrite(wohnzimmerAlarmPin, LOW);
       wohnzimmerAlarm = false;
@@ -327,7 +227,7 @@ void messageReceived(char * topic, unsigned char * payload, unsigned int length)
     }
   }
 
-  if (strcmp(topic,"alarm/auto/motion") == 0) {
+  if (strcmp(topic, topic_set_kueche_alarmanlage_old) == 0) {
     if (strncmp((const char *)payload, "False", length) == 0) {
       digitalWrite(autoAlarmPin, LOW);
       autoAlarm = false;
@@ -349,36 +249,33 @@ void handleRFID() {
   blinkLed(wohnzimmerAlarmPin, 3, wohnzimmerAlarm);
   
 //  Serial.println(rfiduid);
-  mqtt.publish("rfid_reader/uid", rfiduid.c_str());
+  mqtt.publish(topic_set_flur_rfidreader_old, rfiduid.c_str());
   if (strcmp(rfiduid.c_str(),"c5d54c73") == 0) {
     if (wohnzimmerAlarm) {
-      mqtt.publish("alarm/wohnzimmer/motion", "False", true);
+      mqtt.publish(topic_set_wohnzimmer_alarmanlage_old, "False", true);
     } else {
-      mqtt.publish("alarm/wohnzimmer/motion", "True", true);
+      mqtt.publish(topic_set_wohnzimmer_alarmanlage_old, "True", true);
     }
   }
   if (strcmp(rfiduid.c_str(),"c6ebfe1f") == 0) {
     if (autoAlarm) {
-      mqtt.publish("alarm/auto/motion", "False", true);
+      mqtt.publish(topic_set_kueche_alarmanlage_old, "False", true);
     } else {
-      mqtt.publish("alarm/auto/motion", "True", true);
+      mqtt.publish(topic_set_kueche_alarmanlage_old, "True", true);
     }
   }
 }
 
 void mqttconnect() {
-  const char* message = "ONLINE";
-  const int laenge = strlen(message);
-
-  while (!mqtt.connect(mqttClientId, mqttUser, mqttPass, "clientstatus/RFIDReader",1,true,"OFFLINE")) {
+  while (!mqtt.connect(mqttClientId, mqttUser, mqttPass, topic_status_flur_will, 1, true, client_offline_message)) {
     Serial.print("failed, rc=");
     Serial.println(mqtt.state());
     delay(500);
   }
   Serial.println("MQTT connected!");
-  mqtt.subscribe("alarm/wohnzimmer/motion");
-  mqtt.subscribe("alarm/auto/motion");
-  mqtt.publish("clientstatus/RFIDReader", message, true);
+  mqtt.subscribe(topic_set_wohnzimmer_alarmanlage_old);
+  mqtt.subscribe(topic_set_kueche_alarmanlage_old);
+  mqtt.publish(topic_status_flur_will, client_online_message, true);
 }
 
 void setup(void){

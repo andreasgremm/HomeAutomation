@@ -87,6 +87,7 @@ void messageReceived(char *topic, unsigned char *payload, unsigned int length)
         // lastTrigger = FromUnsignedCharP(payload);
         lastTrigger = String((char *) payload).substring(0, length) + " ( " + currentTime() + " ) ";
         doTrigger();
+        mqtt.publish(topic_set_wohnzimmer_buzzer_old, "2", false);
     }
 }
 

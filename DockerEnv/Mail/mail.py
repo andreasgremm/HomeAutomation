@@ -62,7 +62,8 @@ def sendmail(
         context = ssl.create_default_context()
         server = smtplib.SMTP_SSL(smtpserver, context=context)
     else:
-        server = smtplib.SMTP(smtpserver)
+        # context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+        server = smtplib.SMTP_SSL(smtpserver)
 
     # start TLS encryption
     if usetls:
